@@ -23,17 +23,21 @@ export const team = [
   { name: "Сємєшкін Єгор", role: "Диякон церкви Еммануїл", image: "/media/semeshkin.jpg", instagram: "https://www.instagram.com/sem_egorrr/" },
 ];
 
-export const news = [
-  { title: "Ноти вдячності", date: "05 жовтня 2025", image: "/media/noti.jpg", href: "https://emmanuil.cv.ua/news/noti-vdyachnosti" },
-  { title: "Справжня любов", date: "09 березня 2025", image: "/media/family-poster.jpg", href: "https://emmanuil.cv.ua/news/spravzhnya-lyubov" },
-  { title: "Реєстрація на сезон домашніх груп 27.01 - 30.03 розпочато!", date: "19 січня 2025", image: "/media/home-group.jpg", href: "https://emmanuil.cv.ua/news/reestratsiya-na-sezon-domashnikh-grup-27-01-30-03-rozpochato" },
-  { title: "Особливий день подяки 20 жовтня 2024", date: "12 жовтня 2024", image: "/media/jatva-2024.jpg", href: "https://emmanuil.cv.ua/news/osoblivij-den-podyaki-20-zhovtnya-2024" },
-  { title: "Вся земля співай Осанна", date: "24 серпня 2024", image: "/media/osana.jpg", href: "https://emmanuil.cv.ua/news/vsia-zemlia-spivai-osanna" },
-  { title: "Водне хрещення 2024 в церкві Emmanuil", date: "07 липня 2024", image: "/media/baptism.jpg", href: "https://emmanuil.cv.ua/news/vodne-khreshchennya-2024-v-tserkvi-emmanuil" },
-  { title: "Свято для дітей з багатодітних сімей та сиріт", date: "08 червня 2024", image: "/media/childrens.jpg", href: "https://emmanuil.cv.ua/news/svyato-dlya-ditej-z-bagatoditnikh-simej-ta-sirit" },
-  { title: "Надія для сімʼї", date: "04 березня 2024", image: "/media/hope-family.jpg", href: "https://emmanuil.cv.ua/news/nadiia-dlia-sim-i" },
-  { title: "Домашні групи, як це?", date: "20 лютого 2024", image: "/media/homegroup-how.jpeg", href: "https://emmanuil.cv.ua/news/domashni-hrupy-iak-tse" },
+export type NewsItem = { title: string; date: string; image: string; slug: string; body: string[] };
+
+export const news: NewsItem[] = [
+  { title: "Ноти вдячності", date: "05 жовтня 2025", image: "/media/noti.jpg", slug: "noti-vdyachnosti", body: ["Запрошуємо вас та ваших близьких на особливе святкування в нашій церкві — День подяки.", "Ми проведемо час у теплій, сімейній атмосфері з гарною музикою, в подяці Богу та з можливістю творити хороші справи.", "Запрошуйте своїх рідних, друзів та колег.", "Локація: вул. Ольги Кобилянської, 53", "Дата: 19 жовтня", "Час: 10:00 та 17:00"] },
+  { title: "Справжня любов", date: "09 березня 2025", image: "/media/family-poster.jpg", slug: "spravzhnya-lyubov", body: ["Запрошуємо всіх на особливий день «Справжня любов»!", "Разом ми будемо молитися, ділитися теплом і взаємною підтримкою, відчуваючи справжню любов, яку дарує нам Господь.", "Також запрошуйте своїх рідних, друзів та колег.", "Локація: вул. Ольги Кобилянської, 53", "Дата: 16 березня", "Час: 10:00 та 17:00"] },
+  { title: "Реєстрація на сезон домашніх груп 27.01 - 30.03 розпочато!", date: "19 січня 2025", image: "/media/home-group.jpg", slug: "reestratsiya-na-sezon-domashnikh-grup-27-01-30-03-rozpochato", body: ["Це чудова можливість для духовного зростання, нових знайомств та підтримки у теплій, дружній атмосфері.", "Разом ми будемо вивчати Божі істини, підтримувати одне одного в молитвах та ділитися досвідом.", "Приєднуйтесь до нас, щоб разом рухатись вперед і відчувати, як Бог веде кожного з нас!"] },
+  { title: "Особливий день подяки 20 жовтня 2024", date: "12 жовтня 2024", image: "/media/jatva-2024.jpg", slug: "osoblivij-den-podyaki-20-zhovtnya-2024", body: [] },
+  { title: "Вся земля співай Осанна", date: "24 серпня 2024", image: "/media/osana.jpg", slug: "vsia-zemlia-spivai-osanna", body: ["ВСЯ ЗЕМЛЯ СПІВАЙ ОСАНА | All The Earth Will Sing Your Praises — Paul Baloche | Emmanuil Worship Live", "Фрагмент із вечора хвали та поклоніння команди Emmanuil Worship.", "Автор та оригінальний виконавець: Paul Baloche"] },
+  { title: "Водне хрещення 2024 в церкві Emmanuil", date: "07 липня 2024", image: "/media/baptism.jpg", slug: "vodne-khreshchennya-2024-v-tserkvi-emmanuil", body: ["«Тож ідіть, і навчіть всі народи, христячи їх в Ім’я Отця, і Сина, і Святого Духа»", "Від Матвія 28:19"] },
+  { title: "Свято для дітей з багатодітних сімей та сиріт", date: "08 червня 2024", image: "/media/childrens.jpg", slug: "svyato-dlya-ditej-z-bagatoditnikh-simej-ta-sirit", body: ["08.06 церква Еммануїл разом з партнерами благодійної організації провели захід для дітей з багатодітних сімей та сиріт.", "Дякуємо Господу за цей час та можливість служити діткам."] },
+  { title: "Надія для сімʼї", date: "04 березня 2024", image: "/media/hope-family.jpg", slug: "nadiia-dlia-sim-i", body: ["Зараз, як ніколи, важливо бути в єдності та любові!", "Тому запрошуємо вас на особливий день — «Надія для сімʼї».", "17 березня о 10:00 та 17:00.", "Запрошуйте друзів, рідних, близьких та сусідів. Ми будемо раді бачити кожного!"] },
+  { title: "Домашні групи, як це?", date: "20 лютого 2024", image: "/media/homegroup-how.jpeg", slug: "domashni-hrupy-iak-tse", body: ["Розпочався сезон домашніх груп. І трішки розповімо вам про них.", "В нас є 13 домашніх груп з різними напрямками. Кожна група збирається у відповідний час та місці.", "Чому такі зустрічі важливі? Це особливий час з людьми, які не просто будуть допомагати вам рости духовно, але ви також можете дізнатися багато чого нового для себе.", "На домашках створюється справжня дружба. Там ви зустрінете людей, які вислухають вас та підтримають.", "Чекаємо саме на тебе!"] },
 ];
+
+export const newsHref = (item: NewsItem) => `/news/${item.slug}`;
 
 export const groups = [
   ["№1. Духовний ріст", "Клодницький Віталій", "Четвер, 19:00", "вул. О. Кобилянської 53, 1-й поверх, офіс"],

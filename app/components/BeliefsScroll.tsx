@@ -28,7 +28,7 @@ export function BeliefsScroll({ beliefs }: { beliefs: string[][] }) {
                 <span className="belief-toggle" aria-hidden="true">{expanded ? "−" : "+"}</span>
               </button>
               <div className="belief-panel" id={panelId} aria-hidden={!expanded}>
-                <div><span aria-hidden="true">✦</span><p>{verse}</p></div>
+                <div><p>{verse}</p></div>
               </div>
             </article>;
           })}

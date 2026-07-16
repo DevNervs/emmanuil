@@ -49,3 +49,24 @@ test("keeps the mobile group application scrollable and group-first", async () =
   assert.match(styles, /height:100dvh; max-height:100dvh; overflow-x:hidden; overflow-y:auto;/);
   assert.match(styles, /touch-action:pan-y/);
 });
+
+test("renders every news item as an internal article", async () => {
+  const slugs = ["noti-vdyachnosti", "spravzhnya-lyubov", "reestratsiya-na-sezon-domashnikh-grup-27-01-30-03-rozpochato", "osoblivij-den-podyaki-20-zhovtnya-2024", "vsia-zemlia-spivai-osanna", "vodne-khreshchennya-2024-v-tserkvi-emmanuil", "svyato-dlya-ditej-z-bagatoditnikh-simej-ta-sirit", "nadiia-dlia-sim-i", "domashni-hrupy-iak-tse"];
+  const listing = await (await render("/news")).text();
+  assert.doesNotMatch(listing, /href="https:\/\/emmanuil\.cv\.ua\/news\//);
+  for (const slug of slugs) {
+    assert.match(listing, new RegExp(`href="/news/${slug}"`));
+    const response = await render(`/news/${slug}`);
+    assert.equal(response.status, 200, slug);
+    const html = await response.text();
+    assert.match(html, /Останні новини/);
+    assert.match(html, /Усі новини/);
+  }
+});
+
+test("renders the manuscript without decorative verse stars or a baked white backdrop", async () => {
+  const about = await (await render("/about")).text();
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.doesNotMatch(about, /✦/);
+  assert.match(styles, /beliefs-scroll-transparent\.png/);
+});

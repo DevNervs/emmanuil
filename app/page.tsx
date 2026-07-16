@@ -1,5 +1,5 @@
 import { Page, SectionTitle } from "./components/SiteShell";
-import { news, site, team } from "./content";
+import { news, newsHref, site, team } from "./content";
 
 export default function Home() {
   return (
@@ -27,7 +27,7 @@ export default function Home() {
 
         <section className="news-section">
           <SectionTitle kicker="Останнє" title="Новини" />
-          <div className="news-grid">{news.slice(0, 3).map((item, index) => <article className={`news-card ${index === 0 ? "news-card-featured" : ""}`} key={item.href}><a className="news-image" href={item.href} target="_blank" rel="noreferrer"><img src={item.image} alt={item.title} loading="lazy" /></a><div className="news-meta"><time>{item.date}</time><span>0{index + 1}</span></div><h3>{item.title}</h3><a className="inline-link" href={item.href} target="_blank" rel="noreferrer">Читати новину</a></article>)}</div>
+          <div className="news-grid">{news.slice(0, 3).map((item, index) => <article className={`news-card ${index === 0 ? "news-card-featured" : ""}`} key={item.slug}><a className="news-image" href={newsHref(item)}><img src={item.image} alt={item.title} loading="lazy" /></a><div className="news-meta"><time>{item.date}</time><span>0{index + 1}</span></div><h3><a href={newsHref(item)}>{item.title}</a></h3><a className="inline-link" href={newsHref(item)}>Читати новину</a></article>)}</div>
           <a className="button button-ghost news-all-button" href="/news">Усі новини</a>
         </section>
 
