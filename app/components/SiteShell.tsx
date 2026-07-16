@@ -27,42 +27,44 @@ export function Brand({ light = false }: { light?: boolean }) {
 
 export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(false);
-  const compactRef = useRef(false);
+  const sentinelRef = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      if (frame) return;
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        const nextCompact = compactRef.current ? window.scrollY > 32 : window.scrollY > 88;
-        if (nextCompact !== compactRef.current) {
-          compactRef.current = nextCompact;
-          setCompact(nextCompact);
-        }
-      });
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", update);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(([entry]) => setCompact(!entry.isIntersecting));
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
-  return (
+  return <>
+    <span ref={sentinelRef} className="header-sentinel" aria-hidden="true" />
     <header className={`site-header ${compact ? "is-compact" : ""}`}>
       <div className="header-inner">
-        <Brand />
-        <div className="desktop-header-actions">
-          <nav className="main-nav" aria-label="Основна навігація"><NavLinks active={active} /></nav>
-          <a className="donate-link header-donate" href="/donate" data-label="Пожертвувати"><Heart className="donate-icon" aria-hidden="true" strokeWidth={1.8} /><span className="donate-label">Пожертвувати</span></a>
+        <div className="desktop-header-shell">
+          <div className="header-layer header-layer-default" aria-hidden={compact}>
+            <Brand />
+            <div className="desktop-header-actions">
+              <nav className="main-nav main-nav-default" aria-label="Основна навігація"><NavLinks active={active} /></nav>
+              <a className="donate-link header-donate" href="/donate"><span className="donate-label">Пожертвувати</span></a>
+            </div>
+          </div>
+          <div className="header-layer header-layer-compact" aria-hidden={!compact}>
+            <Brand />
+            <div className="compact-header-actions">
+              <nav className="main-nav compact-nav" aria-label="Компактна навігація"><NavLinks active={active} /></nav>
+              <a className="donate-link compact-donate" href="/donate" data-label="Пожертвувати" aria-label="Пожертвувати"><Heart aria-hidden="true" strokeWidth={1.8} /></a>
+            </div>
+          </div>
         </div>
-        <details className="mobile-menu">
-          <summary>Меню</summary>
-          <nav aria-label="Мобільна навігація"><NavLinks active={active} /><a href="/donate">Пожертвувати</a></nav>
-        </details>
+        <div className="mobile-header-shell">
+          <Brand />
+          <details className="mobile-menu">
+            <summary>Меню</summary>
+            <nav aria-label="Мобільна навігація"><NavLinks active={active} /><a href="/donate">Пожертвувати</a></nav>
+          </details>
+        </div>
       </div>
     </header>
-  );
+  </>;
 }
 
 export function Footer() {
