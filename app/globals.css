@@ -364,6 +364,8 @@ body { background:#ddd7d0; font-size:16px; }
 .group-tools input { min-height:3.3rem; border:1px solid rgba(255,255,255,.2); border-radius:10rem; background:rgba(255,255,255,.06); padding:.75rem 1.1rem; color:#fff; }
 .group-tools input::placeholder { color:#a99c9b; }
 .day-filters { display:flex; flex-wrap:wrap; gap:.55rem; }
+.day-filters { scrollbar-width:none; }
+.day-filters::-webkit-scrollbar { display:none; }
 .day-filters button { min-height:2.8rem; border:1px solid rgba(255,255,255,.2); border-radius:10rem; background:transparent; padding:.55rem 1rem; color:#fff; cursor:pointer; }
 .day-filters button:hover,.day-filters button.is-active { border-color:#fff; background:#fff; color:var(--wine-dark); }
 .groups-explorer-layout { display:grid; grid-template-columns:.74fr 1.26fr; gap:1.5rem; }
@@ -400,7 +402,7 @@ body { background:#ddd7d0; font-size:16px; }
 .footer-bottom { display:flex; justify-content:space-between; gap:1rem; font-size:.7rem; }
 
 @media (max-width:1000px) {
-  .editorial-hero { min-height:0; }
+  .editorial-hero { grid-template-columns:1fr; min-height:0; }
   .editorial-hero-copy { min-height:31rem; }
   .hero-collage { min-height:34rem; }
   .groups-explorer-layout,.groups-explorer-head,.group-tools { grid-template-columns:1fr; }
@@ -411,13 +413,15 @@ body { background:#ddd7d0; font-size:16px; }
   .header-inner { min-height:4.5rem; }
   .site-header.is-compact .header-inner { min-height:4rem; }
   .editorial-hero-copy { min-height:0; padding:3rem 1.15rem 2.5rem; }
-  .editorial-hero h1 { font-size:clamp(3.25rem,16vw,4.6rem); line-height:.86; }
+  .editorial-hero > *,.page-intro > *,.home-links > *,.team-preview > * { min-width:0; }
+  .editorial-hero h1 { font-size:clamp(2.3rem,11vw,2.65rem); line-height:.94; letter-spacing:-.055em; }
   .hero-actions { display:grid; grid-template-columns:1fr; }
   .hero-actions .button { width:100%; }
   .hero-details { grid-template-columns:1fr; }
   .hero-collage { grid-template-columns:1.35fr .65fr; min-height:26rem; }
   .hero-caption { right:1.1rem; bottom:1.1rem; min-width:9rem; padding:.85rem 1rem; }
   .fact-ribbon > * { min-height:7.5rem; }
+  .fact-ribbon { grid-template-columns:1fr; }
   .page-intro-visual { grid-template-columns:1fr; min-height:0; }
   .page-intro-copy { padding:3.2rem 1.15rem; }
   .page-intro h1 { font-size:clamp(3rem,14vw,4rem); line-height:.92; overflow-wrap:anywhere; }
