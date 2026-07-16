@@ -1,20 +1,6 @@
-import { Page, PageHero, SectionTitle } from "../components/SiteShell";
+import { Page, PageIntro } from "../components/SiteShell";
 import { site } from "../content";
 
 export default function ContactsPage() {
-  return (
-    <Page active="/contacts">
-      <main>
-        <PageHero eyebrow="Контакти" title={<>Давайте<br /><em>познайомимось.</em></>} text="Маєте запитання, хочете завітати або знайти домашню групу? Напишіть чи зателефонуйте — будемо раді зустрічі." image={site.aboutImage} />
-        <section className="contacts-layout">
-          <div><SectionTitle kicker="Ми поруч" title={<>Знайдіть нас<br />у <em>Чернівцях.</em></>} /><a className="map-card" href="https://maps.google.com/?q=48.2861034,25.9393799"><span>▦</span><strong>{site.address}</strong><small>Відкрити маршрут ↗</small></a></div>
-          <div className="contact-details">
-            <article><span>Телефон</span><a href="tel:+380506021866">{site.phone}</a></article>
-            <article><span>Пошта</span><a href="mailto:emmanuil.cv@gmail.com">{site.email}</a></article>
-            <article><span>Соціальні мережі</span><div><a href="https://www.facebook.com">Facebook</a><a href="https://www.instagram.com">Instagram</a><a href="https://www.youtube.com">YouTube</a></div></article>
-          </div>
-        </section>
-      </main>
-    </Page>
-  );
+  return <Page active="/contacts"><main><PageIntro title="Контакти" /><section className="contacts-layout"><div className="contact-block"><h2>Наші контакти</h2><address><strong>{site.address}</strong><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a></address><address><strong>{site.secondAddress}</strong></address></div><div className="contact-block"><h2>Реабілітаційний центр</h2><p>Якщо ви знаєте людей, які знаходяться в наркотичній, алкогольній чи ін. залежностях, звертайтеся:</p><address><strong>с. Великий Кучурів, Чернівецька обл.</strong><a href="tel:+380989423713">(098) 942 37 13</a><a href="tel:+380508476116">(050) 847 61 16</a><a href="tel:+380372904032">(0372) 90 40 32</a><a href={`mailto:${site.email}`}>{site.email}</a></address></div><div className="contact-block"><h2>Соціальні мережі</h2><div className="contact-socials"><a href={site.socials.facebook}>Facebook</a><a href={site.socials.instagram}>Instagram</a><a href={site.socials.youtube}>YouTube</a><a href={site.socials.telegram}>Telegram</a><a href={site.socials.viber}>Viber</a></div></div></section></main></Page>;
 }

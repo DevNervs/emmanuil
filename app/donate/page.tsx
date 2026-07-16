@@ -1,14 +1,6 @@
-import { Page } from "../components/SiteShell";
+import { Page, PageIntro } from "../components/SiteShell";
+import { donation } from "../content";
 
 export default function DonatePage() {
-  return (
-    <Page>
-      <main className="donate-page">
-        <p className="overline">Пожертвування</p>
-        <h1>Разом ми можемо<br /><em>більше.</em></h1>
-        <p>Дякуємо кожному, хто підтримує служіння церкви. Ваша участь допомагає нам бути поруч із людьми та поширювати Боже слово.</p>
-        <div className="donate-choices"><a className="button button-wine" href="https://emmanuil.cv.ua/donate">Підтримати онлайн</a><a className="button button-secondary" href="/contacts">Поставити запитання</a></div>
-      </main>
-    </Page>
-  );
+  return <Page active="/donate"><main><PageIntro title="Пожертвувати" text={<><blockquote>«...щоб хто сіє й хто жне разом раділи.»<cite>Євангеліє від Івана 4:36</cite></blockquote></>}><a className="button button-wine" href={donation.paymentUrl}>Пожертвувати через ПриватБанк</a></PageIntro><section className="donation-section"><div className="card-number"><span>Картка ПриватБанк</span><strong>{donation.card}</strong><p>Призначення платежу: {donation.purpose}</p></div><div className="account-grid">{donation.accounts.map((account) => <article key={account.currency}><span>{account.currency}</span><h2>{account.currency === "UAH" ? "Гривня" : account.currency === "USD" ? "Долар" : "Євро"}</h2><dl><dt>Назва отримувача</dt><dd>{donation.receiver}</dd><dt>Код отримувача</dt><dd>{donation.code}</dd>{account.swift ? <><dt>Код SWIFT</dt><dd>{account.swift}</dd></> : null}<dt>Рахунок IBAN</dt><dd>{account.iban}</dd><dt>Назва банку</dt><dd>{account.bank}</dd><dt>Призначення платежу</dt><dd>{donation.purpose}</dd></dl></article>)}</div><p className="donation-note">Сума пожертви НЕ підлягає поверненню!</p></section></main></Page>;
 }
