@@ -47,7 +47,9 @@ test("keeps the mobile group application scrollable and group-first", async () =
   assert.ok(groupSource.indexOf('className="group-form-groups"') < groupSource.indexOf('className="group-form-contact-fields"'));
   assert.match(groupSource, /group\.address \|\| "Адресу уточнюйте у ведучого"/);
   assert.match(styles, /height:100dvh; max-height:100dvh; overflow-x:hidden; overflow-y:auto;/);
+  assert.match(styles, /height:min\(880px,92vh\); max-height:min\(880px,92vh\)/);
   assert.match(styles, /touch-action:pan-y/);
+  assert.doesNotMatch(styles, /group-form-groups > div \{[^}]*max-height:21rem/);
   assert.match(styles, /animation:group-cta-attention 3\.15s/);
   assert.match(styles, /@keyframes group-cta-attention/);
 });

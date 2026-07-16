@@ -571,7 +571,7 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
 .empty-result,.map-unavailable { padding:2rem; }
 
 .group-form-backdrop { position:fixed; z-index:90; inset:0; display:grid; place-items:center; background:rgba(20,11,13,.76); padding:clamp(.75rem,3vw,2.5rem); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); overscroll-behavior:contain; }
-.group-form-dialog { position:relative; display:grid; grid-template-columns:.68fr 1.32fr; width:min(1180px,100%); max-height:min(880px,92vh); overflow:hidden; border:1px solid rgba(255,255,255,.18); border-radius:1.15rem; background:#fbf8f3; box-shadow:0 40px 120px rgba(0,0,0,.42); color:var(--ink); }
+.group-form-dialog { position:relative; display:grid; grid-template-columns:.68fr 1.32fr; width:min(1180px,100%); height:min(880px,92vh); max-height:min(880px,92vh); overflow:hidden; border:1px solid rgba(255,255,255,.18); border-radius:1.15rem; background:#fbf8f3; box-shadow:0 40px 120px rgba(0,0,0,.42); color:var(--ink); }
 .group-form-close { position:absolute; z-index:3; top:1rem; right:1rem; display:grid; width:2.75rem; height:2.75rem; place-items:center; border:1px solid rgba(42,20,25,.13); border-radius:50%; background:rgba(255,255,255,.82); color:var(--wine-dark); cursor:pointer; }
 .group-form-close svg { width:1.15rem; }
 .group-form-intro { position:relative; overflow:hidden; background:radial-gradient(circle at 10% 90%,#702735 0,transparent 18rem),linear-gradient(145deg,#35171d,#1f1114); padding:clamp(2.5rem,5vw,5rem) clamp(1.6rem,3vw,3.2rem); color:#fff; }
@@ -591,7 +591,7 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
 .group-form-field input:focus { border-color:var(--wine); outline:0; box-shadow:0 0 0 3px rgba(136,47,64,.11); }
 .group-form-field small,.group-form-groups > p { margin:0; color:var(--muted); font-size:.68rem; line-height:1.5; }
 .group-form-groups { margin:2rem 0 1.3rem; border:0; padding:0; }
-.group-form-groups > div { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; max-height:21rem; margin-top:1rem; overflow:auto; padding-right:.3rem; }
+.group-form-groups > div { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-top:1rem; padding-right:.3rem; }
 .group-form-groups label { position:relative; display:grid; grid-template-columns:1fr auto; align-items:center; min-width:0; border:1px solid var(--line); border-radius:.65rem; background:#fff; padding:.8rem; cursor:pointer; transition:border-color .2s ease,background .2s ease,transform .2s ease; }
 .group-form-groups label:hover { border-color:rgba(136,47,64,.45); transform:translateY(-1px); }
 .group-form-groups label.is-selected { border-color:var(--wine); background:#f7e9e7; }
