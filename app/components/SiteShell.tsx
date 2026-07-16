@@ -10,10 +10,10 @@ import { SocialLink } from "./SocialLink";
 const nav: Array<[string, string, LucideIcon]> = [
   ["/", "Головна", Home],
   ["/news", "Новини", Newspaper],
-  ["/about", "Ми віримо", BookOpenText],
-  ["/team", "Команда", UsersRound],
-  ["/groups", "Домашні групи", MapPinned],
   ["/online", "Онлайн", CirclePlay],
+  ["/about", "Ми віримо", BookOpenText],
+  ["/groups", "Домашні групи", MapPinned],
+  ["/team", "Команда", UsersRound],
   ["/contacts", "Контакти", ContactRound],
 ];
 
