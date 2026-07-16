@@ -6,6 +6,7 @@ import { ArrowRight, Check, Send, X } from "lucide-react";
 
 type Group = { title: string; leaders: string; time: string; address: string; coordinates?: string };
 type SubmitState = "idle" | "sending" | "sent" | "error";
+const weekdayOrder = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
 
 export function GroupsExplorer({ groups }: { groups: Group[] }) {
   const [query, setQuery] = useState("");
@@ -19,7 +20,11 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
   const [submitMessage, setSubmitMessage] = useState("");
   const closeButton = useRef<HTMLButtonElement>(null);
   const startedAt = useRef(0);
-  const days = ["Усі дні", ...Array.from(new Set(groups.map((group) => group.time.split(",")[0]).filter(Boolean)))];
+  const days = [
+    ...Array.from(new Set(groups.map((group) => group.time.split(",")[0]).filter(Boolean)))
+      .sort((first, second) => weekdayOrder.indexOf(first) - weekdayOrder.indexOf(second)),
+    "Усі дні",
+  ];
   const filtered = useMemo(() => groups.filter((group) => {
     const haystack = `${group.title} ${group.leaders} ${group.address}`.toLocaleLowerCase("uk");
     return (day === "Усі дні" || group.time.startsWith(day)) && haystack.includes(query.trim().toLocaleLowerCase("uk"));
