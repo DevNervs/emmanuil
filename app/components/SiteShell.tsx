@@ -16,7 +16,7 @@ function NavLinks({ active }: { active?: string }) {
 }
 
 export function Brand({ light = false }: { light?: boolean }) {
-  return <a className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo.png" alt="Християнська церква Еммануїл Чернівці" /></a>;
+  return <a className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo-transparent.png" alt="Християнська церква Еммануїл Чернівці" /></a>;
 }
 
 export function SiteHeader({ active }: { active?: string }) {

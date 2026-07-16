@@ -5,6 +5,14 @@ import { site } from "../content";
 
 export const metadata: Metadata = { title: "Контакти — Еммануїл", description: "Адреси, телефони, електронна пошта та соціальні мережі церкви Еммануїл у Чернівцях." };
 
+const locations = [
+  { title: "Церква Еммануїл", address: "вул. О. Кобилянської, 53, Чернівці, Україна" },
+  { title: "Друга адреса", address: "вул. О. Криворучка, 57, Чернівці, Україна" },
+  { title: "Реабілітаційний центр", address: "с. Великий Кучурів, Чернівецька область, Україна" },
+];
+
+const mapUrl = (address: string) => `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+
 export default function ContactsPage() {
   return <Page active="/contacts"><main>
     <PageIntro eyebrow="Чернівці" title="Контакти" image="/media/hope-family.jpg" imageAlt="Надія для сімʼї" />
@@ -13,6 +21,7 @@ export default function ContactsPage() {
       <div className="contact-block"><h2>Реабілітаційний центр</h2><p>Якщо ви знаєте людей, які знаходяться в наркотичній, алкогольній чи ін. залежностях, звертайтеся:</p><address><strong>с. Великий Кучурів, Чернівецька обл.</strong><a href="tel:+380989423713">(098) 942 37 13</a><a href="tel:+380508476116">(050) 847 61 16</a><a href="tel:+380372904032">(0372) 90 40 32</a><a href={`mailto:${site.email}`}>{site.email}</a></address></div>
       <div className="contact-block"><h2>Соціальні мережі</h2><div className="contact-socials"><a href={site.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={site.socials.instagram} target="_blank" rel="noreferrer">Instagram</a><a href={site.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={site.socials.telegram} target="_blank" rel="noreferrer">Telegram</a><a href={site.socials.viber} target="_blank" rel="noreferrer">Viber</a></div></div>
     </section>
+    <section className="locations-section"><div className="locations-heading"><p className="overline">Місцезнаходження</p><h2>Знайти нас<br />на карті</h2></div><div className="location-grid">{locations.map((location, index) => <article className="location-card" key={location.title}><div className="location-map"><iframe src={mapUrl(location.address)} title={`${location.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></div><div><span>0{index + 1}</span><h3>{location.title}</h3><address>{location.address}</address><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}`} target="_blank" rel="noreferrer">Відкрити маршрут <span aria-hidden="true">↗</span></a></div></article>)}</div></section>
     <section className="form-section"><div><p className="overline">Написати нам</p><h2>Контактна форма</h2></div><ContactForm email={site.email} /></section>
   </main></Page>;
 }
