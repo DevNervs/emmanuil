@@ -6,10 +6,13 @@ export type MapLocation = {
   label: string;
   address: string;
   mapQuery?: string;
+  coordinates?: string;
 };
 
-const embedUrl = (address: string) => `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
-const directionsUrl = (address: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+const embedUrl = (query: string, coordinates?: string) => `https://www.google.com/maps?q=${encodeURIComponent(coordinates ?? query)}&z=17&output=embed`;
+const directionsUrl = (query: string, coordinates?: string) => coordinates
+  ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(coordinates)}`
+  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 
 export function InteractiveMap({ id, eyebrow, title, description, locations, dark = false }: {
   id: string;
@@ -22,6 +25,7 @@ export function InteractiveMap({ id, eyebrow, title, description, locations, dar
   const [selected, setSelected] = useState(0);
   const location = locations[selected];
   const mapQuery = location.mapQuery ?? location.address;
+  const markerKey = location.coordinates ?? mapQuery;
 
   return (
     <section id={id} className={`interactive-map ${dark ? "interactive-map-dark" : ""}`}>
@@ -40,8 +44,8 @@ export function InteractiveMap({ id, eyebrow, title, description, locations, dar
         </div>
       </div>
       <div className="interactive-map-stage">
-        <div className="interactive-map-toolbar"><div><span>Обрана адреса</span><strong>{location.label}</strong></div><a href={directionsUrl(mapQuery)} target="_blank" rel="noreferrer">Прокласти маршрут <span aria-hidden="true">↗</span></a></div>
-        <iframe key={mapQuery} src={embedUrl(mapQuery)} title={`${location.label} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+        <div className="interactive-map-toolbar"><div><span>Обрана адреса</span><strong>{location.label}</strong></div><a href={directionsUrl(mapQuery, location.coordinates)} target="_blank" rel="noreferrer">Прокласти маршрут <span aria-hidden="true">↗</span></a></div>
+        <iframe key={markerKey} src={embedUrl(mapQuery, location.coordinates)} title={`${location.label} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
       </div>
     </section>
   );
