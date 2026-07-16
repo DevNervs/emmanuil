@@ -17,12 +17,19 @@ const nav: Array<[string, string, LucideIcon]> = [
   ["/contacts", "Контакти", ContactRound],
 ];
 
+const footerLocations = [
+  { label: "Церква Еммануїл", address: "м. Чернівці, вул. О. Кобилянської, 53", coordinates: "48.2864175,25.9394979", note: site.services },
+  { label: "Криворучка", address: "м. Чернівці, вул. Ореста Криворучка, 57", coordinates: "48.2786111,25.9200516" },
+  { label: "Садгора", address: "м. Чернівці, вул. Васіле Александрі, 8", coordinates: "48.3464098,25.9594925" },
+  { label: "Сторожинець", address: "м. Сторожинець, вул. Українська, 5", coordinates: "48.1640400,25.7212200" },
+];
+
 function NavLinks({ active }: { active?: string }) {
   return <>{nav.map(([href, label, Icon]) => <a key={href} href={href} data-label={label} aria-current={active === href ? "page" : undefined}><Icon className="nav-icon" aria-hidden="true" strokeWidth={1.7} /><span className="nav-label">{label}</span></a>)}</>;
 }
 
 export function Brand({ light = false }: { light?: boolean }) {
-  return <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo-hq.png" width="4160" height="512" alt="Християнська церква Еммануїл Чернівці" /></Link>;
+  return <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo-hq.png" width="2172" height="216" alt="Християнська церква Еммануїл Чернівці" /></Link>;
 }
 
 export function SiteHeader({ active }: { active?: string }) {
@@ -70,7 +77,7 @@ export function SiteHeader({ active }: { active?: string }) {
 export function Footer() {
   return (
     <footer className="site-footer">
-      <div className="footer-main"><Brand light /><p>{site.address}</p><p>{site.services}</p><a className="footer-route" href="https://www.google.com/maps/dir/?api=1&destination=48.2864175%2C25.9394979" target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div>
+      <div className="footer-main"><Brand light /><div className="footer-locations">{footerLocations.map((location) => <div className="footer-location" key={location.label}><div><strong>{location.label}</strong><p>{location.address}</p>{location.note ? <small>{location.note}</small> : null}</div><a className="footer-route" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.coordinates)}`} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${location.label}`}>Прокласти маршрут <span aria-hidden="true">↗</span></a></div>)}</div></div>
       <div className="footer-column"><span>Розділи</span><a href="/news">Новини</a><a href="/about">Ми віримо</a><a href="/team">Команда</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a></div>
       <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><SocialLink network="facebook" href={site.socials.facebook} /><SocialLink network="instagram" href={site.socials.instagram} /><SocialLink network="youtube" href={site.socials.youtube} /><SocialLink network="telegram" href={site.socials.telegram} /></div></address>
       <div className="footer-bottom"><span>© 2026 {site.shortName}</span><span>Християнська церква у Чернівцях</span></div>

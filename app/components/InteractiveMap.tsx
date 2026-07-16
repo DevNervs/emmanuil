@@ -35,11 +35,14 @@ export function InteractiveMap({ id, eyebrow, title, description, locations, dar
         <p className="interactive-map-description">{description}</p>
         <div className="map-location-list" aria-label="Оберіть місце на карті">
           {locations.map((item, index) => (
-            <button type="button" className={selected === index ? "is-active" : ""} aria-pressed={selected === index} onClick={() => setSelected(index)} key={`${item.label}-${item.address}`}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{item.label}</strong>
-              <small>{item.address}</small>
-            </button>
+            <div className={`map-location-item ${selected === index ? "is-active" : ""}`} key={`${item.label}-${item.address}`}>
+              <button type="button" aria-pressed={selected === index} onClick={() => setSelected(index)}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{item.label}</strong>
+                <small>{item.address}</small>
+              </button>
+              <a href={directionsUrl(item.mapQuery ?? item.address, item.coordinates)} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${item.label}`}>Прокласти маршрут <span aria-hidden="true">↗</span></a>
+            </div>
           ))}
         </div>
       </div>

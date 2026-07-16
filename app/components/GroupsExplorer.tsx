@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowRight, Check, Send, X } from "lucide-react";
 
 type Group = { title: string; leaders: string; time: string; address: string; coordinates?: string };
@@ -104,31 +105,34 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
       </div>
     </div>
 
-    {formOpen ? <div className="group-form-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFormOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setFormOpen(false); }}>
-      <div className="group-form-dialog" role="dialog" aria-modal="true" aria-labelledby="group-form-title">
-        <button ref={closeButton} className="group-form-close" type="button" onClick={() => setFormOpen(false)} aria-label="Закрити анкету"><X aria-hidden="true" /></button>
-        <aside className="group-form-intro">
-          <p className="overline overline-light">Домашні групи</p>
-          <h2 id="group-form-title">Знайдіть<br />своїх людей</h2>
-          <p>Заповніть коротку анкету. Після надсилання адміністратор зв’яжеться з вами у Telegram та підтвердить участь.</p>
-          <div><span>01</span><b>Ваші контакти</b></div><div><span>02</span><b>До двох груп</b></div><div><span>03</span><b>Підтвердження</b></div>
-        </aside>
-        {submitState === "sent" ? <div className="group-form-success"><span><Check aria-hidden="true" /></span><p className="overline">Заявку прийнято</p><h3>Дякуємо!</h3><p>{submitMessage}</p><button className="button button-wine" type="button" onClick={() => setFormOpen(false)}>Готово</button></div> :
-        <form className="group-application-form" onSubmit={submitApplication}>
-          <div className="group-form-heading"><span>Коротка анкета</span><strong>{chosenGroups.length}/2 групи</strong></div>
-          <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
-          <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
-          <fieldset className="group-form-groups"><legend>Оберіть одну або дві групи *</legend><p>Одночасно можна записатися максимум у дві домашні групи.</p><div>{groups.map((group, index) => {
-            const checked = chosenGroups.includes(index);
-            const disabled = !checked && chosenGroups.length >= 2;
-            return <label className={checked ? "is-selected" : disabled ? "is-disabled" : ""} key={`${group.title}-${index}`}><input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleGroup(index)} /><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small></span><Check aria-hidden="true" /></label>;
-          })}</div></fieldset>
-          <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі.</span></label>
-          <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
-          {submitMessage ? <p className={`group-submit-message ${submitState}`}>{submitMessage}</p> : null}
-          <button className="group-submit-button" type="submit" disabled={submitState === "sending" || !chosenGroups.length}><span>{submitState === "sending" ? "Надсилаємо…" : "Надіслати заявку"}</span><Send aria-hidden="true" /></button>
-        </form>}
-      </div>
-    </div> : null}
+    {formOpen && typeof document !== "undefined" ? createPortal(
+      <div className="group-form-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFormOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setFormOpen(false); }}>
+        <div className="group-form-dialog" role="dialog" aria-modal="true" aria-labelledby="group-form-title">
+          <button ref={closeButton} className="group-form-close" type="button" onClick={() => setFormOpen(false)} aria-label="Закрити анкету"><X aria-hidden="true" /></button>
+          <aside className="group-form-intro">
+            <p className="overline overline-light">Домашні групи</p>
+            <h2 id="group-form-title">Знайдіть<br />своїх людей</h2>
+            <p>Заповніть коротку анкету. Після надсилання адміністратор зв’яжеться з вами у Telegram та підтвердить участь.</p>
+            <div><span>01</span><b>Ваші контакти</b></div><div><span>02</span><b>До двох груп</b></div><div><span>03</span><b>Підтвердження</b></div>
+          </aside>
+          {submitState === "sent" ? <div className="group-form-success"><span><Check aria-hidden="true" /></span><p className="overline">Заявку прийнято</p><h3>Дякуємо!</h3><p>{submitMessage}</p><button className="button button-wine" type="button" onClick={() => setFormOpen(false)}>Готово</button></div> :
+          <form className="group-application-form" onSubmit={submitApplication}>
+            <div className="group-form-heading"><span>Коротка анкета</span><strong>{chosenGroups.length}/2 групи</strong></div>
+            <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
+            <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
+            <fieldset className="group-form-groups"><legend>Оберіть одну або дві групи *</legend><p>Одночасно можна записатися максимум у дві домашні групи.</p><div>{groups.map((group, index) => {
+              const checked = chosenGroups.includes(index);
+              const disabled = !checked && chosenGroups.length >= 2;
+              return <label className={checked ? "is-selected" : disabled ? "is-disabled" : ""} key={`${group.title}-${index}`}><input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleGroup(index)} /><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small></span><Check aria-hidden="true" /></label>;
+            })}</div></fieldset>
+            <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі.</span></label>
+            <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
+            {submitMessage ? <p className={`group-submit-message ${submitState}`}>{submitMessage}</p> : null}
+            <button className="group-submit-button" type="submit" disabled={submitState === "sending" || !chosenGroups.length}><span>{submitState === "sending" ? "Надсилаємо…" : "Надіслати заявку"}</span><Send aria-hidden="true" /></button>
+          </form>}
+        </div>
+      </div>,
+      document.body,
+    ) : null}
   </section>;
 }

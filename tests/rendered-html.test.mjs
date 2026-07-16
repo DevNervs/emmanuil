@@ -33,6 +33,10 @@ test("ships brand, SEO and primary interactions", async () => {
 
   const contacts = await (await render("/contacts")).text();
   assert.match(contacts, /Контактна форма/);
+  assert.match(contacts, /Ореста Криворучка, 57/);
+  assert.match(contacts, /Васіле Александрі, 8/);
+  assert.match(contacts, /Українська, 5, Сторожинець/);
+  assert.match(contacts, /Прокласти маршрут/);
   const interactionSource = await readFile(new URL("../app/components/InteractionTools.tsx", import.meta.url), "utf8");
   assert.match(interactionSource, /formsubmit\.co\/ajax/);
 });
