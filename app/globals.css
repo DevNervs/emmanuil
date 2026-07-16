@@ -128,9 +128,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .beliefs-section h2 { max-width:63rem; margin-bottom:.75rem; font-size:clamp(1.45rem,2.5vw,2.5rem); line-height:1.15; }
 .beliefs-section p { margin-bottom:0; color:var(--muted); font-size:.76rem; }
 
-.team-page-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:1.2rem; }
-.team-person { grid-column:span 4; background:var(--paper); }
-.team-person:nth-child(4),.team-person:nth-child(5) { grid-column:span 5; }
+.team-page-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:1.2rem; }
+.team-person { min-width:0; background:var(--paper); }
 .team-person-image { position:relative; overflow:hidden; }
 .team-person-image img { width:100%; aspect-ratio:.9; object-fit:cover; filter:grayscale(.18); transition:filter .3s ease,transform .5s ease; }
 .team-person:hover img { filter:grayscale(0); transform:scale(1.025); }
@@ -222,6 +221,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .page-intro-media { min-height:27rem; }
   .contacts-layout,.account-grid { grid-template-columns:1fr; }
   .group-page-grid { grid-template-columns:repeat(2,1fr); }
+  .team-page-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .team-preview-grid article:nth-child(2) { transform:none; }
 }
 
