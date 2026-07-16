@@ -50,8 +50,8 @@ export function Page({ children, active }: { children: ReactNode; active?: strin
   return <><a className="skip-link" href="#main-content">Перейти до вмісту</a><SiteHeader active={active} /><div id="main-content" tabIndex={-1}>{children}</div><Footer /></>;
 }
 
-export function PageIntro({ eyebrow, title, text, children, home = false }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; home?: boolean }) {
-  return <section className={`page-intro ${home ? "home-intro" : ""}`}>{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</section>;
+export function PageIntro({ eyebrow, title, text, children, image, imageAlt = "" }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; image?: string; imageAlt?: string }) {
+  return <section className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className="page-intro-media"><img src={image} alt={imageAlt} /><span aria-hidden="true">Еммануїл</span></div> : null}</section>;
 }
 
 export function SectionTitle({ kicker, title, text }: { kicker?: string; title: ReactNode; text?: ReactNode }) {

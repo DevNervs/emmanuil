@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     locale: "uk_UA",
     images: [
       {
-        url: "/og.png",
+        url: "/og-editorial.png",
         width: 1680,
         height: 945,
         alt: "Еммануїл — християнська церква у Чернівцях",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Еммануїл — християнська церква у Чернівцях",
     description: "Новини, служителі, домашні групи, онлайн-трансляції, контакти та реквізити церкви Еммануїл.",
-    images: ["/og.png"],
+    images: ["/og-editorial.png"],
   },
 };
 
