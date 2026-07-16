@@ -6,17 +6,17 @@ import Link from "next/link";
 import { site } from "../content";
 
 const nav = [
-  ["/", "Головна"],
-  ["/news", "Новини"],
-  ["/about", "Ми віримо"],
-  ["/team", "Команда"],
-  ["/groups", "Домашні групи"],
-  ["/online", "Онлайн"],
-  ["/contacts", "Контакти"],
+  ["/", "Головна", "⌂"],
+  ["/news", "Новини", "▤"],
+  ["/about", "Ми віримо", "✦"],
+  ["/team", "Команда", "♙"],
+  ["/groups", "Домашні групи", "⌖"],
+  ["/online", "Онлайн", "▶"],
+  ["/contacts", "Контакти", "◎"],
 ];
 
 function NavLinks({ active }: { active?: string }) {
-  return <>{nav.map(([href, label]) => <a key={href} href={href} aria-current={active === href ? "page" : undefined}>{label}</a>)}</>;
+  return <>{nav.map(([href, label, icon]) => <a key={href} href={href} data-label={label} aria-current={active === href ? "page" : undefined}><span className="nav-icon" aria-hidden="true">{icon}</span><span className="nav-label">{label}</span></a>)}</>;
 }
 
 export function Brand({ light = false }: { light?: boolean }) {
@@ -26,17 +26,29 @@ export function Brand({ light = false }: { light?: boolean }) {
 export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(false);
   useEffect(() => {
-    const update = () => setCompact(window.scrollY > 24);
+    let frame = 0;
+    const update = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        setCompact((current) => current ? window.scrollY > 18 : window.scrollY > 96);
+      });
+    };
     update();
     window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
   return (
     <header className={`site-header ${compact ? "is-compact" : ""}`}>
       <div className="header-inner">
         <Brand />
-        <nav className="main-nav" aria-label="Основна навігація"><NavLinks active={active} /></nav>
-        <a className="donate-link" href="/donate">Пожертвувати</a>
+        <div className="desktop-header-actions">
+          <nav className="main-nav" aria-label="Основна навігація"><NavLinks active={active} /></nav>
+          <a className="donate-link header-donate" href="/donate" data-label="Пожертвувати"><span className="donate-icon" aria-hidden="true">♡</span><span className="donate-label">Пожертвувати</span></a>
+        </div>
         <details className="mobile-menu">
           <summary>Меню</summary>
           <nav aria-label="Мобільна навігація"><NavLinks active={active} /><a href="/donate">Пожертвувати</a></nav>
