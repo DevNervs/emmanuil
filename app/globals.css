@@ -739,6 +739,9 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
 .compact-nav a[aria-current="page"] { border-color:var(--wine); background:var(--wine); color:#fff; }
 .compact-donate { border-color:var(--wine); background:var(--wine); color:#fff; }
 .compact-donate svg { width:1.2rem; height:1.2rem; }
+.compact-donate::after,
+.compact-donate:hover::after,
+.compact-donate:focus-visible::after { content:none!important; display:none!important; animation:none!important; transition:none!important; }
 .compact-nav a::after { display:none!important; }
 .compact-nav a::before,.compact-donate::before { content:attr(data-label); position:absolute; top:calc(100% + .65rem); left:50%; width:max-content; max-width:12rem; border:1px solid rgba(255,255,255,.12); border-radius:.45rem; padding:.38rem .55rem; background:var(--wine-dark); color:#fff; font-size:.65rem; font-weight:700; pointer-events:none; opacity:0; transform:translate3d(-50%,-.2rem,0); transition:opacity .16s ease,transform .16s ease; }
 .compact-nav a:hover::before,.compact-nav a:focus-visible::before,.compact-donate:hover::before,.compact-donate:focus-visible::before { opacity:1; transform:translate3d(-50%,0,0); }
