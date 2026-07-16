@@ -80,3 +80,17 @@ test("aligns donation account actions along the bottom edge", async () => {
   assert.match(styles, /\.account-grid article \{[^}]*display:flex;[^}]*height:100%;[^}]*flex-direction:column;/);
   assert.match(styles, /\.account-grid \.copy-button \{[^}]*margin-top:auto;/);
 });
+
+test("renders four consistently timed service locations on the home page and footer", async () => {
+  const home = await (await render("/")).text();
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  const content = await readFile(new URL("../app/content.ts", import.meta.url), "utf8");
+  assert.ok((home.match(/Локації служінь/g) || []).length >= 2);
+  for (const expected of ["Криворучка", "Кобилянська", "Садгора", "Сторожинець"]) assert.match(home, new RegExp(expected, "g"));
+  assert.match(content, /label: "Криворучка"[^\n]+time: "Щонеділі о 10:00"/);
+  assert.match(content, /label: "Кобилянська"[^\n]+time: "Щонеділі о 17:00"/);
+  assert.match(content, /label: "Садгора"[^\n]+time: "Щонеділі о 10:00"/);
+  assert.match(content, /label: "Сторожинець"[^\n]+time: "Щонеділі о 10:00"/);
+  assert.match(styles, /\.home-visit-grid \{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(styles, /\.footer-locations \{[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+});

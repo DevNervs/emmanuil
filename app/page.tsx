@@ -1,5 +1,5 @@
 import { Page, SectionTitle } from "./components/SiteShell";
-import { news, newsHref, site, team } from "./content";
+import { news, newsHref, serviceLocations, team } from "./content";
 
 export default function Home() {
   return (
@@ -18,11 +18,9 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="home-visit" aria-label="Інформація про служіння">
-          <div><span>Загальні служіння</span><strong>{site.services}</strong></div>
-          <div><span>Адреса</span><strong>{site.address}</strong></div>
-          <div><span>Телефон</span><a href="tel:+380669509977">{site.phones[0]}</a></div>
-          <a className="button button-light" href="https://www.google.com/maps/dir/?api=1&destination=48.2864175%2C25.9394979" target="_blank" rel="noreferrer">Прокласти маршрут</a>
+        <section className="home-visit" aria-labelledby="home-services-title">
+          <div className="home-visit-heading"><span>Щонеділі</span><h2 id="home-services-title">Локації служінь</h2></div>
+          <div className="home-visit-grid">{serviceLocations.map((location, index) => <article key={location.label}><span>0{index + 1}</span><h3>{location.label}</h3><time>{location.time}</time><p>{location.address}</p><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.coordinates)}`} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${location.label}`}>Прокласти маршрут <i aria-hidden="true">↗</i></a></article>)}</div>
         </section>
 
         <section className="news-section">

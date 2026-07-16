@@ -15,6 +15,13 @@ export const site = {
   },
 };
 
+export const serviceLocations = [
+  { label: "Криворучка", address: "м. Чернівці, вул. Ореста Криворучка, 57", time: "Щонеділі о 10:00", coordinates: "48.2786111,25.9200516" },
+  { label: "Кобилянська", address: "м. Чернівці, вул. Ольги Кобилянської, 53", time: "Щонеділі о 17:00", coordinates: "48.2864175,25.9394979" },
+  { label: "Садгора", address: "м. Чернівці, вул. Васіле Александрі, 8", time: "Щонеділі о 10:00", coordinates: "48.3464098,25.9594925" },
+  { label: "Сторожинець", address: "м. Сторожинець, вул. Українська, 5", time: "Щонеділі о 10:00", coordinates: "48.1640400,25.7212200" },
+];
+
 export const team = [
   { name: "Никифорець Валерій", role: "Старший пастор церкви Еммануїл", image: "/media/nikiforec.jpg", facebook: "https://www.facebook.com/profile.php?id=100010668361401" },
   { name: "Григорчук Олександр", role: "Пастор церкви Еммануїл", image: "/media/grigorchuk.jpg", facebook: "https://www.facebook.com/profile.php?id=100002941578783", instagram: "https://www.instagram.com/hryhorchuk_aleksandr/" },
