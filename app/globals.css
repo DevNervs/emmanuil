@@ -292,10 +292,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 /* 2026 premium refinement */
 :root { --paper:#f7f4ef; --ink:#181513; --muted:#716a65; --line:#d8d0c7; --wine:#842c3b; --wine-dark:#2d171b; --rose:#efe3df; --serif:"Prata",Georgia,serif; --sans:"Manrope",Inter,system-ui,sans-serif; --radius:1.25rem; --shadow:0 24px 70px rgba(45,28,22,.10); }
 body { background:#ddd7d0; font-size:16px; }
-.site-header { transition:min-height .25s ease,background .25s ease,box-shadow .25s ease; }
-.header-inner { min-height:5.4rem; transition:min-height .25s ease; }
-.site-header.is-compact { background:rgba(247,244,239,.96); box-shadow:0 10px 35px rgba(34,23,19,.08); }
-.site-header.is-compact .header-inner { min-height:4.35rem; }
+.site-header { background:rgba(247,244,239,.82); -webkit-backdrop-filter:blur(18px) saturate(1.2); backdrop-filter:blur(18px) saturate(1.2); transition:background .32s ease,box-shadow .32s ease,border-color .32s ease,backdrop-filter .32s ease; }
+.header-inner { min-height:5.4rem; transition:min-height .32s cubic-bezier(.2,.7,.2,1),padding .32s ease; }
+.brand { transition:width .32s cubic-bezier(.2,.7,.2,1),transform .32s ease; transform-origin:left center; }
+.site-header.is-compact { border-color:rgba(45,28,22,.08); background:rgba(247,244,239,.72); -webkit-backdrop-filter:blur(28px) saturate(1.35); backdrop-filter:blur(28px) saturate(1.35); box-shadow:0 12px 38px rgba(34,23,19,.09); }
+.site-header.is-compact .header-inner { min-height:3.95rem; }
+.site-header.is-compact .brand { width:clamp(10.5rem,14vw,12.5rem); }
 .main-nav a { font-size:.78rem; }
 .donate-link,.button { min-height:3.25rem; font-size:.78rem; }
 .overline { font-size:.7rem; }
@@ -411,7 +413,8 @@ body { background:#ddd7d0; font-size:16px; }
 
 @media (max-width:680px) {
   .header-inner { min-height:4.5rem; }
-  .site-header.is-compact .header-inner { min-height:4rem; }
+  .site-header.is-compact .header-inner { min-height:3.7rem; }
+  .site-header.is-compact .brand { width:9.3rem; }
   .editorial-hero-copy { min-height:0; padding:3rem 1.15rem 2.5rem; }
   .editorial-hero > *,.page-intro > *,.home-links > *,.team-preview > * { min-width:0; }
   .editorial-hero h1 { font-size:clamp(2.3rem,11vw,2.65rem); line-height:.94; letter-spacing:-.055em; }
