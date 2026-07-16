@@ -14,7 +14,7 @@ export default function Home() {
           <div className="hero-collage" aria-label="Життя церкви Еммануїл">
             <figure className="hero-photo-main"><img src="/media/baptism.jpg" alt="Водне хрещення церкви Еммануїл" /></figure>
             <figure className="hero-photo-small"><img src="/media/childrens.jpg" alt="Свято для дітей" /></figure>
-            <div className="hero-wordmark" aria-hidden="true"><span>EM</span><span>MAN</span><span>UIL</span></div>
+            <div className="hero-signature" aria-hidden="true"><img src="/emmanuil-logo.png" alt="" /><span>Чернівці</span></div>
           </div>
         </section>
 
