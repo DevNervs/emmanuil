@@ -3,6 +3,7 @@ const groupNames = [
 ];
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
 const escapeHtml = (value) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+const youtubeLiveUrl = "https://www.youtube.com/@EmmanuilCV/live";
 
 async function register(request, env) {
   if (request.method !== "POST") return json({ message: "Метод не підтримується." }, 405);
@@ -26,9 +27,26 @@ async function register(request, env) {
   return json({ message: "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram." });
 }
 
+async function youtubeLive(request) {
+  if (request.method !== "GET") return json({ live: false }, 405);
+  try {
+    const response = await fetch(youtubeLiveUrl, { headers: { Accept: "text/html,application/xhtml+xml", "Accept-Language": "uk-UA,uk;q=0.9,en;q=0.7", "User-Agent": "Mozilla/5.0 (compatible; EmmanuilChurch/1.0)" }, redirect: "follow" });
+    if (!response.ok) return json({ live: false, available: false }, 502);
+    const html = await response.text();
+    const canonical = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"&]+)[^"]*"/i);
+    const isLiveNow = /["\\]isLiveNow["\\]\s*:\s*true/i.test(html);
+    const videoId = canonical?.[1]?.replace(/[^a-zA-Z0-9_-]/g, "");
+    return new Response(JSON.stringify(videoId && isLiveNow ? { live: true, videoId } : { live: false }), { headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "public, max-age=30, s-maxage=45, stale-while-revalidate=60" } });
+  } catch {
+    return json({ live: false, available: false }, 502);
+  }
+}
+
 export default {
   async fetch(request, env) {
-    if (new URL(request.url).pathname === "/api/group-registration") return register(request, env);
+    const pathname = new URL(request.url).pathname;
+    if (pathname === "/api/group-registration") return register(request, env);
+    if (pathname === "/api/youtube-live") return youtubeLive(request);
     return env.ASSETS.fetch(request);
   },
 };

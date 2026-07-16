@@ -2,6 +2,7 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { handleGroupRegistration } from "./groupRegistration";
+import { handleYouTubeLive } from "./youtubeLive";
 
 interface Env {
   ASSETS: Fetcher;
@@ -33,6 +34,7 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/group-registration") return handleGroupRegistration(request, env ?? {});
+    if (url.pathname === "/api/youtube-live") return handleYouTubeLive(request);
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
