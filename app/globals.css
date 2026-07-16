@@ -289,14 +289,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .card-number strong { display:block; font-family:var(--serif); font-size:clamp(2rem,5vw,5rem); font-weight:400; letter-spacing:.03em; }
 .card-number p { margin:1rem 0 0; color:#d8cbca; font-size:.76rem; }
 .account-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
-.account-grid article { border:1px solid var(--line); border-radius:1rem; background:var(--white); padding:1.6rem; box-shadow:0 18px 45px rgba(40,25,20,.05); }
+.account-grid article { display:flex; height:100%; flex-direction:column; border:1px solid var(--line); border-radius:1rem; background:var(--white); padding:1.6rem; box-shadow:0 18px 45px rgba(40,25,20,.05); }
 .account-grid article > span { color:var(--wine); font-size:.66rem; font-weight:800; }
 .account-grid h2 { margin:1rem 0 1.5rem; font-size:2.1rem; }
 .account-grid dl { margin:0; }
 .account-grid dt { margin-top:1rem; color:var(--muted); font-size:.61rem; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
 .account-grid dd { overflow-wrap:anywhere; margin:.3rem 0 0; font-size:.73rem; line-height:1.45; }
 .copy-button { min-height:2.7rem; margin-top:1rem; border:1px solid currentColor; border-radius:10rem; background:transparent; padding:.55rem .85rem; color:inherit; font-size:.68rem; font-weight:750; cursor:pointer; }
-.account-grid .copy-button { width:100%; color:var(--wine); }
+.account-grid .copy-button { width:100%; margin-top:auto; color:var(--wine); }
 .donation-note { margin:2rem 0 0; color:var(--wine); font-size:.76rem; font-weight:800; }
 
 .site-footer { display:grid; grid-template-columns:1.2fr .7fr 1fr; gap:3rem; max-width:1600px; margin:0 auto; padding:clamp(5rem,8vw,8rem) clamp(1rem,5vw,5rem) 1.5rem; background:#12100f; color:var(--white); }

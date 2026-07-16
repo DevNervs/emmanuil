@@ -74,3 +74,9 @@ test("renders the manuscript without decorative verse stars or a baked white bac
   assert.doesNotMatch(about, /✦/);
   assert.match(styles, /beliefs-scroll-transparent\.png/);
 });
+
+test("aligns donation account actions along the bottom edge", async () => {
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(styles, /\.account-grid article \{[^}]*display:flex;[^}]*height:100%;[^}]*flex-direction:column;/);
+  assert.match(styles, /\.account-grid \.copy-button \{[^}]*margin-top:auto;/);
+});
