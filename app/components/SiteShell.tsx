@@ -3,21 +3,22 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { BookOpenText, CirclePlay, ContactRound, Heart, Home, MapPinned, Newspaper, UsersRound, type LucideIcon } from "lucide-react";
 import { site } from "../content";
 import { SocialLink } from "./SocialLink";
 
-const nav = [
-  ["/", "Головна", "⌂"],
-  ["/news", "Новини", "▤"],
-  ["/about", "Ми віримо", "✦"],
-  ["/team", "Команда", "♙"],
-  ["/groups", "Домашні групи", "⌖"],
-  ["/online", "Онлайн", "▶"],
-  ["/contacts", "Контакти", "◎"],
+const nav: Array<[string, string, LucideIcon]> = [
+  ["/", "Головна", Home],
+  ["/news", "Новини", Newspaper],
+  ["/about", "Ми віримо", BookOpenText],
+  ["/team", "Команда", UsersRound],
+  ["/groups", "Домашні групи", MapPinned],
+  ["/online", "Онлайн", CirclePlay],
+  ["/contacts", "Контакти", ContactRound],
 ];
 
 function NavLinks({ active }: { active?: string }) {
-  return <>{nav.map(([href, label, icon]) => <a key={href} href={href} data-label={label} aria-current={active === href ? "page" : undefined}><span className="nav-icon" aria-hidden="true">{icon}</span><span className="nav-label">{label}</span></a>)}</>;
+  return <>{nav.map(([href, label, Icon]) => <a key={href} href={href} data-label={label} aria-current={active === href ? "page" : undefined}><Icon className="nav-icon" aria-hidden="true" strokeWidth={1.7} /><span className="nav-label">{label}</span></a>)}</>;
 }
 
 export function Brand({ light = false }: { light?: boolean }) {
@@ -48,7 +49,7 @@ export function SiteHeader({ active }: { active?: string }) {
         <Brand />
         <div className="desktop-header-actions">
           <nav className="main-nav" aria-label="Основна навігація"><NavLinks active={active} /></nav>
-          <a className="donate-link header-donate" href="/donate" data-label="Пожертвувати"><span className="donate-icon" aria-hidden="true">♡</span><span className="donate-label">Пожертвувати</span></a>
+          <a className="donate-link header-donate" href="/donate" data-label="Пожертвувати"><Heart className="donate-icon" aria-hidden="true" strokeWidth={1.8} /><span className="donate-label">Пожертвувати</span></a>
         </div>
         <details className="mobile-menu">
           <summary>Меню</summary>
