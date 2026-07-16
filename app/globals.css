@@ -405,18 +405,26 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
 .manuscript-heading .overline { grid-column:1/-1; color:#7c382c; }
 .manuscript-heading h2 { margin:0; color:#35251c; font-size:clamp(3rem,5.8vw,6rem); line-height:.9; text-shadow:0 1px 0 rgba(255,255,255,.55); }
 .manuscript-heading > span { color:#795c46; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
-.manuscript-scroll { position:relative; z-index:1; max-width:980px; margin:2.5rem auto; border-right:1px solid rgba(91,55,31,.25); border-left:1px solid rgba(91,55,31,.25); background:radial-gradient(ellipse at 15% 4%,rgba(133,82,45,.14),transparent 22rem),radial-gradient(ellipse at 90% 90%,rgba(133,82,45,.12),transparent 25rem),repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 2px,transparent 3px 8px),linear-gradient(90deg,#d5b98e 0,#ead5ad 5%,#f2dfba 16%,#efd9ae 84%,#d2b184 100%); padding:clamp(4.5rem,7vw,6.5rem) clamp(1rem,6vw,5.5rem); box-shadow:0 35px 90px rgba(67,42,27,.22),inset 0 0 80px rgba(92,54,27,.12); color:#3d291d; }
-.manuscript-scroll::before,.manuscript-scroll::after { content:""; position:absolute; z-index:2; right:-2.2rem; left:-2.2rem; height:3.1rem; border:1px solid rgba(89,51,27,.32); border-radius:55% 48% 50% 46% / 42% 52% 45% 56%; background:linear-gradient(180deg,#c59d69,#ead0a2 40%,#a97949 78%,#7b4c2c); box-shadow:0 8px 18px rgba(50,29,18,.24),inset 0 3px 5px rgba(255,255,255,.3),inset 0 -4px 8px rgba(64,35,19,.24); }
-.manuscript-scroll::before { top:-1.55rem; }
-.manuscript-scroll::after { bottom:-1.55rem; transform:rotate(.35deg); }
-.scroll-ornament { display:flex; align-items:center; gap:1rem; margin-bottom:2rem; color:#8b4b37; }
+.manuscript-scroll { position:relative; z-index:1; max-width:980px; margin:3.5rem auto; border:1px solid rgba(105,69,40,.22); border-radius:.3rem .15rem .4rem .2rem / .15rem .35rem .18rem .3rem; background:radial-gradient(ellipse at 7% 8%,rgba(124,74,38,.16),transparent 17rem),radial-gradient(ellipse at 94% 88%,rgba(117,67,34,.13),transparent 20rem),radial-gradient(circle at 30% 45%,rgba(91,51,27,.075) 0 .7px,transparent 1.2px),radial-gradient(circle at 70% 20%,rgba(255,255,255,.34) 0 .8px,transparent 1.3px),linear-gradient(90deg,#c5a06d 0%,#e4c998 2.5%,#f0ddb4 8%,#f5e7c7 48%,#efdbb2 92%,#c49d68 100%); background-size:auto,auto,19px 23px,27px 29px,auto; padding:clamp(5rem,7vw,6.8rem) clamp(1rem,6vw,5.5rem); box-shadow:0 42px 95px rgba(58,35,21,.2),0 10px 28px rgba(58,35,21,.13),inset 24px 0 34px -27px rgba(73,40,20,.48),inset -24px 0 34px -27px rgba(73,40,20,.42),inset 0 1px rgba(255,255,255,.42); color:#3d291d; }
+.manuscript-scroll::before,.manuscript-scroll::after { content:""; position:absolute; z-index:3; right:-1.2rem; left:-1.2rem; height:1.65rem; border:1px solid rgba(91,54,29,.28); background:radial-gradient(circle at 15% 60%,rgba(103,62,31,.14),transparent 18%),linear-gradient(180deg,#d6b47e 0%,#f1d5a4 32%,#d5ad74 68%,#8c5b32 100%); box-shadow:0 8px 13px rgba(50,29,18,.2),inset 0 2px 3px rgba(255,255,255,.26),inset 0 -3px 5px rgba(69,39,20,.19); }
+.manuscript-scroll::before { top:-.8rem; border-radius:52% 47% 49% 51% / 65% 58% 46% 42%; transform:rotate(-.12deg); }
+.manuscript-scroll::after { bottom:-.8rem; border-radius:47% 53% 51% 49% / 44% 48% 62% 58%; transform:rotate(.18deg); }
+.scroll-dowel { position:absolute; z-index:2; right:-2.2rem; left:-2.2rem; height:.62rem; border:1px solid rgba(54,29,16,.45); border-radius:10rem; background:linear-gradient(180deg,#4b2a18,#9a6033 35%,#6e3c20 64%,#321a10); box-shadow:0 5px 11px rgba(44,24,14,.3),inset 0 1px rgba(255,222,169,.27); }
+.scroll-dowel::before,.scroll-dowel::after { content:""; position:absolute; top:50%; width:1.15rem; height:1.15rem; border:1px solid rgba(52,28,15,.5); border-radius:50%; background:radial-gradient(circle at 38% 35%,#bd7b43,#69391f 48%,#2f180f 100%); box-shadow:0 4px 9px rgba(45,24,13,.28); transform:translateY(-50%); }
+.scroll-dowel::before { left:-.35rem; }
+.scroll-dowel::after { right:-.35rem; }
+.scroll-dowel-top { top:-1.08rem; }
+.scroll-dowel-bottom { bottom:-1.08rem; }
+.scroll-ornament,.beliefs-accordion,.scroll-seal { position:relative; z-index:4; }
+.scroll-ornament { display:flex; align-items:center; gap:1rem; margin-bottom:2.4rem; color:#7e3c31; }
 .scroll-ornament::before,.scroll-ornament::after { content:""; height:1px; flex:1; background:linear-gradient(90deg,transparent,#9c6b48,transparent); }
 .scroll-ornament span { font-family:var(--serif); font-size:.85rem; letter-spacing:.25em; text-transform:uppercase; }
-.beliefs-accordion { border-top:1px solid rgba(88,52,29,.28); }
-.belief-entry { border-bottom:1px solid rgba(88,52,29,.25); }
+.beliefs-accordion { border-top:1px solid rgba(88,52,29,.25); }
+.belief-entry { position:relative; border-bottom:1px solid rgba(88,52,29,.22); transition:background .28s ease; }
+.belief-entry.is-open { background:linear-gradient(90deg,rgba(125,47,45,.045),rgba(255,255,255,.1) 50%,rgba(125,47,45,.035)); }
 .belief-entry button { display:grid; grid-template-columns:3rem 1fr 2.5rem; align-items:center; gap:1rem; width:100%; border:0; background:transparent; padding:1.55rem .4rem; color:inherit; text-align:left; cursor:pointer; }
 .belief-entry button:hover,.belief-entry.is-open button { color:#7d2f2d; }
-.belief-number { display:grid; width:2.35rem; height:2.35rem; place-items:center; border:1px solid currentColor; border-radius:50%; font-size:.66rem; font-weight:800; }
+.belief-number { display:grid; width:2.35rem; height:2.35rem; place-items:center; border:1px solid currentColor; border-radius:47% 53% 49% 51%; background:rgba(255,249,231,.22); font-size:.66rem; font-weight:800; box-shadow:inset 0 0 0 3px rgba(125,47,45,.035); }
 .belief-entry button strong { font-family:var(--serif); font-size:clamp(1.15rem,2vw,1.7rem); font-weight:400; line-height:1.35; }
 .belief-toggle { display:grid; width:2.25rem; height:2.25rem; place-items:center; border:1px solid rgba(88,52,29,.35); border-radius:50%; font-size:1.3rem; transition:transform .3s ease,background .3s ease,color .3s ease; }
 .belief-entry.is-open .belief-toggle { background:#7d2f2d; color:#f4dfb9; transform:rotate(180deg); }
@@ -426,7 +434,8 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
 .belief-panel > div { display:grid; grid-template-columns:1.5rem 1fr; gap:.75rem; margin:0 0 1.5rem 4.4rem; border-left:2px solid rgba(125,47,45,.42); padding:.2rem 1rem .2rem 1.25rem; }
 .belief-panel span { color:#8d4e3a; }
 .belief-panel p { margin:0; color:#694c39; font-family:Georgia,"Times New Roman",serif; font-size:.95rem; font-style:italic; line-height:1.75; }
-.scroll-seal { display:grid; width:3.8rem; height:3.8rem; margin:2.5rem auto 0; place-items:center; border:3px double #7f2d2d; border-radius:50%; color:#7f2d2d; font-family:var(--serif); font-size:1.55rem; box-shadow:0 0 0 4px rgba(127,45,45,.1); transform:rotate(-7deg); }
+.scroll-seal { display:grid; width:4.2rem; height:4rem; margin:3rem auto 0; place-items:center; border:1px solid rgba(74,19,28,.5); border-radius:48% 52% 45% 55% / 53% 46% 54% 47%; background:radial-gradient(circle at 37% 30%,#a64a55,#7d2935 54%,#541923 100%); color:#ead3a8; font-family:var(--serif); font-size:1.45rem; text-shadow:0 1px #4d1720; box-shadow:0 7px 16px rgba(73,24,31,.22),inset 0 2px 4px rgba(255,255,255,.18),inset 0 -3px 7px rgba(53,12,18,.32),0 0 0 4px rgba(125,41,53,.1); transform:rotate(-7deg); }
+.scroll-seal::after { content:""; position:absolute; inset:.45rem; border:1px solid rgba(234,211,168,.48); border-radius:50%; }
 
 .team-page-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.6rem; }
 .team-page-section { background:linear-gradient(180deg,#fff,#f7f1eb); }
@@ -523,6 +532,8 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
   .manuscript-heading h2 { font-size:3rem; }
   .manuscript-scroll { margin-right:.8rem; margin-left:.8rem; padding:4rem .7rem; }
   .manuscript-scroll::before,.manuscript-scroll::after { right:-1rem; left:-1rem; }
+  .scroll-dowel { right:-1.25rem; left:-1.25rem; }
+  .scroll-dowel::before,.scroll-dowel::after { width:.9rem; height:.9rem; }
   .belief-entry button { grid-template-columns:2.35rem 1fr 2.2rem; gap:.65rem; padding:1.25rem .15rem; }
   .belief-number { width:2rem; height:2rem; }
   .belief-entry button strong { font-size:1.05rem; line-height:1.4; }

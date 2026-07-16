@@ -12,6 +12,8 @@ export function BeliefsScroll({ beliefs }: { beliefs: string[][] }) {
       <span>{beliefs.length} положень</span>
     </div>
     <div className="manuscript-scroll">
+      <span className="scroll-dowel scroll-dowel-top" aria-hidden="true" />
+      <span className="scroll-dowel scroll-dowel-bottom" aria-hidden="true" />
       <div className="scroll-ornament" aria-hidden="true"><span>Еммануїл</span></div>
       <div className="beliefs-accordion">
         {beliefs.map(([title, verse], index) => {
