@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Page, PageIntro } from "../components/SiteShell";
 
-export const metadata: Metadata = { title: "Ми віримо — Еммануїл", description: "Основи віровчення християнської церкви Еммануїл." };
+export const metadata: Metadata = { title: "Ми віримо — Еммануїл", description: "Основи віровчення християнської церкви Еммануїл.", alternates: { canonical: "/about" } };
 
 const beliefs = [
   ["У єдиного істинного і святого Бога, Який відкривається у трьох Особах: Отець, Син і Святий Дух.", "«Отож ідіть, і навчіть всі народи, хрестячи їх в Ім’я Отця, і Сина, і Святого Духа» (Мт. 28:19)."],

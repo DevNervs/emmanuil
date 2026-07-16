@@ -10,18 +10,19 @@ export default function Home() {
             <p className="overline">Чернівці · Україна</p>
             <h1>Християнська<br />церква<br /><em>Еммануїл</em></h1>
             <div className="hero-actions"><a className="button button-wine" href="/online">Дивитися онлайн</a><a className="button button-ghost" href="/contacts">Контакти <span aria-hidden="true">↗</span></a></div>
+            <div className="hero-details"><div><span>Загальні служіння</span><strong>{site.services}</strong></div><div><span>Адреса</span><strong>{site.address}</strong></div></div>
           </div>
           <div className="hero-collage" aria-label="Життя церкви Еммануїл">
-            <figure className="hero-photo-main"><img src="/media/baptism.jpg" alt="Водне хрещення церкви Еммануїл" /></figure>
-            <figure className="hero-photo-small"><img src="/media/childrens.jpg" alt="Свято для дітей" /></figure>
-            <div className="hero-signature" aria-hidden="true"><img src="/emmanuil-logo-transparent.png" alt="" /><span>Чернівці</span></div>
+            <figure className="hero-photo-main"><img src="/media/baptism.jpg" alt="Водне хрещення церкви Еммануїл" fetchPriority="high" /></figure>
+            <figure className="hero-photo-small"><img src="/media/childrens.jpg" alt="Свято для дітей" fetchPriority="high" /></figure>
+            <div className="hero-caption"><span>Життя церкви</span><strong>Чернівці</strong></div>
           </div>
         </section>
 
         <section className="fact-ribbon">
-          <div><span>Загальні служіння</span><strong>{site.services}</strong></div>
-          <div><span>Адреса</span><strong>{site.address}</strong></div>
-          <a href="/online"><span>Онлайн</span><strong>Пряма трансляція</strong><b aria-hidden="true">↗</b></a>
+          <a href="/about"><span>01</span><strong>Ми віримо</strong><b aria-hidden="true">↗</b></a>
+          <a href="/groups"><span>02</span><strong>Домашні групи</strong><b aria-hidden="true">↗</b></a>
+          <a href="/online"><span>03</span><strong>Пряма трансляція</strong><b aria-hidden="true">↗</b></a>
         </section>
 
         <section className="home-links" aria-label="Основні розділи">
@@ -35,7 +36,7 @@ export default function Home() {
 
         <section className="news-section">
           <SectionTitle kicker="Останнє" title="Новини" />
-          <div className="news-grid">{news.slice(0, 3).map((item, index) => <article className={`news-card ${index === 0 ? "news-card-featured" : ""}`} key={item.href}><a className="news-image" href={item.href} target="_blank" rel="noreferrer"><img src={item.image} alt={item.title} /><span aria-hidden="true">↗</span></a><div className="news-meta"><time>{item.date}</time><span>0{index + 1}</span></div><h3>{item.title}</h3><a className="inline-link" href={item.href} target="_blank" rel="noreferrer">Читати новину</a></article>)}</div>
+          <div className="news-grid">{news.slice(0, 3).map((item, index) => <article className={`news-card ${index === 0 ? "news-card-featured" : ""}`} key={item.href}><a className="news-image" href={item.href} target="_blank" rel="noreferrer"><img src={item.image} alt={item.title} loading="lazy" /><span aria-hidden="true">↗</span></a><div className="news-meta"><time>{item.date}</time><span>0{index + 1}</span></div><h3>{item.title}</h3><a className="inline-link" href={item.href} target="_blank" rel="noreferrer">Читати новину</a></article>)}</div>
           <a className="text-arrow" href="/news">Усі новини <span aria-hidden="true">→</span></a>
         </section>
 

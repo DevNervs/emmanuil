@@ -16,22 +16,28 @@ export function CopyButton({ value, label = "Копіювати" }: { value: str
 }
 
 export function ContactForm({ email }: { email: string }) {
-  function submit(event: FormEvent<HTMLFormElement>) {
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") || "");
-    const sender = String(data.get("email") || "");
-    const message = String(data.get("message") || "");
-    const subject = encodeURIComponent(`Повідомлення з сайту — ${name}`);
-    const body = encodeURIComponent(`ПІБ: ${name}\nE-mail: ${sender}\n\n${message}`);
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    const form = event.currentTarget;
+    setStatus("sending");
+    try {
+      const response = await fetch(`https://formsubmit.co/ajax/${email}`, { method: "POST", headers: { Accept: "application/json" }, body: new FormData(form) });
+      if (!response.ok) throw new Error("send failed");
+      form.reset();
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
   }
 
   return <form className="contact-form" onSubmit={submit}>
+    <input className="honeypot" type="text" name="_honey" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+    <input type="hidden" name="_subject" value="Повідомлення з сайту Еммануїл" />
     <div><label htmlFor="contact-name">ПІБ</label><input id="contact-name" name="name" autoComplete="name" required /></div>
     <div><label htmlFor="contact-email">E-mail</label><input id="contact-email" name="email" type="email" autoComplete="email" required /></div>
     <div><label htmlFor="contact-message">Повідомлення</label><textarea id="contact-message" name="message" rows={6} required /></div>
-    <button className="button button-wine" type="submit">Надіслати</button>
-    <p>Після натискання відкриється ваша поштова програма.</p>
+    <button className="button button-wine" type="submit" disabled={status === "sending"}>{status === "sending" ? "Надсилаємо…" : "Надіслати"}</button>
+    <p className={`form-status ${status}`} role="status" aria-live="polite">{status === "sent" ? "Дякуємо! Повідомлення надіслано." : status === "error" ? "Не вдалося надіслати. Спробуйте ще раз або напишіть нам на e-mail." : "Відповімо на вказану електронну адресу."}</p>
   </form>;
 }

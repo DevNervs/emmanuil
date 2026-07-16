@@ -4,7 +4,7 @@ import { ContactForm } from "../components/InteractionTools";
 import { InteractiveMap } from "../components/InteractiveMap";
 import { site } from "../content";
 
-export const metadata: Metadata = { title: "Контакти — Еммануїл", description: "Адреси, телефони, електронна пошта та соціальні мережі церкви Еммануїл у Чернівцях." };
+export const metadata: Metadata = { title: "Контакти — Еммануїл", description: "Адреси, телефони, електронна пошта та соціальні мережі церкви Еммануїл у Чернівцях.", alternates: { canonical: "/contacts" } };
 
 const locations = [
   { label: "Церква Еммануїл", address: "вул. О. Кобилянської, 53, Чернівці", mapQuery: "вулиця Ольги Кобилянської, 53, Чернівці, Чернівецький район, Чернівецька область, 58002, Україна", coordinates: "48.2864175,25.9394979" },
