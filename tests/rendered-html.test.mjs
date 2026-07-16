@@ -48,6 +48,8 @@ test("keeps the mobile group application scrollable and group-first", async () =
   assert.match(groupSource, /group\.address \|\| "Адресу уточнюйте у ведучого"/);
   assert.match(styles, /height:100dvh; max-height:100dvh; overflow-x:hidden; overflow-y:auto;/);
   assert.match(styles, /touch-action:pan-y/);
+  assert.match(styles, /animation:group-cta-attention 3\.15s/);
+  assert.match(styles, /@keyframes group-cta-attention/);
 });
 
 test("renders every news item as an internal article", async () => {
