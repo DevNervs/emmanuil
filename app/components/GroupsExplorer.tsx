@@ -1,13 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowRight, Check, Send, X } from "lucide-react";
 
 type Group = { title: string; leaders: string; time: string; address: string; coordinates?: string };
+type SubmitState = "idle" | "sending" | "sent" | "error";
 
 export function GroupsExplorer({ groups }: { groups: Group[] }) {
   const [query, setQuery] = useState("");
   const [day, setDay] = useState("Усі дні");
   const [selected, setSelected] = useState(0);
+  const [formOpen, setFormOpen] = useState(false);
+  const [chosenGroups, setChosenGroups] = useState<number[]>([]);
+  const [name, setName] = useState("");
+  const [telegram, setTelegram] = useState("");
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
+  const closeButton = useRef<HTMLButtonElement>(null);
+  const startedAt = useRef(0);
   const days = ["Усі дні", ...Array.from(new Set(groups.map((group) => group.time.split(",")[0]).filter(Boolean)))];
   const filtered = useMemo(() => groups.filter((group) => {
     const haystack = `${group.title} ${group.leaders} ${group.address}`.toLocaleLowerCase("uk");
@@ -15,10 +26,66 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
   }), [groups, query, day]);
   const active = filtered[selected] ?? filtered[0];
 
+  useEffect(() => {
+    if (!formOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButton.current?.focus();
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [formOpen]);
+
   function changeFilters(next?: string) { if (next !== undefined) setQuery(next); setSelected(0); }
+
+  function openRegistration() {
+    const activeIndex = active ? groups.indexOf(active) : -1;
+    if (activeIndex >= 0) setChosenGroups([activeIndex]);
+    startedAt.current = Date.now();
+    setSubmitState("idle");
+    setSubmitMessage("");
+    setFormOpen(true);
+  }
+
+  function toggleGroup(index: number) {
+    setChosenGroups((current) => current.includes(index)
+      ? current.filter((item) => item !== index)
+      : current.length < 2 ? [...current, index] : current);
+  }
+
+  async function submitApplication(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!chosenGroups.length || chosenGroups.length > 2) {
+      setSubmitState("error");
+      setSubmitMessage("Оберіть одну або дві домашні групи.");
+      return;
+    }
+    const data = new FormData(event.currentTarget);
+    setSubmitState("sending");
+    setSubmitMessage("");
+    try {
+      const response = await fetch("/api/group-registration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ name, telegram, groups: chosenGroups, website: data.get("website"), startedAt: startedAt.current }),
+      });
+      const result = await response.json() as { message?: string };
+      if (!response.ok) throw new Error(result.message || "Не вдалося надіслати заявку.");
+      setSubmitState("sent");
+      setSubmitMessage(result.message || "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram.");
+      setName("");
+      setTelegram("");
+      setChosenGroups([]);
+    } catch (error) {
+      setSubmitState("error");
+      setSubmitMessage(error instanceof Error ? error.message : "Не вдалося надіслати заявку. Спробуйте ще раз.");
+    }
+  }
 
   return <section className="groups-explorer" id="groups-map">
     <div className="groups-explorer-head"><div><p className="overline overline-light">Місця зустрічей</p><h2>Домашні групи</h2></div><p>Знайдіть групу за днем, назвою, ведучим або адресою та відкрийте точний маршрут.</p></div>
+    <button className="groups-register-cta" type="button" onClick={openRegistration}>
+      <span><b>Записатися на домашню групу</b><small>Оберіть одну або дві групи — адміністратор зв’яжеться з вами у Telegram</small></span>
+      <i aria-hidden="true"><ArrowRight strokeWidth={1.8} /></i>
+    </button>
     <div className="group-tools">
       <label><span>Пошук</span><input type="search" value={query} onChange={(event) => changeFilters(event.target.value)} placeholder="Назва, ведучий або адреса" /></label>
       <div className="day-filters" aria-label="Фільтр за днем">{days.map((item) => <button type="button" className={item === day ? "is-active" : ""} aria-pressed={item === day} onClick={() => { setDay(item); setSelected(0); }} key={item}>{item}</button>)}</div>
@@ -31,5 +98,32 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
         {active?.coordinates ? <><div className="group-map-info"><div><span>Обрана група</span><strong>{active.title}</strong><small>{active.address}</small></div><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.coordinates)}`} target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div><iframe key={active.coordinates} src={`https://www.google.com/maps?q=${encodeURIComponent(active.coordinates)}&z=17&output=embed`} title={`${active.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></> : <div className="map-unavailable"><strong>{active?.title}</strong><p>Адресу цієї групи потрібно уточнити у ведучого.</p></div>}
       </div>
     </div>
+
+    {formOpen ? <div className="group-form-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFormOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setFormOpen(false); }}>
+      <div className="group-form-dialog" role="dialog" aria-modal="true" aria-labelledby="group-form-title">
+        <button ref={closeButton} className="group-form-close" type="button" onClick={() => setFormOpen(false)} aria-label="Закрити анкету"><X aria-hidden="true" /></button>
+        <aside className="group-form-intro">
+          <p className="overline overline-light">Домашні групи</p>
+          <h2 id="group-form-title">Знайдіть<br />своїх людей</h2>
+          <p>Заповніть коротку анкету. Після надсилання адміністратор зв’яжеться з вами у Telegram та підтвердить участь.</p>
+          <div><span>01</span><b>Ваші контакти</b></div><div><span>02</span><b>До двох груп</b></div><div><span>03</span><b>Підтвердження</b></div>
+        </aside>
+        {submitState === "sent" ? <div className="group-form-success"><span><Check aria-hidden="true" /></span><p className="overline">Заявку прийнято</p><h3>Дякуємо!</h3><p>{submitMessage}</p><button className="button button-wine" type="button" onClick={() => setFormOpen(false)}>Готово</button></div> :
+        <form className="group-application-form" onSubmit={submitApplication}>
+          <div className="group-form-heading"><span>Коротка анкета</span><strong>{chosenGroups.length}/2 групи</strong></div>
+          <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
+          <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
+          <fieldset className="group-form-groups"><legend>Оберіть одну або дві групи *</legend><p>Одночасно можна записатися максимум у дві домашні групи.</p><div>{groups.map((group, index) => {
+            const checked = chosenGroups.includes(index);
+            const disabled = !checked && chosenGroups.length >= 2;
+            return <label className={checked ? "is-selected" : disabled ? "is-disabled" : ""} key={`${group.title}-${index}`}><input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleGroup(index)} /><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small></span><Check aria-hidden="true" /></label>;
+          })}</div></fieldset>
+          <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі.</span></label>
+          <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
+          {submitMessage ? <p className={`group-submit-message ${submitState}`}>{submitMessage}</p> : null}
+          <button className="group-submit-button" type="submit" disabled={submitState === "sending" || !chosenGroups.length}><span>{submitState === "sending" ? "Надсилаємо…" : "Надіслати заявку"}</span><Send aria-hidden="true" /></button>
+        </form>}
+      </div>
+    </div> : null}
   </section>;
 }

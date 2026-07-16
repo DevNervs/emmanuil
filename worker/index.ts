@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { handleGroupRegistration } from "./groupRegistration";
 
 interface Env {
   ASSETS: Fetcher;
@@ -12,6 +13,8 @@ interface Env {
       };
     };
   };
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_ADMIN_CHAT_ID?: string;
 }
 
 interface ExecutionContext {
@@ -28,6 +31,8 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/group-registration") return handleGroupRegistration(request, env ?? {});
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
