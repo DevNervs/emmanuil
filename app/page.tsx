@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <Page active="/">
       <main>
-        <PageIntro eyebrow="Чернівці" title={<>Християнська церква<br /><em>Еммануїл</em></>}>
+        <PageIntro home eyebrow="Чернівці" title={<>Християнська церква<br /><em>Еммануїл</em></>}>
           <div className="fact-row">
             <div><span>Загальні служіння</span><strong>{site.services}</strong></div>
             <div><span>Адреса</span><strong>{site.address}</strong></div>

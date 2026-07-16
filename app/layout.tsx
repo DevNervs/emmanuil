@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://emmanuil-chernivtsi-journal.boris-smuglyakov.chatgpt.site"),
   title: "Еммануїл — євангельська церква Чернівців",
   description: "Еммануїл — християнська церква у Чернівцях: служіння, домашні групи, команда, новини та онлайн.",
+  icons: { icon: "/favicon.png", shortcut: "/favicon.png" },
   openGraph: {
     title: "Еммануїл — християнська церква у Чернівцях",
     description: "Новини, служителі, домашні групи, онлайн-трансляції, контакти та реквізити церкви Еммануїл.",

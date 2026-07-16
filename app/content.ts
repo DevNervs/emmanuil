@@ -16,23 +16,23 @@ export const site = {
 };
 
 export const team = [
-  { name: "Никифорець Валерій", role: "Старший пастор церкви Еммануїл", image: "https://emmanuil.cv.ua/images/2026/02/02/nikiforec.jpg", facebook: "https://www.facebook.com/profile.php?id=100010668361401" },
-  { name: "Григорчук Олександр", role: "Пастор церкви Еммануїл", image: "https://emmanuil.cv.ua/images/2026/02/02/grigorchuk.jpg", facebook: "https://www.facebook.com/profile.php?id=100002941578783", instagram: "https://www.instagram.com/hryhorchuk_aleksandr/" },
-  { name: "Кучурян Костянтин", role: "Пастор церкви Еммануїл", image: "https://emmanuil.cv.ua/images/2026/02/02/kuchuryan.jpg", facebook: "https://www.facebook.com/profile.php?id=1542009203", instagram: "https://www.instagram.com/cuciureanconstantin/" },
-  { name: "Клодницький Віталій", role: "Диякон церкви Еммануїл", image: "https://emmanuil.cv.ua/images/2026/02/02/klodnickij.jpg", facebook: "https://www.facebook.com/profile.php?id=100001007664424", instagram: "https://www.instagram.com/vitaliy_klodnytskyi/" },
-  { name: "Сємєшкін Єгор", role: "Диякон церкви Еммануїл", image: "https://emmanuil.cv.ua/images/2026/02/04/semeshkin.jpg", instagram: "https://www.instagram.com/sem_egorrr/" },
+  { name: "Никифорець Валерій", role: "Старший пастор церкви Еммануїл", image: "/media/nikiforec.jpg", facebook: "https://www.facebook.com/profile.php?id=100010668361401" },
+  { name: "Григорчук Олександр", role: "Пастор церкви Еммануїл", image: "/media/grigorchuk.jpg", facebook: "https://www.facebook.com/profile.php?id=100002941578783", instagram: "https://www.instagram.com/hryhorchuk_aleksandr/" },
+  { name: "Кучурян Костянтин", role: "Пастор церкви Еммануїл", image: "/media/kuchuryan.jpg", facebook: "https://www.facebook.com/profile.php?id=1542009203", instagram: "https://www.instagram.com/cuciureanconstantin/" },
+  { name: "Клодницький Віталій", role: "Диякон церкви Еммануїл", image: "/media/klodnickij.jpg", facebook: "https://www.facebook.com/profile.php?id=100001007664424", instagram: "https://www.instagram.com/vitaliy_klodnytskyi/" },
+  { name: "Сємєшкін Єгор", role: "Диякон церкви Еммануїл", image: "/media/semeshkin.jpg", instagram: "https://www.instagram.com/sem_egorrr/" },
 ];
 
 export const news = [
-  { title: "Ноти вдячності", date: "05 жовтня 2025", image: "https://emmanuil.cv.ua/images/2025/10/05/noti_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/noti-vdyachnosti" },
-  { title: "Справжня любов", date: "09 березня 2025", image: "https://emmanuil.cv.ua/images/2025/03/09/family-poster_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/spravzhnya-lyubov" },
-  { title: "Реєстрація на сезон домашніх груп 27.01 - 30.03 розпочато!", date: "19 січня 2025", image: "https://emmanuil.cv.ua/images/2025/03/09/home-group-27-01_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/reestratsiya-na-sezon-domashnikh-grup-27-01-30-03-rozpochato" },
-  { title: "Особливий день подяки 20 жовтня 2024", date: "12 жовтня 2024", image: "https://emmanuil.cv.ua/images/2024/10/12/jatva-2024_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/osoblivij-den-podyaki-20-zhovtnya-2024" },
-  { title: "Вся земля співай Осанна", date: "24 серпня 2024", image: "https://emmanuil.cv.ua/images/2025/03/09/osana_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/vsia-zemlia-spivai-osanna" },
-  { title: "Водне хрещення 2024 в церкві Emmanuil", date: "07 липня 2024", image: "https://emmanuil.cv.ua/images/2024/07/28/baptism_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/vodne-khreshchennya-2024-v-tserkvi-emmanuil" },
-  { title: "Свято для дітей з багатодітних сімей та сиріт", date: "08 червня 2024", image: "https://emmanuil.cv.ua/images/2024/07/28/childrens_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/svyato-dlya-ditej-z-bagatoditnikh-simej-ta-sirit" },
-  { title: "Надія для сімʼї", date: "04 березня 2024", image: "https://emmanuil.cv.ua/images/2024/03/16/hope-family_thumbnail.jpg", href: "https://emmanuil.cv.ua/news/nadiia-dlia-sim-i" },
-  { title: "Домашні групи, як це?", date: "20 лютого 2024", image: "https://emmanuil.cv.ua/images/2024/03/16/homegroup_how_thumbnail.jpeg", href: "https://emmanuil.cv.ua/news/domashni-hrupy-iak-tse" },
+  { title: "Ноти вдячності", date: "05 жовтня 2025", image: "/media/noti.jpg", href: "https://emmanuil.cv.ua/news/noti-vdyachnosti" },
+  { title: "Справжня любов", date: "09 березня 2025", image: "/media/family-poster.jpg", href: "https://emmanuil.cv.ua/news/spravzhnya-lyubov" },
+  { title: "Реєстрація на сезон домашніх груп 27.01 - 30.03 розпочато!", date: "19 січня 2025", image: "/media/home-group.jpg", href: "https://emmanuil.cv.ua/news/reestratsiya-na-sezon-domashnikh-grup-27-01-30-03-rozpochato" },
+  { title: "Особливий день подяки 20 жовтня 2024", date: "12 жовтня 2024", image: "/media/jatva-2024.jpg", href: "https://emmanuil.cv.ua/news/osoblivij-den-podyaki-20-zhovtnya-2024" },
+  { title: "Вся земля співай Осанна", date: "24 серпня 2024", image: "/media/osana.jpg", href: "https://emmanuil.cv.ua/news/vsia-zemlia-spivai-osanna" },
+  { title: "Водне хрещення 2024 в церкві Emmanuil", date: "07 липня 2024", image: "/media/baptism.jpg", href: "https://emmanuil.cv.ua/news/vodne-khreshchennya-2024-v-tserkvi-emmanuil" },
+  { title: "Свято для дітей з багатодітних сімей та сиріт", date: "08 червня 2024", image: "/media/childrens.jpg", href: "https://emmanuil.cv.ua/news/svyato-dlya-ditej-z-bagatoditnikh-simej-ta-sirit" },
+  { title: "Надія для сімʼї", date: "04 березня 2024", image: "/media/hope-family.jpg", href: "https://emmanuil.cv.ua/news/nadiia-dlia-sim-i" },
+  { title: "Домашні групи, як це?", date: "20 лютого 2024", image: "/media/homegroup-how.jpeg", href: "https://emmanuil.cv.ua/news/domashni-hrupy-iak-tse" },
 ];
 
 export const groups = [

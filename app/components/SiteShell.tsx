@@ -40,18 +40,18 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-main"><Brand light /><p>{site.address}</p><p>{site.services}</p></div>
       <div className="footer-column"><span>Розділи</span><a href="/news">Новини</a><a href="/about">Ми віримо</a><a href="/team">Команда</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a></div>
-      <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><a href={site.socials.facebook}>Facebook</a><a href={site.socials.instagram}>Instagram</a><a href={site.socials.youtube}>YouTube</a><a href={site.socials.telegram}>Telegram</a></div></address>
+      <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><a href={site.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={site.socials.instagram} target="_blank" rel="noreferrer">Instagram</a><a href={site.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={site.socials.telegram} target="_blank" rel="noreferrer">Telegram</a></div></address>
       <div className="footer-bottom">© 2026 {site.shortName}</div>
     </footer>
   );
 }
 
 export function Page({ children, active }: { children: ReactNode; active?: string }) {
-  return <><SiteHeader active={active} />{children}<Footer /></>;
+  return <><a className="skip-link" href="#main-content">Перейти до вмісту</a><SiteHeader active={active} /><div id="main-content" tabIndex={-1}>{children}</div><Footer /></>;
 }
 
-export function PageIntro({ eyebrow, title, text, children }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode }) {
-  return <section className="page-intro">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</section>;
+export function PageIntro({ eyebrow, title, text, children, home = false }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; home?: boolean }) {
+  return <section className={`page-intro ${home ? "home-intro" : ""}`}>{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</section>;
 }
 
 export function SectionTitle({ kicker, title, text }: { kicker?: string; title: ReactNode; text?: ReactNode }) {
