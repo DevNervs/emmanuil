@@ -368,6 +368,35 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
 .beliefs-section h2 { max-width:55rem; font-size:clamp(1.35rem,2vw,2rem); line-height:1.35; letter-spacing:-.03em; }
 .beliefs-section p { font-size:.86rem; }
 
+.beliefs-manuscript { position:relative; max-width:1600px; margin:0 auto; overflow:hidden; background:radial-gradient(circle at 90% 10%,rgba(181,138,85,.14),transparent 28rem),linear-gradient(180deg,#f6efe5,#e9ddd0); padding:clamp(5rem,9vw,9rem) clamp(1rem,7vw,7rem); }
+.beliefs-manuscript::before { content:""; position:absolute; inset:0; opacity:.22; background-image:repeating-linear-gradient(7deg,transparent 0 13px,rgba(88,57,35,.045) 14px),radial-gradient(circle at 20% 30%,rgba(117,76,43,.16) 0 1px,transparent 2px); background-size:auto,31px 31px; pointer-events:none; }
+.manuscript-heading { position:relative; z-index:1; display:grid; grid-template-columns:1fr auto; align-items:end; max-width:1080px; margin:0 auto 4rem; border-bottom:1px solid rgba(91,55,31,.28); padding-bottom:2rem; }
+.manuscript-heading .overline { grid-column:1/-1; color:#7c382c; }
+.manuscript-heading h2 { margin:0; color:#35251c; font-size:clamp(3rem,5.8vw,6rem); line-height:.9; text-shadow:0 1px 0 rgba(255,255,255,.55); }
+.manuscript-heading > span { color:#795c46; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.manuscript-scroll { position:relative; z-index:1; max-width:980px; margin:2.5rem auto; border-right:1px solid rgba(91,55,31,.25); border-left:1px solid rgba(91,55,31,.25); background:radial-gradient(ellipse at 15% 4%,rgba(133,82,45,.14),transparent 22rem),radial-gradient(ellipse at 90% 90%,rgba(133,82,45,.12),transparent 25rem),repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 2px,transparent 3px 8px),linear-gradient(90deg,#d5b98e 0,#ead5ad 5%,#f2dfba 16%,#efd9ae 84%,#d2b184 100%); padding:clamp(4.5rem,7vw,6.5rem) clamp(1rem,6vw,5.5rem); box-shadow:0 35px 90px rgba(67,42,27,.22),inset 0 0 80px rgba(92,54,27,.12); color:#3d291d; }
+.manuscript-scroll::before,.manuscript-scroll::after { content:""; position:absolute; z-index:2; right:-2.2rem; left:-2.2rem; height:3.1rem; border:1px solid rgba(89,51,27,.32); border-radius:55% 48% 50% 46% / 42% 52% 45% 56%; background:linear-gradient(180deg,#c59d69,#ead0a2 40%,#a97949 78%,#7b4c2c); box-shadow:0 8px 18px rgba(50,29,18,.24),inset 0 3px 5px rgba(255,255,255,.3),inset 0 -4px 8px rgba(64,35,19,.24); }
+.manuscript-scroll::before { top:-1.55rem; }
+.manuscript-scroll::after { bottom:-1.55rem; transform:rotate(.35deg); }
+.scroll-ornament { display:flex; align-items:center; gap:1rem; margin-bottom:2rem; color:#8b4b37; }
+.scroll-ornament::before,.scroll-ornament::after { content:""; height:1px; flex:1; background:linear-gradient(90deg,transparent,#9c6b48,transparent); }
+.scroll-ornament span { font-family:var(--serif); font-size:.85rem; letter-spacing:.25em; text-transform:uppercase; }
+.beliefs-accordion { border-top:1px solid rgba(88,52,29,.28); }
+.belief-entry { border-bottom:1px solid rgba(88,52,29,.25); }
+.belief-entry button { display:grid; grid-template-columns:3rem 1fr 2.5rem; align-items:center; gap:1rem; width:100%; border:0; background:transparent; padding:1.55rem .4rem; color:inherit; text-align:left; cursor:pointer; }
+.belief-entry button:hover,.belief-entry.is-open button { color:#7d2f2d; }
+.belief-number { display:grid; width:2.35rem; height:2.35rem; place-items:center; border:1px solid currentColor; border-radius:50%; font-size:.66rem; font-weight:800; }
+.belief-entry button strong { font-family:var(--serif); font-size:clamp(1.15rem,2vw,1.7rem); font-weight:400; line-height:1.35; }
+.belief-toggle { display:grid; width:2.25rem; height:2.25rem; place-items:center; border:1px solid rgba(88,52,29,.35); border-radius:50%; font-size:1.3rem; transition:transform .3s ease,background .3s ease,color .3s ease; }
+.belief-entry.is-open .belief-toggle { background:#7d2f2d; color:#f4dfb9; transform:rotate(180deg); }
+.belief-panel { display:grid; grid-template-rows:0fr; opacity:0; transition:grid-template-rows .38s cubic-bezier(.2,.7,.2,1),opacity .3s ease; }
+.belief-entry.is-open .belief-panel { grid-template-rows:1fr; opacity:1; }
+.belief-panel > div { min-height:0; overflow:hidden; }
+.belief-panel > div { display:grid; grid-template-columns:1.5rem 1fr; gap:.75rem; margin:0 0 1.5rem 4.4rem; border-left:2px solid rgba(125,47,45,.42); padding:.2rem 1rem .2rem 1.25rem; }
+.belief-panel span { color:#8d4e3a; }
+.belief-panel p { margin:0; color:#694c39; font-family:Georgia,"Times New Roman",serif; font-size:.95rem; font-style:italic; line-height:1.75; }
+.scroll-seal { display:grid; width:3.8rem; height:3.8rem; margin:2.5rem auto 0; place-items:center; border:3px double #7f2d2d; border-radius:50%; color:#7f2d2d; font-family:var(--serif); font-size:1.55rem; box-shadow:0 0 0 4px rgba(127,45,45,.1); transform:rotate(-7deg); }
+
 .team-page-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.6rem; }
 .team-page-section { background:linear-gradient(180deg,#fff,#f7f1eb); }
 .team-person { border:1px solid rgba(136,47,64,.10); border-top:2px solid var(--wine); border-radius:.45rem; overflow:hidden; box-shadow:var(--shadow-soft); }
@@ -456,6 +485,15 @@ body { background:radial-gradient(circle at 15% 0%,#f1ebe3 0,transparent 32rem),
   .page-intro-copy { padding:3.2rem 1.15rem; }
   .page-intro h1 { font-size:clamp(3rem,14vw,4rem); line-height:.92; overflow-wrap:anywhere; }
   .page-intro-media { min-height:18rem; }
+  .beliefs-manuscript { padding:4rem .75rem 5rem; }
+  .manuscript-heading { grid-template-columns:1fr; margin:0 .4rem 3.2rem; gap:1rem; }
+  .manuscript-heading h2 { font-size:3rem; }
+  .manuscript-scroll { margin-right:.8rem; margin-left:.8rem; padding:4rem .7rem; }
+  .manuscript-scroll::before,.manuscript-scroll::after { right:-1rem; left:-1rem; }
+  .belief-entry button { grid-template-columns:2.35rem 1fr 2.2rem; gap:.65rem; padding:1.25rem .15rem; }
+  .belief-number { width:2rem; height:2rem; }
+  .belief-entry button strong { font-size:1.05rem; line-height:1.4; }
+  .belief-panel > div { margin-left:2.7rem; padding-left:.8rem; }
   .team-page-grid { grid-template-columns:1fr; }
   .groups-explorer { padding:4rem 1rem; }
   .groups-explorer-head { gap:1.25rem; }

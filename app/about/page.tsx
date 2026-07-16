@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Page, PageIntro } from "../components/SiteShell";
+import { BeliefsScroll } from "../components/BeliefsScroll";
 
 export const metadata: Metadata = { title: "Ми віримо — Еммануїл", description: "Основи віровчення християнської церкви Еммануїл.", alternates: { canonical: "/about" } };
 
@@ -19,5 +20,5 @@ const beliefs = [
 ];
 
 export default function AboutPage() {
-  return <Page active="/about"><main><PageIntro eyebrow="Про церкву" title="Ми віримо" image="/media/baptism.jpg" imageAlt="Водне хрещення церкви Еммануїл" /><section className="beliefs-section">{beliefs.map(([title, verse], index) => <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><div><h2>{title}</h2><p>{verse}</p></div></article>)}</section></main></Page>;
+  return <Page active="/about"><main><PageIntro eyebrow="Про церкву" title="Ми віримо" image="/media/baptism.jpg" imageAlt="Водне хрещення церкви Еммануїл" /><BeliefsScroll beliefs={beliefs} /></main></Page>;
 }
