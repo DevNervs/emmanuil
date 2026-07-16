@@ -22,7 +22,7 @@ function NavLinks({ active }: { active?: string }) {
 }
 
 export function Brand({ light = false }: { light?: boolean }) {
-  return <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo-transparent.png" alt="Християнська церква Еммануїл Чернівці" /></Link>;
+  return <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo-hq.png" width="4160" height="512" alt="Християнська церква Еммануїл Чернівці" /></Link>;
 }
 
 export function SiteHeader({ active }: { active?: string }) {

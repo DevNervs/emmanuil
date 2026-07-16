@@ -23,7 +23,7 @@ test("renders every public route in Ukrainian", async () => {
 test("ships brand, SEO and primary interactions", async () => {
   const home = await (await render("/")).text();
   assert.match(home, /Християнська/);
-  assert.match(home, /emmanuil-logo-transparent\.png/);
+  assert.match(home, /emmanuil-logo-hq\.png/);
   assert.match(home, /application\/ld\+json/);
   assert.match(home, /emmanuil\.pages\.dev\/og-editorial\.png/);
 
