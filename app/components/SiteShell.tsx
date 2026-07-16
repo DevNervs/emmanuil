@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { BookOpenText, CirclePlay, ContactRound, Heart, Home, MapPinned, Newspaper, UsersRound, type LucideIcon } from "lucide-react";
 import { site } from "../content";
@@ -27,13 +27,18 @@ export function Brand({ light = false }: { light?: boolean }) {
 
 export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(false);
+  const compactRef = useRef(false);
   useEffect(() => {
     let frame = 0;
     const update = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        setCompact((current) => current ? window.scrollY > 18 : window.scrollY > 96);
+        const nextCompact = compactRef.current ? window.scrollY > 32 : window.scrollY > 88;
+        if (nextCompact !== compactRef.current) {
+          compactRef.current = nextCompact;
+          setCompact(nextCompact);
+        }
       });
     };
     update();
