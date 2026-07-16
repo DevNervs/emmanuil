@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { site } from "../content";
+import { SocialLink } from "./SocialLink";
 
 const nav = [
   ["/", "Головна", "⌂"],
@@ -63,7 +64,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-main"><Brand light /><p>{site.address}</p><p>{site.services}</p><a className="footer-route" href="https://www.google.com/maps/dir/?api=1&destination=48.2864175%2C25.9394979" target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div>
       <div className="footer-column"><span>Розділи</span><a href="/news">Новини</a><a href="/about">Ми віримо</a><a href="/team">Команда</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a></div>
-      <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><a href={site.socials.facebook} target="_blank" rel="noreferrer">Facebook</a><a href={site.socials.instagram} target="_blank" rel="noreferrer">Instagram</a><a href={site.socials.youtube} target="_blank" rel="noreferrer">YouTube</a><a href={site.socials.telegram} target="_blank" rel="noreferrer">Telegram</a></div></address>
+      <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><SocialLink network="facebook" href={site.socials.facebook} /><SocialLink network="instagram" href={site.socials.instagram} /><SocialLink network="youtube" href={site.socials.youtube} /><SocialLink network="telegram" href={site.socials.telegram} /></div></address>
       <div className="footer-bottom"><span>© 2026 {site.shortName}</span><span>Християнська церква у Чернівцях</span></div>
     </footer>
   );
