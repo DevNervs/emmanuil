@@ -3,21 +3,18 @@ import { Page, PageIntro } from "../components/SiteShell";
 import { SocialLink } from "../components/SocialLink";
 import { ContactForm } from "../components/InteractionTools";
 import { InteractiveMap } from "../components/InteractiveMap";
-import { site } from "../content";
+import { serviceLocations, site } from "../content";
 
-export const metadata: Metadata = { title: "Контакти — Еммануїл", description: "Адреси, телефони, електронна пошта та соціальні мережі церкви Еммануїл у Чернівцях.", alternates: { canonical: "/contacts" } };
+export const metadata: Metadata = { title: "Локації та контакти — Еммануїл", description: "Локації служінь, маршрути, телефони та соціальні мережі церкви Еммануїл.", alternates: { canonical: "/contacts" } };
 
 const locations = [
-  { label: "Церква Еммануїл", address: "вул. О. Кобилянської, 53, Чернівці", mapQuery: "вулиця Ольги Кобилянської, 53, Чернівці, Чернівецький район, Чернівецька область, 58002, Україна", coordinates: "48.2864175,25.9394979" },
-  { label: "Криворучка", address: "вул. Ореста Криворучка, 57, Чернівці", mapQuery: "вулиця Ореста Криворучка, 57, Чернівці, Чернівецький район, Чернівецька область, 58010, Україна", coordinates: "48.2786111,25.9200516" },
-  { label: "Садгора — Баронський двір", address: "вул. Васіле Александрі, 8, Чернівці", mapQuery: "вулиця Васіле Александрі, 8, Чернівці, Чернівецький район, Чернівецька область, Україна", coordinates: "48.3464098,25.9594925" },
-  { label: "Сторожинець", address: "вул. Українська, 5, Сторожинець", mapQuery: "вулиця Українська, 5, Сторожинець, Чернівецький район, Чернівецька область, 59000, Україна", coordinates: "48.1640400,25.7212200" },
+  ...serviceLocations.map((location) => ({ ...location, mapQuery: location.address })),
   { label: "Реабілітаційний центр", address: "с. Великий Кучурів, Чернівецька обл.", mapQuery: "Великий Кучурів, Чернівецький район, Чернівецька область, Україна", coordinates: "48.1993414,25.8942594" },
 ];
 
 export default function ContactsPage() {
   return <Page active="/contacts"><main>
-    <PageIntro eyebrow="Чернівці" title="Контакти" image="/media/hope-family.jpg" imageAlt="Надія для сімʼї" />
+    <PageIntro eyebrow="Чернівці та область" title={<>Локації<br />та контакти</>} text={<p>Оберіть місце служіння, відкрийте маршрут або зв’яжіться з нами, якщо вам потрібна допомога перед візитом.</p>} image="/media/hope-family.webp" imageAlt="Надія для сімʼї"><a className="button button-wine" href="/visit">Вперше у нас</a></PageIntro>
     <InteractiveMap id="contacts-map" eyebrow="Місцезнаходження" title="Знайти нас на карті" description="Оберіть потрібну адресу в Чернівцях або Чернівецькій області. Для кожної точки можна одразу відкрити точний маршрут." locations={locations} />
     <section className="contacts-layout">
       <div className="contact-block"><h2>Наші контакти</h2><address><strong>{site.address}</strong><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a></address><address><strong>{site.secondAddress}</strong></address></div>

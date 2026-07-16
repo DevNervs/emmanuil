@@ -3,18 +3,17 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { BookOpenText, CirclePlay, ContactRound, Heart, Home, MapPinned, Newspaper, UsersRound, type LucideIcon } from "lucide-react";
+import { BookOpenText, CircleHelp, CirclePlay, Heart, Home, MapPinned, type LucideIcon } from "lucide-react";
 import { serviceLocations, site } from "../content";
 import { SocialLink } from "./SocialLink";
 
 const nav: Array<[string, string, LucideIcon]> = [
   ["/", "Головна", Home],
-  ["/news", "Новини", Newspaper],
-  ["/online", "Онлайн", CirclePlay],
-  ["/about", "Ми віримо", BookOpenText],
+  ["/visit", "Вперше у нас", CircleHelp],
+  ["/contacts", "Локації", MapPinned],
   ["/groups", "Домашні групи", MapPinned],
-  ["/team", "Команда", UsersRound],
-  ["/contacts", "Контакти", ContactRound],
+  ["/online", "Онлайн", CirclePlay],
+  ["/about", "Про церкву", BookOpenText],
 ];
 
 function NavLinks({ active }: { active?: string }) {
@@ -72,14 +71,15 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-top">
         <div className="footer-main"><Brand light /></div>
-        <nav className="footer-column" aria-label="Розділи сайту"><span>Розділи</span><a href="/news">Новини</a><a href="/about">Ми віримо</a><a href="/team">Команда</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a></nav>
+        <nav className="footer-column" aria-label="Розділи сайту"><span>Розділи</span><a href="/visit">Вперше у нас</a><a href="/contacts">Локації та контакти</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a><a href="/about">Про церкву</a></nav>
+        <nav className="footer-column" aria-label="Додаткові розділи"><span>Додатково</span><a href="/news">Архів життя церкви</a><a href="/team">Команда</a><a href="/donate">Пожертвувати</a><a href="/privacy">Конфіденційність</a></nav>
         <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><SocialLink network="facebook" href={site.socials.facebook} /><SocialLink network="instagram" href={site.socials.instagram} /><SocialLink network="youtube" href={site.socials.youtube} /><SocialLink network="telegram" href={site.socials.telegram} /></div></address>
       </div>
       <section className="footer-service-section" aria-labelledby="footer-services-title">
         <div className="footer-section-heading"><span>Щонеділі</span><h2 id="footer-services-title">Локації служінь</h2></div>
         <div className="footer-locations">{serviceLocations.map((location, index) => <article className="footer-location" key={location.label}><span className="footer-location-number">0{index + 1}</span><div><strong>{location.label}</strong><time>{location.time}</time><p>{location.address}</p></div><a className="footer-route" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.coordinates)}`} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${location.label}`}>Маршрут <span aria-hidden="true">↗</span></a></article>)}</div>
       </section>
-      <div className="footer-bottom"><span>© 2026 {site.shortName}</span><span>Християнська церква у Чернівцях</span></div>
+      <div className="footer-bottom"><span>© 2026 {site.shortName}</span><a href="/privacy">Політика конфіденційності</a><span>Християнська церква у Чернівцях</span></div>
     </footer>
   );
 }
@@ -89,7 +89,7 @@ export function Page({ children, active }: { children: ReactNode; active?: strin
 }
 
 export function PageIntro({ eyebrow, title, text, children, image, imageAlt = "" }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; image?: string; imageAlt?: string }) {
-  return <section className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className="page-intro-media"><img src={image} alt={imageAlt} fetchPriority="high" /></div> : null}</section>;
+  return <section className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className="page-intro-media"><img src={image} alt={imageAlt} fetchPriority="high" decoding="async" /></div> : null}</section>;
 }
 
 export function SectionTitle({ kicker, title, text }: { kicker?: string; title: ReactNode; text?: ReactNode }) {

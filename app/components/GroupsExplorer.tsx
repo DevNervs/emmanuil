@@ -4,8 +4,8 @@ import type { FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowRight, Check, Send, X } from "lucide-react";
+import type { Group } from "../content";
 
-type Group = { title: string; leaders: string; time: string; address: string; coordinates?: string };
 type SubmitState = "idle" | "sending" | "sent" | "error";
 const weekdayOrder = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
 
@@ -27,7 +27,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
     "Усі дні",
   ];
   const filtered = useMemo(() => groups.filter((group) => {
-    const haystack = `${group.title} ${group.leaders} ${group.address}`.toLocaleLowerCase("uk");
+    const haystack = `${group.title} ${group.leaders} ${group.address ?? ""}`.toLocaleLowerCase("uk");
     return (day === "Усі дні" || group.time.startsWith(day)) && haystack.includes(query.trim().toLocaleLowerCase("uk"));
   }), [groups, query, day]);
   const active = filtered[selected] ?? filtered[0];
@@ -127,7 +127,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
               <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
               <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
             </div>
-            <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі.</span></label>
+            <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі, та приймаю <a href="/privacy" target="_blank" rel="noreferrer">політику конфіденційності</a>.</span></label>
             <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
             {submitMessage ? <p className={`group-submit-message ${submitState}`}>{submitMessage}</p> : null}
             <button className="group-submit-button" type="submit" disabled={submitState === "sending" || !chosenGroups.length}><span>{submitState === "sending" ? "Надсилаємо…" : "Надіслати заявку"}</span><Send aria-hidden="true" /></button>

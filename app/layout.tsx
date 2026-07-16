@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { serviceLocations, site } from "./content";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://emmanuil.pages.dev"),
@@ -37,6 +38,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const organization = { "@context": "https://schema.org", "@type": "Church", name: "Християнська церква Еммануїл", url: "https://emmanuil.pages.dev", email: "emmanuil.cv@gmail.com", telephone: "+380669509977", address: { "@type": "PostalAddress", streetAddress: "вул. О. Кобилянської, 53", addressLocality: "Чернівці", addressCountry: "UA" } };
-  return <html lang="uk"><head><meta name="color-scheme" content="light only" /><meta name="darkreader-lock" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" /><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet" /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }} /></head><body>{children}</body></html>;
+  const structuredData = { "@context": "https://schema.org", "@graph": [{ "@type": "Church", "@id": `${site.canonicalUrl}/#church`, name: "Християнська церква Еммануїл", url: site.canonicalUrl, email: site.email, telephone: "+380669509977", sameAs: Object.values(site.socials), address: { "@type": "PostalAddress", streetAddress: "вул. О. Кобилянської, 53", addressLocality: "Чернівці", addressCountry: "UA" } }, ...serviceLocations.map((location) => ({ "@type": "Place", "@id": `${site.canonicalUrl}/contacts#${encodeURIComponent(location.label)}`, name: `Еммануїл — ${location.label}`, address: location.address, geo: { "@type": "GeoCoordinates", latitude: Number(location.coordinates.split(",")[0]), longitude: Number(location.coordinates.split(",")[1]) }, containedInPlace: { "@id": `${site.canonicalUrl}/#church` } }))] };
+  return <html lang="uk"><head><meta name="color-scheme" content="light only" /><meta name="darkreader-lock" /><link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" /><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Prata&display=swap" rel="stylesheet" /><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} /></head><body>{children}</body></html>;
 }
