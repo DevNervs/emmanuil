@@ -118,13 +118,15 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
           {submitState === "sent" ? <div className="group-form-success"><span><Check aria-hidden="true" /></span><p className="overline">Заявку прийнято</p><h3>Дякуємо!</h3><p>{submitMessage}</p><button className="button button-wine" type="button" onClick={() => setFormOpen(false)}>Готово</button></div> :
           <form className="group-application-form" onSubmit={submitApplication}>
             <div className="group-form-heading"><span>Коротка анкета</span><strong>{chosenGroups.length}/2 групи</strong></div>
-            <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
-            <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
             <fieldset className="group-form-groups"><legend>Оберіть одну або дві групи *</legend><p>Одночасно можна записатися максимум у дві домашні групи.</p><div>{groups.map((group, index) => {
               const checked = chosenGroups.includes(index);
               const disabled = !checked && chosenGroups.length >= 2;
-              return <label className={checked ? "is-selected" : disabled ? "is-disabled" : ""} key={`${group.title}-${index}`}><input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleGroup(index)} /><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small></span><Check aria-hidden="true" /></label>;
+              return <label className={checked ? "is-selected" : disabled ? "is-disabled" : ""} key={`${group.title}-${index}`}><input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleGroup(index)} /><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small><em>{group.address || "Адресу уточнюйте у ведучого"}</em></span><Check aria-hidden="true" /></label>;
             })}</div></fieldset>
+            <div className="group-form-contact-fields">
+              <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
+              <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
+            </div>
             <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі.</span></label>
             <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
             {submitMessage ? <p className={`group-submit-message ${submitState}`}>{submitMessage}</p> : null}

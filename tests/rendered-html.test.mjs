@@ -40,3 +40,12 @@ test("ships brand, SEO and primary interactions", async () => {
   const interactionSource = await readFile(new URL("../app/components/InteractionTools.tsx", import.meta.url), "utf8");
   assert.match(interactionSource, /formsubmit\.co\/ajax/);
 });
+
+test("keeps the mobile group application scrollable and group-first", async () => {
+  const groupSource = await readFile(new URL("../app/components/GroupsExplorer.tsx", import.meta.url), "utf8");
+  const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.ok(groupSource.indexOf('className="group-form-groups"') < groupSource.indexOf('className="group-form-contact-fields"'));
+  assert.match(groupSource, /group\.address \|\| "Адресу уточнюйте у ведучого"/);
+  assert.match(styles, /height:100dvh; max-height:100dvh; overflow-x:hidden; overflow-y:auto;/);
+  assert.match(styles, /touch-action:pan-y/);
+});
