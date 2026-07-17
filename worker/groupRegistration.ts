@@ -40,7 +40,7 @@ export async function handleGroupRegistration(request: Request, env: TelegramEnv
   if (!groups.length || groups.length > 2) return json({ message: "Оберіть одну або дві домашні групи." }, 400);
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_ADMIN_CHAT_ID) return json({ message: "Надсилання заявок ще налаштовується. Спробуйте трохи пізніше." }, 503);
   const groupList = groups.map((index, order) => `${order + 1}. ${escapeHtml(groupNames[index])}`).join("\n");
-  const message = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Telegram:</b> ${escapeHtml(telegram)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з emmanuil.cv.ua</i>`;
+  const message = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Telegram:</b> ${escapeHtml(telegram)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з emmanuil.pages.dev</i>`;
   const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: env.TELEGRAM_ADMIN_CHAT_ID, text: message, parse_mode: "HTML", disable_web_page_preview: true }) });
   if (!response.ok) return json({ message: "Не вдалося передати заявку адміністратору. Спробуйте ще раз." }, 502);
   return json({ message: "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram." });

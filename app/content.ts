@@ -6,7 +6,7 @@ export const site = {
   phones: ["(066) 950 99 77", "(096) 950 99 77"],
   email: "emmanuil.cv@gmail.com",
   services: "Щонеділі о 10:00 та 17:00",
-  canonicalUrl: "https://emmanuil.cv.ua",
+  canonicalUrl: "https://emmanuil.pages.dev",
   socials: {
     facebook: "https://www.facebook.com/emmanuil.cv.ua",
     instagram: "https://www.instagram.com/emmanuilcv/",

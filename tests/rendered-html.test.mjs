@@ -18,7 +18,7 @@ test("renders every public route in Ukrainian", async () => {
     const html = await response.text();
     assert.match(html, /<html lang="uk">/);
     assert.match(html, /Еммануїл/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.cv.ua${pathname === "/" ? "/" : pathname}"/>`), `canonical ${pathname}`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev${pathname === "/" ? "/" : pathname}"/>`), `canonical ${pathname}`);
     assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
   }
 });
@@ -29,7 +29,7 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /emmanuil-logo-hq\.png/);
   assert.match(home, /favicon-emmanuil-dark-32\.png/);
   assert.match(home, /application\/ld\+json/);
-  assert.match(home, /emmanuil\.cv\.ua\/og-editorial\.png/);
+  assert.match(home, /emmanuil\.pages\.dev\/og-editorial\.png/);
   assert.match(home, /Церква Еммануїл у Чернівцях \| Християнська церква/);
   assert.match(home, /Эммануил Черновцы/);
   assert.match(home, /Emmanuil Chernivtsi/);
@@ -98,7 +98,7 @@ test("renders every news item as an internal article", async () => {
     assert.match(html, /Увесь архів/);
     assert.match(html, /BreadcrumbList/);
     assert.match(html, /Article/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.cv.ua/news/${slug}"/>`), `canonical ${slug}`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev/news/${slug}"/>`), `canonical ${slug}`);
   }
 });
 
@@ -119,7 +119,7 @@ test("uses centralized typed content and stable sitemap dates", async () => {
   assert.match(layout, /"Church"/);
   assert.match(layout, /"LocalBusiness"/);
   assert.match(layout, /"@type": "WebSite"/);
-  assert.doesNotMatch(layout, /emmanuil\.pages\.dev/);
+  assert.match(layout, /metadataBase: new URL\(site\.canonicalUrl\)/);
 });
 
 test("preserves authority from indexed legacy URLs with permanent redirects", async () => {
@@ -128,9 +128,9 @@ test("preserves authority from indexed legacy URLs with permanent redirects", as
   const { default: worker } = await import(workerUrl.href);
   const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
   for (const [oldPath, newPath] of [["/about-us/team", "/team"], ["/about-us/mi-virimo", "/about#beliefs"], ["/live", "/online"], ["/departments", "/about"]]) {
-    const response = await worker.fetch(new Request(`https://emmanuil.cv.ua${oldPath}`), env, { waitUntil() {}, passThroughOnException() {} });
+    const response = await worker.fetch(new Request(`https://emmanuil.pages.dev${oldPath}`), env, { waitUntil() {}, passThroughOnException() {} });
     assert.equal(response.status, 301, oldPath);
-    assert.equal(response.headers.get("location"), `https://emmanuil.cv.ua${newPath}`);
+    assert.equal(response.headers.get("location"), `https://emmanuil.pages.dev${newPath}`);
   }
 });
 
