@@ -4,6 +4,14 @@ const groupNames = [
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" } });
 const escapeHtml = (value) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 const youtubeLiveUrl = "https://www.youtube.com/@EmmanuilCV/live";
+const legacyRedirects = {
+  "/about-us": "/about",
+  "/about-us/team": "/team",
+  "/about-us/mi-virimo": "/about#beliefs",
+  "/about-us/virovchennja-chve": "/about#beliefs",
+  "/departments": "/about",
+  "/live": "/online",
+};
 
 async function register(request, env) {
   if (request.method !== "POST") return json({ message: "Метод не підтримується." }, 405);
@@ -21,7 +29,7 @@ async function register(request, env) {
   if (!groups.length || groups.length > 2) return json({ message: "Оберіть одну або дві домашні групи." }, 400);
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_ADMIN_CHAT_ID) return json({ message: "Надсилання заявок ще налаштовується. Спробуйте трохи пізніше." }, 503);
   const groupList = groups.map((index, order) => `${order + 1}. ${escapeHtml(groupNames[index])}`).join("\n");
-  const text = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Telegram:</b> ${escapeHtml(telegram)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з emmanuil.pages.dev</i>`;
+  const text = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Telegram:</b> ${escapeHtml(telegram)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з emmanuil.cv.ua</i>`;
   const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: env.TELEGRAM_ADMIN_CHAT_ID, text, parse_mode: "HTML", disable_web_page_preview: true }) });
   if (!response.ok) return json({ message: "Не вдалося передати заявку адміністратору. Спробуйте ще раз." }, 502);
   return json({ message: "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram." });
@@ -44,7 +52,14 @@ async function youtubeLive(request) {
 
 export default {
   async fetch(request, env) {
-    const pathname = new URL(request.url).pathname;
+    const url = new URL(request.url);
+    const pathname = url.pathname.length > 1 ? url.pathname.replace(/\/$/, "") : url.pathname;
+    const legacyTarget = legacyRedirects[pathname];
+    if (legacyTarget) {
+      const target = new URL(legacyTarget, url.origin);
+      target.search = url.search;
+      return Response.redirect(target, 301);
+    }
     if (pathname === "/api/group-registration") return register(request, env);
     if (pathname === "/api/youtube-live") return youtubeLive(request);
     return env.ASSETS.fetch(request);

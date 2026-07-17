@@ -3,8 +3,8 @@ import { Page, PageIntro } from "../components/SiteShell";
 import { serviceLocations, site } from "../content";
 
 export const metadata: Metadata = {
-  title: "Вперше у нас — Еммануїл",
-  description: "Оберіть локацію та сплануйте перший візит до церкви Еммануїл.",
+  title: "Вперше у церкві Еммануїл",
+  description: "Оберіть одну з локацій церкви Еммануїл у Чернівцях і Сторожинці, перевірте час недільного служіння та побудуйте маршрут.",
   alternates: { canonical: "/visit" },
 };
 

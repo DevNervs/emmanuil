@@ -3,7 +3,7 @@ import { Page, PageIntro } from "../components/SiteShell";
 import { BeliefsScroll } from "../components/BeliefsScroll";
 import { team } from "../content";
 
-export const metadata: Metadata = { title: "Про церкву — Еммануїл", description: "Спільнота, команда та основи віровчення християнської церкви Еммануїл.", alternates: { canonical: "/about" } };
+export const metadata: Metadata = { title: "Про християнську церкву", description: "Історія спільноти, команда та основи віровчення християнської євангельської церкви Еммануїл у Чернівцях.", alternates: { canonical: "/about" } };
 
 const beliefs = [
   ["У єдиного істинного і святого Бога, Який відкривається у трьох Особах: Отець, Син і Святий Дух.", "«Отож ідіть, і навчіть всі народи, хрестячи їх в Ім’я Отця, і Сина, і Святого Духа» (Мт. 28:19)."],

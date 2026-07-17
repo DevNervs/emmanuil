@@ -5,7 +5,7 @@ import { ContactForm } from "../components/InteractionTools";
 import { InteractiveMap } from "../components/InteractiveMap";
 import { serviceLocations, site } from "../content";
 
-export const metadata: Metadata = { title: "Локації та контакти — Еммануїл", description: "Локації служінь, маршрути, телефони та соціальні мережі церкви Еммануїл.", alternates: { canonical: "/contacts" } };
+export const metadata: Metadata = { title: "Адреси, локації та контакти", description: "Адреси служінь церкви Еммануїл у Чернівцях, Садгорі та Сторожинці, точні маршрути, телефони й соціальні мережі.", alternates: { canonical: "/contacts" } };
 
 const locations = [
   ...serviceLocations.map((location) => ({ ...location, mapQuery: location.address })),

@@ -18,7 +18,7 @@ test("renders every public route in Ukrainian", async () => {
     const html = await response.text();
     assert.match(html, /<html lang="uk">/);
     assert.match(html, /Еммануїл/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev${pathname === "/" ? "/" : pathname}"/>`), `canonical ${pathname}`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.cv.ua${pathname === "/" ? "/" : pathname}"/>`), `canonical ${pathname}`);
     assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
   }
 });
@@ -29,7 +29,12 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /emmanuil-logo-hq\.png/);
   assert.match(home, /favicon-emmanuil-dark-32\.png/);
   assert.match(home, /application\/ld\+json/);
-  assert.match(home, /emmanuil\.pages\.dev\/og-editorial\.png/);
+  assert.match(home, /emmanuil\.cv\.ua\/og-editorial\.png/);
+  assert.match(home, /Церква Еммануїл у Чернівцях \| Християнська церква/);
+  assert.match(home, /Эммануил Черновцы/);
+  assert.match(home, /Emmanuil Chernivtsi/);
+  assert.match(home, /LocalBusiness/);
+  assert.match(home, /WebSite/);
   assert.match(home, /href="\/visit"/);
   assert.match(home, /href="\/online"/);
   assert.match(home, /З життя церкви · Архів/);
@@ -74,6 +79,9 @@ test("keeps the mobile group application scrollable and group-first", async () =
   assert.match(styles, /@keyframes group-cta-attention/);
   assert.doesNotMatch(groupSource, /5 травня/);
   assert.match(groupSource, /chosenGroups\.length >= 2/);
+  assert.match(groupSource, /type="button" role="checkbox" aria-checked=\{checked\}/);
+  assert.match(styles, /\.group-form-groups button \{[^}]*width:100%;/);
+  assert.match(styles, /\.home-online-section \.video-placeholder \{[^}]*min-height:32rem; aspect-ratio:auto;/);
 });
 
 test("renders every news item as an internal article", async () => {
@@ -90,7 +98,7 @@ test("renders every news item as an internal article", async () => {
     assert.match(html, /Увесь архів/);
     assert.match(html, /BreadcrumbList/);
     assert.match(html, /Article/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev/news/${slug}"/>`), `canonical ${slug}`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.cv.ua/news/${slug}"/>`), `canonical ${slug}`);
   }
 });
 
@@ -108,8 +116,22 @@ test("uses centralized typed content and stable sitemap dates", async () => {
   assert.match(publicSitemap, /\/privacy<\/loc>/);
   assert.match(publicSitemap, /<lastmod>2025-10-05<\/lastmod>/);
   assert.equal((publicSitemap.match(/<url>/g) || []).length, 19);
-  assert.match(layout, /"@type": "Church"/);
-  assert.match(layout, /"@type": "Place"/);
+  assert.match(layout, /"Church"/);
+  assert.match(layout, /"LocalBusiness"/);
+  assert.match(layout, /"@type": "WebSite"/);
+  assert.doesNotMatch(layout, /emmanuil\.pages\.dev/);
+});
+
+test("preserves authority from indexed legacy URLs with permanent redirects", async () => {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("redirect-test", `${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
+  const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
+  for (const [oldPath, newPath] of [["/about-us/team", "/team"], ["/about-us/mi-virimo", "/about#beliefs"], ["/live", "/online"], ["/departments", "/about"]]) {
+    const response = await worker.fetch(new Request(`https://emmanuil.cv.ua${oldPath}`), env, { waitUntil() {}, passThroughOnException() {} });
+    assert.equal(response.status, 301, oldPath);
+    assert.equal(response.headers.get("location"), `https://emmanuil.cv.ua${newPath}`);
+  }
 });
 
 test("renders the manuscript without decorative verse stars or a baked white backdrop", async () => {
@@ -160,4 +182,30 @@ test("rejects more than two selected groups without sending a real request", asy
   const response = await handleGroupRegistration(request, {});
   assert.equal(response.status, 400);
   assert.deepEqual(await response.json(), { message: "Оберіть одну або дві домашні групи." });
+});
+
+test("sends a valid group application through a mocked Telegram request", async () => {
+  let telegramRequest;
+  mock.method(globalThis, "fetch", async (url, init) => {
+    telegramRequest = { url: String(url), init };
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  });
+  try {
+    const request = new Request("http://localhost/api/group-registration", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Тест Мобільний", telegram: "@mobile_test", groups: [7, 8], startedAt: Date.now() - 5_000 }),
+    });
+    const response = await handleGroupRegistration(request, { TELEGRAM_BOT_TOKEN: "test-token", TELEGRAM_ADMIN_CHAT_ID: "test-chat" });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { message: "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram." });
+    assert.equal(telegramRequest.url, "https://api.telegram.org/bottest-token/sendMessage");
+    const payload = JSON.parse(telegramRequest.init.body);
+    assert.equal(payload.chat_id, "test-chat");
+    assert.match(payload.text, /Тест Мобільний/);
+    assert.match(payload.text, /№8\. Садгора\. Шлях до Батька/);
+    assert.match(payload.text, /№9\. Садгора\. Молодіжна група/);
+  } finally {
+    mock.restoreAll();
+  }
 });

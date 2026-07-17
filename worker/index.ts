@@ -23,6 +23,15 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
+const LEGACY_REDIRECTS: Record<string, string> = {
+  "/about-us": "/about",
+  "/about-us/team": "/team",
+  "/about-us/mi-virimo": "/about#beliefs",
+  "/about-us/virovchennja-chve": "/about#beliefs",
+  "/departments": "/about",
+  "/live": "/online",
+};
+
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
 // To route SVGs through the optimizer (with security headers), set
@@ -32,6 +41,14 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+    const normalizedPath = url.pathname.length > 1 ? url.pathname.replace(/\/$/, "") : url.pathname;
+    const legacyTarget = LEGACY_REDIRECTS[normalizedPath];
+
+    if (legacyTarget) {
+      const target = new URL(legacyTarget, url.origin);
+      target.search = url.search;
+      return Response.redirect(target, 301);
+    }
 
     if (url.pathname === "/api/group-registration") return handleGroupRegistration(request, env ?? {});
     if (url.pathname === "/api/youtube-live") return handleYouTubeLive(request);

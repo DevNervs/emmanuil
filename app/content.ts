@@ -6,7 +6,7 @@ export const site = {
   phones: ["(066) 950 99 77", "(096) 950 99 77"],
   email: "emmanuil.cv@gmail.com",
   services: "Щонеділі о 10:00 та 17:00",
-  canonicalUrl: "https://emmanuil.pages.dev",
+  canonicalUrl: "https://emmanuil.cv.ua",
   socials: {
     facebook: "https://www.facebook.com/emmanuil.cv.ua",
     instagram: "https://www.instagram.com/emmanuilcv/",
@@ -19,15 +19,18 @@ export const site = {
 export type ServiceLocation = {
   label: string;
   address: string;
+  streetAddress: string;
+  addressLocality: string;
+  addressRegion: string;
   time: string;
   coordinates: string;
 };
 
 export const serviceLocations: ServiceLocation[] = [
-  { label: "Криворучка", address: "м. Чернівці, вул. Ореста Криворучка, 57", time: "Щонеділі о 10:00", coordinates: "48.2786111,25.9200516" },
-  { label: "Кобилянська", address: "м. Чернівці, вул. Ольги Кобилянської, 53", time: "Щонеділі о 17:00", coordinates: "48.2864175,25.9394979" },
-  { label: "Садгора", address: "м. Чернівці, вул. Васіле Александрі, 8", time: "Щонеділі о 10:00", coordinates: "48.3464098,25.9594925" },
-  { label: "Сторожинець", address: "м. Сторожинець, вул. Українська, 5", time: "Щонеділі о 10:00", coordinates: "48.1640400,25.7212200" },
+  { label: "Криворучка", address: "м. Чернівці, вул. Ореста Криворучка, 57", streetAddress: "вул. Ореста Криворучка, 57", addressLocality: "Чернівці", addressRegion: "Чернівецька область", time: "Щонеділі о 10:00", coordinates: "48.2786111,25.9200516" },
+  { label: "Кобилянська", address: "м. Чернівці, вул. Ольги Кобилянської, 53", streetAddress: "вул. Ольги Кобилянської, 53", addressLocality: "Чернівці", addressRegion: "Чернівецька область", time: "Щонеділі о 17:00", coordinates: "48.2864175,25.9394979" },
+  { label: "Садгора", address: "м. Чернівці, вул. Васіле Александрі, 8", streetAddress: "вул. Васіле Александрі, 8", addressLocality: "Чернівці", addressRegion: "Чернівецька область", time: "Щонеділі о 10:00", coordinates: "48.3464098,25.9594925" },
+  { label: "Сторожинець", address: "м. Сторожинець, вул. Українська, 5", streetAddress: "вул. Українська, 5", addressLocality: "Сторожинець", addressRegion: "Чернівецька область", time: "Щонеділі о 10:00", coordinates: "48.1640400,25.7212200" },
 ];
 
 export const team = [

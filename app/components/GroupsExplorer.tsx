@@ -121,7 +121,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
             <fieldset className="group-form-groups"><legend>Оберіть одну або дві групи *</legend><p>Одночасно можна записатися максимум у дві домашні групи.</p><div>{groups.map((group, index) => {
               const checked = chosenGroups.includes(index);
               const disabled = !checked && chosenGroups.length >= 2;
-              return <label className={checked ? "is-selected" : disabled ? "is-disabled" : ""} key={`${group.title}-${index}`}><input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggleGroup(index)} /><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small><em>{group.address || "Адресу уточнюйте у ведучого"}</em></span><Check aria-hidden="true" /></label>;
+              return <button type="button" role="checkbox" aria-checked={checked} disabled={disabled} className={checked ? "is-selected" : disabled ? "is-disabled" : ""} onClick={() => toggleGroup(index)} key={`${group.title}-${index}`}><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small><em>{group.address || "Адресу уточнюйте у ведучого"}</em></span><Check aria-hidden="true" /></button>;
             })}</div></fieldset>
             <div className="group-form-contact-fields">
               <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>

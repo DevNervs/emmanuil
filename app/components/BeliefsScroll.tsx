@@ -5,7 +5,7 @@ import { useState } from "react";
 export function BeliefsScroll({ beliefs }: { beliefs: string[][] }) {
   const [open, setOpen] = useState(0);
 
-  return <section className="beliefs-manuscript" aria-labelledby="beliefs-heading">
+  return <section className="beliefs-manuscript" id="beliefs" aria-labelledby="beliefs-heading">
     <div className="manuscript-heading">
       <p className="overline">Основи віровчення</p>
       <h2 id="beliefs-heading">У що ми віримо</h2>

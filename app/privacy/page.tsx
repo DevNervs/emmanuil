@@ -3,7 +3,7 @@ import { Page, PageIntro } from "../components/SiteShell";
 import { site } from "../content";
 
 export const metadata: Metadata = {
-  title: "Політика конфіденційності — Еммануїл",
+  title: "Політика конфіденційності",
   description: "Як сайт церкви Еммануїл обробляє дані з контактної форми та заявки на домашню групу.",
   alternates: { canonical: "/privacy" },
 };
