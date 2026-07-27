@@ -1,4 +1,3 @@
-import { LiveStream } from "./components/LiveStream";
 import { NextService } from "./components/NextService";
 import { Page } from "./components/SiteShell";
 import { announcement, groupSeason, groups } from "./content";
@@ -86,16 +85,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="home-live" aria-labelledby="home-live-title">
-          <div className="home-live-copy">
-            <p className="overline overline-light">Онлайн-служіння</p>
-            <h2 id="home-live-title">Дивіться наживо</h2>
-            <p>Щонеділі о 10:00 та 17:00. Під час ефіру плеєр увімкнеться тут автоматично.</p>
-          </div>
-          <div className="home-live-player">
-            <LiveStream />
-          </div>
-        </section>
+
 
         <section className="first-visit-feature" aria-labelledby="home-expect-title">
           <div>

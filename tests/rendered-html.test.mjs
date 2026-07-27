@@ -50,7 +50,6 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /Найближче служіння/);
   assert.match(home, /Актуальний сезон/);
   assert.match(home, /Домашні групи/);
-  assert.match(home, /Дивіться наживо/);
   assert.doesNotMatch(home, /Сторінка онлайн/);
   assert.match(home, /Що очікувати/);
   assert.match(home, /Підтримати/);
