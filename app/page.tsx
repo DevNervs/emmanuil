@@ -39,6 +39,17 @@ export default function Home() {
           </div>
 
           <div className="video-hero-overlay">
+            {/* Slogan */}
+            <div className="hero-center">
+              <h1 className="sr-only">Християнська церква Еммануїл у Чернівцях</h1>
+              <p className="hero-slogan">Існуємо, щоб ви дізналися про Бога більше</p>
+              <div className="hero-actions">
+                <a className="button button-wine" href="/visit">Вперше у нас</a>
+                <a className="button button-ghost" href="/online">Дивитися онлайн</a>
+              </div>
+              <p className="hero-tagline">Поклоніння · учнівство · духовний зріст</p>
+            </div>
+
             {/* 4 Locations Overlay Bar (Ecclesia style) */}
             <div className="hero-locations-bar">
               <div className="hero-locations-header">
@@ -56,19 +67,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
-            {/* Slogan */}
-            <div className="hero-center">
-              <h1 className="sr-only">Християнська церква Еммануїл у Чернівцях</h1>
-              <p className="hero-slogan">Існуємо, щоб ви дізналися про Бога більше</p>
-              <div className="hero-actions">
-                <a className="button button-wine" href="/visit">Вперше у нас</a>
-                <a className="button button-ghost" href="/online">Дивитися онлайн</a>
-              </div>
-            </div>
-
-            {/* Tagline */}
-            <p className="hero-tagline">Поклоніння · учнівство · духовний зріст</p>
           </div>
         </section>
 
