@@ -1,7 +1,7 @@
 import { LiveStream } from "./components/LiveStream";
 import { NextService } from "./components/NextService";
 import { Page } from "./components/SiteShell";
-import { groupSeason, groups, news, newsHref } from "./content";
+import { announcement, groupSeason, groups } from "./content";
 import { pageMetadata } from "./seo";
 
 export const metadata = pageMetadata({
@@ -15,31 +15,43 @@ export const metadata = pageMetadata({
 });
 
 export default function Home() {
-  const archivePreview = news.slice(0, 3);
-
   return (
     <Page active="/">
       <main>
-        <section className="photo-hero photo-hero-mission" aria-label="Християнська церква Еммануїл">
-          <div className="photo-hero-media">
-            <img
-              src="/media/hero-worship-organic-grain.webp?v=q2"
-              width="1920"
-              height="1080"
-              alt=""
-              fetchPriority="high"
-              decoding="async"
+        <section className="video-hero" aria-label="Християнська церква Еммануїл">
+          <div className="video-hero-media">
+            <video
+              src="/media/hero-worship-loop.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden="true"
             />
           </div>
-          <div className="photo-hero-copy">
-            <h1 className="sr-only">Християнська церква Еммануїл у Чернівцях</h1>
-            <p className="hero-lead">Щонеділі о 10:00 та 17:00 · 4 локації</p>
-            <div className="hero-actions">
-              <a className="button button-wine" href="/visit">Вперше у нас</a>
-              <a className="button button-ghost" href="/online">Дивитися онлайн</a>
+          <div className="video-hero-overlay">
+            <p className="hero-schedule">Щонеділі о 10:00 та 17:00 · 4 локації</p>
+            <div className="hero-center">
+              <h1 className="sr-only">Християнська церква Еммануїл у Чернівцях</h1>
+              <p className="hero-slogan">Існуємо, щоб ви дізналися про Бога більше</p>
+              <div className="hero-actions">
+                <a className="button button-wine" href="/visit">Вперше у нас</a>
+                <a className="button button-ghost" href="/online">Дивитися онлайн</a>
+              </div>
             </div>
+            <p className="hero-tagline">Поклоніння · учнівство · духовний зріст</p>
           </div>
         </section>
+
+        {announcement && (
+          <section className="announcement-bar">
+            {announcement.href ? (
+              <a href={announcement.href}>{announcement.text}</a>
+            ) : (
+              <p>{announcement.text}</p>
+            )}
+          </section>
+        )}
 
         <NextService />
 
@@ -57,6 +69,21 @@ export default function Home() {
           <figure className="home-season-media">
             <img src="/media/homegroup-how.webp?v=q2" width="1440" height="1440" alt="Домашні групи церкви Еммануїл" loading="lazy" decoding="async" />
           </figure>
+        </section>
+
+        <section className="groups-carousel" aria-label="Фото домашніх груп">
+          <div className="groups-carousel-track">
+            <div className="groups-carousel-slide">
+              <img src="/media/homegroup-how.webp?v=q2" alt="Домашня група" loading="lazy" decoding="async" />
+            </div>
+            <div className="groups-carousel-slide">
+              <img src="/media/home-group.webp?v=q2" alt="Домашня група" loading="lazy" decoding="async" />
+            </div>
+            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 3</span></div>
+            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 4</span></div>
+            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 5</span></div>
+            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 6</span></div>
+          </div>
         </section>
 
         <section className="home-live" aria-labelledby="home-live-title">
@@ -82,33 +109,6 @@ export default function Home() {
               <a className="inline-link" href="/contacts">Знайти на карті</a>
             </div>
           </div>
-        </section>
-
-        <section className="archive-preview news-section" aria-labelledby="home-archive-title">
-          <div className="section-title">
-            <p className="overline">Новини</p>
-            <h2 id="home-archive-title">Архів подій</h2>
-            <div className="section-description"><p>Останні публікації з життя церкви. Усі події в цьому розділі вже завершилися.</p></div>
-          </div>
-          <div className="news-list">
-            {archivePreview.map((item) => (
-              <article className="news-list-item" key={item.slug}>
-                <a className="news-list-media" href={newsHref(item)} tabIndex={-1} aria-hidden="true">
-                  <img src={item.image} alt="" loading="lazy" decoding="async" />
-                </a>
-                <div className="news-list-copy">
-                  <div className="news-meta">
-                    <time dateTime={item.publishedAt}>{item.date}</time>
-                    <span>{item.category}</span>
-                  </div>
-                  <h3><a href={newsHref(item)}>{item.title}</a></h3>
-                  <p className="news-summary">{item.summary}</p>
-                  <a className="inline-link" href={newsHref(item)}>Читати</a>
-                </div>
-              </article>
-            ))}
-          </div>
-          <a className="button button-secondary news-all-button" href="/news">Увесь архів новин</a>
         </section>
 
         <section className="donation-band">

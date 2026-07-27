@@ -12,24 +12,24 @@ async function render(pathname = "/") {
 }
 
 test("renders every public route in Ukrainian", async () => {
-  for (const pathname of ["/", "/visit", "/news", "/about", "/team", "/groups", "/online", "/contacts", "/donate", "/privacy", "/virovchennja"]) {
+  for (const pathname of ["/", "/visit", "/about", "/team", "/groups", "/online", "/contacts", "/europe", "/departments", "/donate", "/privacy", "/virovchennja"]) {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     const html = await response.text();
     assert.match(html, /<html lang="uk">/);
     assert.match(html, /Еммануїл/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev${pathname === "/" ? "/" : `${pathname}/`}"/>`), `canonical ${pathname}`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev${pathname === "/" ? "" : `${pathname}/`}"/>`), `canonical ${pathname}`);
     assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
   }
 });
 
 test("ships brand, SEO and primary interactions", async () => {
   const home = await (await render("/")).text();
-  assert.match(home, /photo-hero/);
-  assert.match(home, /\/media\/hero-worship-organic-grain\.webp/);
+  assert.match(home, /video-hero/);
+  assert.match(home, /\/media\/hero-worship-loop\.mp4/);
   assert.doesNotMatch(home, /<h1>Еммануїл<\/h1>/);
   assert.match(home, /Щонеділі о 10:00 та 17:00 · 4 локації/);
-  assert.doesNotMatch(home, /Існуємо, щоб ви дізнались про Бога більше/);
+  assert.match(home, /Існуємо, щоб ви дізналися про Бога більше/);
   assert.match(home, /home-now-locations/);
   assert.doesNotMatch(home, /Наші церкви та графік служінь/);
   assert.doesNotMatch(home, /hero-caption/);
@@ -54,9 +54,9 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.doesNotMatch(home, /Сторінка онлайн/);
   assert.match(home, /Що очікувати/);
   assert.match(home, /Підтримати/);
-  assert.match(home, /Архів подій/);
-  assert.match(home, /Увесь архів новин/);
-  assert.match(home, /href="\/news"/);
+  assert.match(home, /groups-carousel/);
+  assert.doesNotMatch(home, /Архів подій/);
+  assert.doesNotMatch(home, /href="\/news"/);
   assert.doesNotMatch(home, /Зробіть перший крок спокійно/);
   assert.doesNotMatch(home, /З життя церкви · Архів/);
   assert.doesNotMatch(home, /Локації та час/);
@@ -82,10 +82,10 @@ test("ships brand, SEO and primary interactions", async () => {
   const groups = await (await render("/groups")).text();
   assert.match(groups, /\/media\/homegroup-how\.webp/);
   assert.match(groups, /Назва, ведучий або адреса/);
-  assert.match(groups, /48\.2864175,25\.9394979/);
+  assert.match(groups, /48\.2863973,25\.9391673/);
 
   const contacts = await (await render("/contacts")).text();
-  assert.match(contacts, /\/media\/contacts-church-hall\.webp/);
+  assert.match(contacts, /\/media\/contacts-worship-hall\.webp/);
   assert.match(contacts, /Контактна форма/);
   assert.match(contacts, /Ореста Криворучка, 57/);
   assert.match(contacts, /Васіле Александрі, 8/);
@@ -106,13 +106,15 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.ok(about.includes('property="og:url" content="https://emmanuil.pages.dev/about/"'), "about og:url");
   assert.match(about, /BreadcrumbList/);
   const online = await (await render("/online")).text();
-  assert.ok(online.includes('property="og:url" content="https://emmanuil.pages.dev/online"'), "online og:url");
+  assert.ok(online.includes('property="og:url" content="https://emmanuil.pages.dev/online/"'), "online og:url");
   assert.match(online, /Онлайн-служіння/);
   assert.match(online, /twitter:title" content="Онлайн-служіння Еммануїл"/);
   const teamPage = await (await render("/team")).text();
   assert.match(teamPage, /\/media\/team-ministry\.webp/);
-  const newsPage = await (await render("/news")).text();
-  assert.match(newsPage, /\/media\/news-worship\.webp/);
+  const europe = await (await render("/europe")).text();
+  assert.match(europe, /Розділ в розробці/);
+  const departments = await (await render("/departments")).text();
+  assert.match(departments, /Департаменти/);
 });
 
 test("keeps the mobile group application scrollable and group-first", async () => {
@@ -136,38 +138,18 @@ test("keeps the mobile group application scrollable and group-first", async () =
   assert.match(styles, /animation:group-cta-spin 2\.8s/);
   assert.match(styles, /conic-gradient\(from var\(--cta-angle\)/);
   assert.match(styles, /--photo-filter:/);
-  assert.match(styles, /\.photo-hero \{[^}]*min-height:min\(72svh/);
-  assert.match(styles, /\.news-list-item/);
+  assert.match(styles, /\.video-hero \{[^}]*min-height:min\(85svh/);
+  assert.match(styles, /\.groups-carousel/);
   assert.match(styles, /\.live-indicator i \{[^}]*animation:live-pulse/);
   assert.doesNotMatch(styles, /\.video-placeholder-mark/);
-  assert.match(styles, /\.photo-hero-copy h1 \{[^}]*animation:rise/);
-  assert.match(styles, /\.photo-hero-media::before \{[^}]*radial-gradient/);
-  assert.doesNotMatch(styles, /\.photo-hero::after \{[^}]*background-image:radial-gradient/);
-  assert.match(styles, /\.photo-hero-media img \{[^}]*brightness\(\.9/);
+  assert.match(styles, /\.video-hero \.hero-slogan \{[^}]*animation:rise/);
+  assert.match(styles, /\.video-hero-media video \{[^}]*brightness\(\.7/);
   assert.doesNotMatch(styles, /\.donate-link:hover,\.button:hover \{[^}]*transform:translateY/);
   assert.doesNotMatch(groupSource, /5 травня/);
   assert.match(groupSource, /chosenGroups\.length >= 2/);
   assert.match(groupSource, /type="button" role="checkbox" aria-checked=\{checked\}/);
   assert.match(styles, /\.group-form-groups button \{[^}]*width:100%;/);
   assert.match(styles, /\.home-online-section \.video-placeholder \{[^}]*min-height:32rem; aspect-ratio:auto;/);
-});
-
-test("renders every news item as an internal article", async () => {
-  const slugs = ["noti-vdyachnosti", "spravzhnya-lyubov", "reestratsiya-na-sezon-domashnikh-grup-27-01-30-03-rozpochato", "osoblivij-den-podyaki-20-zhovtnya-2024", "vsia-zemlia-spivai-osanna", "vodne-khreshchennya-2024-v-tserkvi-emmanuil", "svyato-dlya-ditej-z-bagatoditnikh-simej-ta-sirit", "nadiia-dlia-sim-i", "domashni-hrupy-iak-tse"];
-  const listing = await (await render("/news")).text();
-  assert.doesNotMatch(listing, /href="https:\/\/emmanuil\.cv\.ua\/news\//);
-  for (const slug of slugs) {
-    assert.match(listing, new RegExp(`href="/news/${slug}"`));
-    const response = await render(`/news/${slug}`);
-    assert.equal(response.status, 200, slug);
-    const html = await response.text();
-    assert.match(html, /Подія завершена/);
-    assert.match(html, /З архіву/);
-    assert.match(html, /Увесь архів/);
-    assert.match(html, /BreadcrumbList/);
-    assert.match(html, /Article/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev/news/${slug}/"/>`), `canonical ${slug}`);
-  }
 });
 
 test("uses centralized typed content and stable sitemap dates", async () => {
@@ -194,8 +176,8 @@ test("uses centralized typed content and stable sitemap dates", async () => {
   assert.match(publicSitemap, /\/visit\/<\/loc>/);
   assert.match(publicSitemap, /\/privacy\/<\/loc>/);
   assert.match(publicSitemap, /\/virovchennja\/<\/loc>/);
-  assert.match(publicSitemap, /<lastmod>2025-10-05<\/lastmod>/);
-  assert.equal((publicSitemap.match(/<url>/g) || []).length, 20);
+  assert.match(publicSitemap, /<lastmod>2026-07-28<\/lastmod>/);
+  assert.equal((publicSitemap.match(/<url>/g) || []).length, 12);
   assert.match(seo, /pageMetadata/);
   assert.match(seo, /buildBreadcrumbList/);
   assert.match(seo, /"Church"/);
@@ -218,7 +200,7 @@ test("preserves authority from indexed legacy URLs with permanent redirects", as
   workerUrl.searchParams.set("redirect-test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
   const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
-  for (const [oldPath, newPath] of [["/about-us/team", "/team"], ["/about-us/mi-virimo", "/about#beliefs"], ["/about-us/virovchennja-chve", "/virovchennja"], ["/live", "/online"], ["/departments", "/about"]]) {
+  for (const [oldPath, newPath] of [["/about-us/team", "/team"], ["/about-us/mi-virimo", "/about#beliefs"], ["/about-us/virovchennja-chve", "/virovchennja"], ["/live", "/online"]]) {
     const response = await worker.fetch(new Request(`https://emmanuil.pages.dev${oldPath}`), env, { waitUntil() {}, passThroughOnException() {} });
     assert.equal(response.status, 301, oldPath);
     assert.equal(response.headers.get("location"), `https://emmanuil.pages.dev${newPath}`);

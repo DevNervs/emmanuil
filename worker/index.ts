@@ -15,7 +15,6 @@ const LEGACY_REDIRECTS: Record<string, string> = {
   "/about-us/team": "/team",
   "/about-us/mi-virimo": "/about#beliefs",
   "/about-us/virovchennja-chve": "/virovchennja",
-  "/departments": "/about",
   "/live": "/online",
 };
 

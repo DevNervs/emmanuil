@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { news, serviceLocations, site, visitFaq, type ServiceLocation } from "./content";
+import { serviceLocations, site, visitFaq, type ServiceLocation } from "./content";
 
 export const seoKeywords = [
   "церква Чернівці",
@@ -26,7 +26,8 @@ export const siteRoutes = [
   { path: "/about", priority: 0.8, changeFrequency: "monthly" as const, lastModified: "2026-07-23" },
   { path: "/virovchennja", priority: 0.75, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
   { path: "/team", priority: 0.7, changeFrequency: "monthly" as const, lastModified: "2026-07-23" },
-  { path: "/news", priority: 0.7, changeFrequency: "weekly" as const, lastModified: "2026-07-23" },
+  { path: "/europe", priority: 0.5, changeFrequency: "monthly" as const, lastModified: "2026-07-28" },
+  { path: "/departments", priority: 0.5, changeFrequency: "monthly" as const, lastModified: "2026-07-28" },
   { path: "/donate", priority: 0.65, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
 ];
@@ -335,12 +336,6 @@ export function buildSitemapEntries() {
       lastModified: route.lastModified,
       changeFrequency: route.changeFrequency,
       priority: route.priority,
-    })),
-    ...news.map((item) => ({
-      url: absoluteUrl(`/news/${item.slug}`),
-      lastModified: item.publishedAt,
-      changeFrequency: "yearly" as const,
-      priority: 0.55,
     })),
   ];
 }

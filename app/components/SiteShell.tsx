@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useLayoutEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpenText, CircleHelp, CirclePlay, Heart, MapPinned, Newspaper, Users, type LucideIcon } from "lucide-react";
+import { BookOpenText, Building2, CircleHelp, CirclePlay, Globe, Heart, MapPinned, Users, type LucideIcon } from "lucide-react";
 import { site } from "../content";
 import { SocialLink } from "./SocialLink";
 
@@ -13,8 +13,9 @@ const nav: Array<[string, string, LucideIcon]> = [
   ["/visit", "Вперше у нас", CircleHelp],
   ["/groups", "Домашні групи", MapPinned],
   ["/online", "Онлайн", CirclePlay],
-  ["/news", "Новини", Newspaper],
   ["/team", "Служителі", Users],
+  ["/europe", "Церкви в Європі", Globe],
+  ["/departments", "Департаменти", Building2],
 ];
 
 function NavLinks({ active }: { active?: string }) {
@@ -160,8 +161,8 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-top">
-        <nav className="footer-column" aria-label="Розділи сайту"><span>Розділи</span><a href="/about">Про нас</a><a href="/contacts">Графік служінь та локації</a><a href="/visit">Вперше у нас</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a><a href="/news">Новини</a></nav>
-        <nav className="footer-column" aria-label="Додаткові розділи"><span>Додатково</span><a href="/team">Служителі</a><a href="/virovchennja">Основи віровчення УЦХВЄ</a><a href="/donate">Пожертвувати</a><a href="/contacts">Контактна інформація</a><a href="/privacy">Конфіденційність</a></nav>
+        <nav className="footer-column" aria-label="Розділи сайту"><span>Розділи</span><a href="/about">Про нас</a><a href="/contacts">Графік служінь та локації</a><a href="/visit">Вперше у нас</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a></nav>
+        <nav className="footer-column" aria-label="Додаткові розділи"><span>Додатково</span><a href="/team">Служителі</a><a href="/europe">Церкви в Європі</a><a href="/departments">Департаменти</a><a href="/virovchennja">Основи віровчення УЦХВЄ</a><a href="/donate">Пожертвувати</a><a href="/contacts">Контактна інформація</a><a href="/privacy">Конфіденційність</a></nav>
         <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><SocialLink network="facebook" href={site.socials.facebook} /><SocialLink network="instagram" href={site.socials.instagram} /><SocialLink network="youtube" href={site.socials.youtube} /><SocialLink network="telegram" href={site.socials.telegram} /></div></address>
       </div>
       <div className="footer-bottom"><span>© 2026 {site.shortName}</span><a href="/privacy">Політика конфіденційності</a><span>Християнська церква у Чернівцях</span></div>

@@ -35,3 +35,6 @@ export const site = {
     viber: "https://invite.viber.com/?g2=AQAe6QfRzoySXEs%2FGBAO9%2Bc5IIwOyE3n6Dedj0owub6XcDOVqmwOBCpCTdx1DkGu",
   },
 };
+
+export const announcement: { text: string; href?: string } | null = null;
+// Set to e.g. { text: "Реєстрація на домашні групи відкрита!", href: "/groups" } to show
