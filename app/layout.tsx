@@ -90,7 +90,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const structuredData = buildSiteGraph();
   const ogImage = shareImageUrl();
   return (
-    <html lang="uk">
+    <html lang="uk" data-header-theme="dark">
       <head>
         <meta name="color-scheme" content="light only" />
         <meta name="darkreader-lock" />

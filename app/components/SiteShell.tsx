@@ -22,11 +22,21 @@ function NavLinks({ active }: { active?: string }) {
   return <>{nav.map(([href, label, Icon]) => <a key={href} href={href} data-label={label} aria-current={active === href ? "page" : undefined}><Icon className="nav-icon" aria-hidden="true" strokeWidth={1.7} /><span className="nav-label">{label}</span></a>)}</>;
 }
 
-export function Brand({ light = false }: { light?: boolean }) {
+export function Brand() {
   return (
-    <a className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці">
+    <a className="brand" href="/" aria-label="Християнська церква Еммануїл Чернівці">
       <img
-        src={light ? "/emmanuil-logo-brand-light.png?v=2" : "/emmanuil-logo-brand.png?v=2"}
+        className="brand-logo-dark"
+        src="/emmanuil-logo-brand.png?v=2"
+        width="360"
+        height="60"
+        alt="Християнська церква Еммануїл Чернівці"
+        decoding="async"
+        loading="lazy"
+      />
+      <img
+        className="brand-logo-light"
+        src="/emmanuil-logo-brand-light.png?v=2"
         width="360"
         height="60"
         alt="Християнська церква Еммануїл Чернівці"
@@ -35,6 +45,69 @@ export function Brand({ light = false }: { light?: boolean }) {
       />
     </a>
   );
+}
+
+function parseColor(color: string): { r: number; g: number; b: number } | null {
+  const match = color.match(/rgba?\(([^)]+)\)/);
+  if (!match) return null;
+  const parts = match[1].split(",").map((v) => parseFloat(v.trim()));
+  if (parts.length < 3 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1]) || !Number.isFinite(parts[2])) return null;
+  return { r: parts[0], g: parts[1], b: parts[2] };
+}
+
+function relativeLuminance({ r, g, b }: { r: number; g: number; b: number }): number {
+  const [lr, lg, lb] = [r, g, b].map((v) => {
+    v /= 255;
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
+}
+
+function colorLuminance(color: string): number {
+  const rgb = parseColor(color);
+  return rgb ? relativeLuminance(rgb) : 0.5;
+}
+
+function sectionTextColor(el: Element): string {
+  const sectionTags = new Set(["section", "main", "article", "header", "footer"]);
+  let node: Element | null = el;
+  while (node && node !== document.body) {
+    const tag = node.tagName.toLowerCase();
+    if (sectionTags.has(tag)) return window.getComputedStyle(node).color;
+    node = node.parentElement;
+  }
+  return window.getComputedStyle(document.body).color;
+}
+
+function getHeaderTheme(): "dark" | "light" {
+  const header = document.querySelector(".site-header");
+  if (!header) return "dark";
+  const rect = header.getBoundingClientRect();
+  const y = Math.floor(rect.top + rect.height / 2);
+  const w = window.innerWidth;
+  const points = [
+    Math.max(0, Math.floor(w * 0.15)),
+    Math.max(0, Math.floor(w * 0.5)),
+    Math.min(Math.max(0, w - 1), Math.floor(w * 0.85)),
+  ];
+  let total = 0;
+  let count = 0;
+  for (const x of points) {
+    if (y < 0) continue;
+    const elements = document.elementsFromPoint(x, y);
+    for (const el of elements) {
+      if (el.closest(".site-header")) continue;
+      total += colorLuminance(sectionTextColor(el));
+      count++;
+      break;
+    }
+  }
+  const average = count > 0 ? total / count : 0.5;
+  return average > 0.55 ? "dark" : "light";
+}
+
+function applyHeaderTheme(next: "dark" | "light") {
+  document.documentElement.setAttribute("data-header-theme", next);
 }
 
 /** Same-page # links: smooth scrollIntoView for Safari/Chrome; no wheel hijacking. */
@@ -98,6 +171,7 @@ export function SiteHeader({ active }: { active?: string }) {
     const current = readHeaderCompact();
     applyHeaderCompact(current);
     setCompact(current);
+    applyHeaderTheme(getHeaderTheme());
     const bootFrame = requestAnimationFrame(() => {
       requestAnimationFrame(() => document.documentElement.classList.remove("hdr-boot"));
     });
@@ -112,14 +186,17 @@ export function SiteHeader({ active }: { active?: string }) {
         if (next !== prev) applyHeaderCompact(next);
         return next;
       });
+      applyHeaderTheme(getHeaderTheme());
     };
     const onScroll = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(update);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(bootFrame);
       if (frame) window.cancelAnimationFrame(frame);
     };
@@ -144,7 +221,7 @@ export function SiteHeader({ active }: { active?: string }) {
           </div>
         </div>
         <div className="mobile-header-shell">
-          <Brand light />
+          <Brand />
           <details className="mobile-menu">
             <summary aria-label="Меню">
               <span className="menu-burger" aria-hidden="true"><i /><i /><i /></span>

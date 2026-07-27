@@ -16,7 +16,7 @@ test("renders every public route in Ukrainian", async () => {
     const response = await render(pathname);
     assert.equal(response.status, 200, pathname);
     const html = await response.text();
-    assert.match(html, /<html lang="uk">/);
+    assert.match(html, /<html[^>]*lang="uk"/);
     assert.match(html, /Еммануїл/);
     assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev${pathname === "/" ? "" : `${pathname}/`}"/>`), `canonical ${pathname}`);
     assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
