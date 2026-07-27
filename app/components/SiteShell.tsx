@@ -24,7 +24,7 @@ function NavLinks({ active }: { active?: string }) {
 
 export function Brand({ light = false }: { light?: boolean }) {
   return (
-    <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці">
+    <a className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці">
       <img
         src={light ? "/emmanuil-logo-brand-light.png?v=2" : "/emmanuil-logo-brand.png?v=2"}
         width="360"
@@ -33,7 +33,7 @@ export function Brand({ light = false }: { light?: boolean }) {
         decoding="async"
         fetchPriority="high"
       />
-    </Link>
+    </a>
   );
 }
 
