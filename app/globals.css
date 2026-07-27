@@ -39,8 +39,8 @@ h1 em,h2 em { color:var(--wine); font-style:normal; font-weight:700; }
 .brand img { width:100%; height:auto; }
 .desktop-header-actions { display:grid; grid-template-columns:1fr auto; align-items:center; gap:2rem; min-width:0; }
 .main-nav { display:flex; justify-content:center; gap:clamp(.12rem,.42vw,.5rem); }
-.main-nav a { display:flex; min-height:2.55rem; align-items:center; border-bottom:1px solid transparent; padding:.25rem .06rem; font-family:var(--serif); font-size:clamp(.6rem,.65vw,.72rem); font-weight:600; text-transform:uppercase; letter-spacing:.02em; white-space:nowrap; transition:color .18s ease-out,border-color .18s ease-out; }
-.main-nav a:hover,.main-nav a[aria-current="page"] { border-color:var(--wine); color:var(--wine); }
+.main-nav a { display:flex; min-height:2.55rem; align-items:center; border-bottom:1px solid transparent; padding:.25rem .06rem; font-family:var(--serif); font-size:clamp(.6rem,.65vw,.72rem); font-weight:600; text-transform:uppercase; letter-spacing:.02em; color:#fff; white-space:nowrap; transition:color .18s ease-out,border-color .18s ease-out; }
+.main-nav a:hover,.main-nav a[aria-current="page"] { border-color:var(--gold-soft); color:var(--gold-soft); }
 .donate-link,.button { display:inline-flex; min-height:2.65rem; align-items:center; justify-content:center; gap:.45rem; border:1px solid transparent; border-radius:10rem; padding:.55rem 1.2rem; font-family:var(--serif); font-size:clamp(.62rem,.68vw,.74rem); font-weight:600; text-transform:uppercase; letter-spacing:.03em; transition:background .2s cubic-bezier(.2,.7,.2,1),color .2s ease-out,border-color .2s ease-out,box-shadow .2s ease-out,transform .18s cubic-bezier(.2,.7,.2,1),filter .18s ease-out; }
 .donate-link,.button-wine { background:var(--wine); color:var(--white); }
 .donate-link:hover,.button-wine:hover { background:var(--wine-dark); }
@@ -530,7 +530,7 @@ body { background:var(--paper); font-size:16px; }
 .main-nav a { position:relative; overflow:visible; border:0; }
 .nav-label { max-width:none; overflow:visible; opacity:1; }
 .nav-icon { display:none; width:1.15rem; height:1.15rem; overflow:hidden; opacity:0; }
-.main-nav a::after { content:""; position:absolute; right:50%; bottom:.35rem; left:50%; height:1px; background:var(--wine); transition:right .25s ease,left .25s ease; }
+.main-nav a::after { content:""; position:absolute; right:50%; bottom:.35rem; left:50%; height:1px; background:var(--gold-soft); transition:right .25s ease,left .25s ease; }
 .main-nav a:hover::after,.main-nav a[aria-current="page"]::after { right:0; left:0; }
 .header-donate { position:relative; }
 .donate-icon { display:none; width:1.2rem; height:1.2rem; }
