@@ -1062,19 +1062,19 @@ html.hdr-compact .site-header .header-layer-default .desktop-header-actions { gr
 .home-season-copy h2 { margin-bottom:.85rem; font-size:clamp(3.2rem,5.5vw,5.8rem); line-height:.92; }
 .home-season-period { margin:0 0 1.1rem; color:var(--wine); font-size:.78rem; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
 .home-season-copy > p:not(.overline):not(.home-season-period) { max-width:34rem; margin-bottom:0; color:var(--muted); line-height:1.7; }
-.home-season-media-wrapper { display:flex; flex-direction:column; gap:1.15rem; padding:clamp(2.5rem,5vw,5rem) clamp(1rem,4vw,4rem); align-self:center; max-width:580px; width:100%; box-sizing:border-box; }
-.home-season-media { margin:0; width:100%; border-radius:.85rem; overflow:hidden; max-height:18rem; }
-.home-season-media img { width:100%; height:18rem; object-fit:cover; object-position:center 42%; filter:var(--photo-filter); border-radius:.85rem; }
+.home-season-media-wrapper { display:flex; flex-direction:column; justify-content:center; gap:1.5rem; padding:clamp(2rem,4vw,4rem); align-self:stretch; max-width:100%; width:100%; box-sizing:border-box; }
+.home-season-media { margin:0; width:100%; flex:1 1 55%; min-height:18rem; max-height:32rem; border-radius:.85rem; overflow:hidden; }
+.home-season-media img { width:100%; height:100%; max-height:32rem; object-fit:cover; object-position:center 42%; filter:var(--photo-filter); border-radius:.85rem; }
 
 /* Continuous Infinite Marquee Auto-Scroll */
 @keyframes marquee-slide {
   0% { transform:translate3d(0,0,0); }
   100% { transform:translate3d(-50%,0,0); }
 }
-.groups-carousel-marquee { width:100%; overflow:hidden; border-radius:.75rem; background:transparent; mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%); -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%); }
-.groups-carousel-track { display:flex; gap:.75rem; width:max-content; animation:marquee-slide 28s linear infinite; will-change:transform; }
+.groups-carousel-marquee { width:100%; flex:0 0 40%; min-height:12rem; overflow:hidden; border-radius:.85rem; background:transparent; mask-image:linear-gradient(90deg,transparent 0%,#000 4%,#000 96%,transparent 100%); -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 4%,#000 96%,transparent 100%); }
+.groups-carousel-track { display:flex; gap:.9rem; width:max-content; animation:marquee-slide 28s linear infinite; will-change:transform; }
 .groups-carousel-track:hover { animation-play-state:paused; }
-.groups-carousel-slide { flex:0 0 11.5rem; height:7.8rem; border-radius:.6rem; overflow:hidden; }
+.groups-carousel-slide { flex:0 0 clamp(13rem,18vw,17rem); height:100%; min-height:12rem; border-radius:.75rem; overflow:hidden; }
 .groups-carousel-slide img { width:100%; height:100%; object-fit:cover; }
 .placeholder-page { min-height:60vh; display:flex; align-items:center; justify-content:center; }
 .placeholder-content { max-width:36rem; padding:clamp(4rem,8vw,8rem) clamp(1rem,5vw,5rem); text-align:center; }
@@ -1210,7 +1210,7 @@ html.hdr-compact .site-header .header-layer-default .desktop-header-actions { gr
   .page-intro-media { min-height:30rem; }
   .first-visit-feature,.home-online-section,.home-connect,.home-season,.home-live,.about-team-preview,.visit-steps,.visit-help { grid-template-columns:1fr; }
   .home-visit-compact .home-visit-heading,.home-now-heading { grid-template-columns:1fr; }
-  .home-connect-media,.home-season-media { min-height:26rem; }
+  .home-connect-media { min-height:26rem; }
   .visit-location-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .visit-location-grid article:nth-child(2) { border-right:0; padding-right:0; }
   .visit-location-grid article:nth-child(3),.visit-location-grid article:nth-child(4) { border-top:1px solid rgba(255,255,255,.14); }
@@ -1231,7 +1231,7 @@ html.hdr-compact .site-header .header-layer-default .desktop-header-actions { gr
   .video-frame.video-placeholder { min-height:0; padding:1.5rem 1.15rem 1.75rem; }
   .video-placeholder h2 { max-width:100%; font-size:clamp(1.55rem,7.2vw,2.35rem); line-height:1.08; }
   .video-placeholder p { margin-bottom:1.25rem; font-size:.95rem; }
-  .home-connect-media,.home-season-media { min-height:20rem; }
+  .home-connect-media { min-height:20rem; }
   .first-visit-actions,.visit-help-links,.team-preview-actions,.home-now-actions { align-items:stretch; flex-direction:column; }
   .first-visit-actions .button,.visit-help-links .button,.team-preview-actions .button,.home-now-actions .button { width:100%; }
   .visit-faq-item summary { grid-template-columns:2.4rem 1fr; }
