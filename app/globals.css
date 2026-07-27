@@ -955,13 +955,13 @@ html.hdr-compact .site-header .header-layer-default .desktop-header-actions { gr
 .header-layer-default .nav-icon { display:none!important; width:0!important; opacity:0!important; }
 .site-header .header-layer-default .header-donate { width:auto; min-width:0; height:auto; min-height:3.25rem; flex:none; aspect-ratio:auto; padding:.75rem 1.35rem; }
 .compact-nav { gap:.38rem; }
-.compact-nav a,.compact-donate { position:relative; display:flex; flex:0 0 2.75rem; width:2.75rem; height:2.75rem; min-width:2.75rem; min-height:2.75rem; aspect-ratio:1; box-sizing:border-box; align-items:center; justify-content:center; overflow:visible; border:1px solid rgba(26,58,92,.12); border-radius:50%; padding:0; background:rgba(255,255,255,.5); color:var(--ink); box-shadow:0 3px 10px rgba(18,26,36,.04); transition:background-color .18s ease-out,border-color .18s ease-out,color .18s ease-out,transform .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s ease-out; }
+.compact-nav a,.compact-donate { position:relative; display:flex; flex:0 0 2.75rem; width:2.75rem; height:2.75rem; min-width:2.75rem; min-height:2.75rem; aspect-ratio:1; box-sizing:border-box; align-items:center; justify-content:center; overflow:visible; border:1px solid rgba(26,58,92,.12); border-radius:50%; padding:0; background:transparent; color:var(--ink); box-shadow:none; transition:background-color .18s ease-out,border-color .18s ease-out,color .18s ease-out,transform .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s ease-out; -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
 .compact-donate.donate-link { min-height:2.75rem; }
 .compact-nav .nav-label { position:absolute!important; width:1px!important; max-width:1px!important; height:1px!important; overflow:hidden!important; clip:rect(0 0 0 0)!important; opacity:0!important; }
 .compact-nav .nav-icon { display:block!important; width:1.12rem!important; height:1.12rem; overflow:visible; opacity:1!important; transform:none!important; }
-.compact-nav a:hover { border-color:rgba(26,58,92,.28); background:rgba(255,255,255,.82); color:var(--wine); }
+.compact-nav a:hover { border-color:rgba(26,58,92,.28); background:rgba(255,255,255,.18); color:var(--wine); }
 .compact-nav a[aria-current="page"] { border-color:var(--wine); background:var(--wine); color:#fff; }
-.compact-donate { border-color:var(--wine); background:var(--wine); color:#fff; }
+.compact-donate { border-color:rgba(26,58,92,.12); background:transparent; color:var(--ink); }
 .compact-donate svg { width:1.2rem; height:1.2rem; }
 .compact-donate::after,
 .compact-donate:hover::after,
