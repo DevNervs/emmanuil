@@ -1,6 +1,5 @@
-import { NextService } from "./components/NextService";
 import { Page } from "./components/SiteShell";
-import { announcement, groupSeason, groups } from "./content";
+import { announcement, groupSeason, groups, serviceLocations } from "./content";
 import { pageMetadata } from "./seo";
 
 export const metadata = pageMetadata({
@@ -12,6 +11,15 @@ export const metadata = pageMetadata({
   ogDescription:
     "Недільні служіння о 10:00 та 17:00 на 4 локаціях у Чернівцях і області, домашні групи, онлайн-трансляції та контакти.",
 });
+
+const carouselPhotos = [
+  "/media/homegroup-how.webp?v=q2",
+  "/media/home-group.webp?v=q2",
+  "/media/about-community.webp",
+  "/media/contacts-church-hall.webp",
+  "/media/jatva-2024.webp",
+  "/media/visit-worship.webp",
+];
 
 export default function Home() {
   return (
@@ -27,9 +35,30 @@ export default function Home() {
               playsInline
               aria-hidden="true"
             />
+            <div className="video-grain-overlay" aria-hidden="true" />
           </div>
+
           <div className="video-hero-overlay">
-            <p className="hero-schedule">Щонеділі о 10:00 та 17:00 · 4 локації</p>
+            {/* 4 Locations Overlay Bar (Ecclesia style) */}
+            <div className="hero-locations-bar">
+              <div className="hero-locations-header">
+                <span className="hero-locations-title">Найближчі служіння</span>
+                <a className="hero-locations-link" href="/contacts">
+                  Карта та маршрути →
+                </a>
+              </div>
+              <div className="hero-locations-grid">
+                {serviceLocations.map((loc) => (
+                  <a key={loc.label} className="hero-location-card" href="/contacts">
+                    <strong>{loc.label}</strong>
+                    <span>{loc.streetAddress}</span>
+                    <time>{loc.time}</time>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Slogan */}
             <div className="hero-center">
               <h1 className="sr-only">Християнська церква Еммануїл у Чернівцях</h1>
               <p className="hero-slogan">Існуємо, щоб ви дізналися про Бога більше</p>
@@ -38,6 +67,8 @@ export default function Home() {
                 <a className="button button-ghost" href="/online">Дивитися онлайн</a>
               </div>
             </div>
+
+            {/* Tagline */}
             <p className="hero-tagline">Поклоніння · учнівство · духовний зріст</p>
           </div>
         </section>
@@ -52,8 +83,7 @@ export default function Home() {
           </section>
         )}
 
-        <NextService />
-
+        {/* Home Groups Section */}
         <section className="home-season" aria-labelledby="home-season-title">
           <div className="home-season-copy">
             <p className="overline">{groupSeason.label}</p>
@@ -65,27 +95,31 @@ export default function Home() {
               <a className="inline-link" href="/groups">Розклад груп</a>
             </div>
           </div>
-          <figure className="home-season-media">
-            <img src="/media/homegroup-how.webp?v=q2" width="1440" height="1440" alt="Домашні групи церкви Еммануїл" loading="lazy" decoding="async" />
-          </figure>
-        </section>
 
-        <section className="groups-carousel" aria-label="Фото домашніх груп">
-          <div className="groups-carousel-track">
-            <div className="groups-carousel-slide">
-              <img src="/media/homegroup-how.webp?v=q2" alt="Домашня група" loading="lazy" decoding="async" />
+          <div className="home-season-media-wrapper">
+            <figure className="home-season-media">
+              <img
+                src="/media/homegroup-how.webp?v=q2"
+                width="1440"
+                height="1440"
+                alt="Домашні групи церкви Еммануїл"
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
+
+            {/* Continuous Marquee Auto-Scrolling Carousel constrained to media width */}
+            <div className="groups-carousel-marquee" aria-label="Галерея домашніх груп">
+              <div className="groups-carousel-track">
+                {[...carouselPhotos, ...carouselPhotos].map((src, idx) => (
+                  <div className="groups-carousel-slide" key={idx}>
+                    <img src={src} alt="Домашня група Еммануїл" loading="lazy" decoding="async" />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="groups-carousel-slide">
-              <img src="/media/home-group.webp?v=q2" alt="Домашня група" loading="lazy" decoding="async" />
-            </div>
-            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 3</span></div>
-            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 4</span></div>
-            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 5</span></div>
-            <div className="groups-carousel-slide groups-carousel-placeholder"><span>Фото 6</span></div>
           </div>
         </section>
-
-
 
         <section className="first-visit-feature" aria-labelledby="home-expect-title">
           <div>

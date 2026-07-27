@@ -28,9 +28,9 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /video-hero/);
   assert.match(home, /\/media\/hero-worship-loop\.mp4/);
   assert.doesNotMatch(home, /<h1>Еммануїл<\/h1>/);
-  assert.match(home, /Щонеділі о 10:00 та 17:00 · 4 локації/);
+  assert.match(home, /hero-locations-grid/);
   assert.match(home, /Існуємо, щоб ви дізналися про Бога більше/);
-  assert.match(home, /home-now-locations/);
+  assert.match(home, /hero-locations-bar/);
   assert.doesNotMatch(home, /Наші церкви та графік служінь/);
   assert.doesNotMatch(home, /hero-caption/);
   assert.match(home, /Християнська/);
@@ -47,7 +47,7 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /WebSite/);
   assert.match(home, /href="\/visit"/);
   assert.match(home, /href="\/online"/);
-  assert.match(home, /Найближче служіння/);
+  assert.match(home, /Найближчі служіння/);
   assert.match(home, /Актуальний сезон/);
   assert.match(home, /Домашні групи/);
   assert.doesNotMatch(home, /Сторінка онлайн/);
@@ -225,9 +225,8 @@ test("surfaces the next service and keeps all locations on contacts", async () =
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   const service = await readFile(new URL("../app/data/service.ts", import.meta.url), "utf8");
   const locations = await readFile(new URL("../app/data/locations.ts", import.meta.url), "utf8");
-  assert.match(home, /Найближче служіння/);
-  assert.match(home, /home-now/);
-  assert.match(home, /home-now-locations/);
+  assert.match(home, /Найближчі служіння/);
+  assert.match(home, /hero-locations-grid/);
   assert.doesNotMatch(home, /home-churches/);
   assert.doesNotMatch(home, /home-now-grid/);
   assert.doesNotMatch(home, /Адреси церков — у блоці локацій нижче/);
