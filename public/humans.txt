@@ -1,0 +1,12 @@
+/* TEAM */
+Church: Християнська церква Еммануїл
+Location: Chernivtsi, Ukraine
+Contact: emmanuil.cv@gmail.com
+Phones: +380669509977, +380969509977
+
+/* SITE */
+Last update: 2026-07-23
+Language: Ukrainian
+Standards: HTML5, Schema.org JSON-LD
+Canonical: https://emmanuil.pages.dev
+Sitemap: https://emmanuil.pages.dev/sitemap.xml

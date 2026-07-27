@@ -7,12 +7,15 @@ export type MapLocation = {
   address: string;
   mapQuery?: string;
   coordinates?: string;
+  mapsUrl?: string;
 };
 
 const embedUrl = (query: string, coordinates?: string) => `https://www.google.com/maps?q=${encodeURIComponent(coordinates ?? query)}&z=17&output=embed`;
-const directionsUrl = (query: string, coordinates?: string) => coordinates
-  ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(coordinates)}`
-  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+const directionsUrl = (item: MapLocation) => {
+  if (item.mapsUrl) return item.mapsUrl;
+  if (item.coordinates) return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(item.coordinates)}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.mapQuery ?? item.address)}`;
+};
 
 export function InteractiveMap({ id, eyebrow, title, description, locations, dark = false }: {
   id: string;
@@ -41,13 +44,13 @@ export function InteractiveMap({ id, eyebrow, title, description, locations, dar
                 <strong>{item.label}</strong>
                 <small>{item.address}</small>
               </button>
-              <a href={directionsUrl(item.mapQuery ?? item.address, item.coordinates)} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${item.label}`}>Прокласти маршрут <span aria-hidden="true">↗</span></a>
+              <a href={directionsUrl(item)} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${item.label}`}>Прокласти маршрут <span aria-hidden="true">↗</span></a>
             </div>
           ))}
         </div>
       </div>
       <div className="interactive-map-stage">
-        <div className="interactive-map-toolbar"><div><span>Обрана адреса</span><strong>{location.label}</strong></div><a href={directionsUrl(mapQuery, location.coordinates)} target="_blank" rel="noreferrer">Прокласти маршрут <span aria-hidden="true">↗</span></a></div>
+        <div className="interactive-map-toolbar"><div><span>Обрана адреса</span><strong>{location.label}</strong></div><a href={directionsUrl(location)} target="_blank" rel="noreferrer">Прокласти маршрут <span aria-hidden="true">↗</span></a></div>
         <iframe key={markerKey} src={embedUrl(mapQuery, location.coordinates)} title={`${location.label} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
       </div>
     </section>

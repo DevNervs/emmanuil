@@ -1,0 +1,33 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; font-src 'self'; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com; connect-src 'self' https://api.telegram.org https://formsubmit.co https://www.youtube.com; form-action 'self' https://formsubmit.co; base-uri 'self';
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/tg-preview.jpg
+  Cache-Control: public, max-age=3600
+
+/tg-preview-brand.jpg
+  Cache-Control: public, max-age=3600
+
+/share-card.jpg
+  Cache-Control: public, max-age=3600
+
+/og-card.jpg
+  Cache-Control: public, max-age=86400
+
+/og-share.jpg
+  Cache-Control: public, max-age=86400
+
+/og-editorial.jpg
+  Cache-Control: public, max-age=86400
+
+/og-editorial.png
+  Cache-Control: public, max-age=86400

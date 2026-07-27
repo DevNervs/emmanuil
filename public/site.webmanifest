@@ -1,11 +1,16 @@
 {
   "name": "Християнська церква Еммануїл",
   "short_name": "Еммануїл",
+  "description": "Християнська євангельська церква Еммануїл у Чернівцях",
+  "lang": "uk",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
-    { "src": "/icon-dark-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-dark-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/icon-dark-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-dark-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ],
-  "theme_color": "#050505",
-  "background_color": "#050505",
-  "display": "standalone"
+  "theme_color": "#7d2633",
+  "background_color": "#f6f3ee",
+  "display": "standalone",
+  "orientation": "portrait-primary"
 }

@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated / temporary artifacts:
+    "dist/**",
+    ".wrangler/**",
+    "public/_worker.js",
+    "tmp/**",
+    ".tmp/**",
+    "work/**",
+    "outputs/**",
   ]),
 ]);
 

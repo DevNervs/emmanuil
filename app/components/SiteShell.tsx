@@ -1,19 +1,20 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpenText, CircleHelp, CirclePlay, Heart, Home, MapPinned, type LucideIcon } from "lucide-react";
-import { serviceLocations, site } from "../content";
+import { BookOpenText, CircleHelp, CirclePlay, Heart, MapPinned, Newspaper, Users, type LucideIcon } from "lucide-react";
+import { site } from "../content";
 import { SocialLink } from "./SocialLink";
 
 const nav: Array<[string, string, LucideIcon]> = [
-  ["/", "Головна", Home],
+  ["/about", "Про нас", BookOpenText],
+  ["/contacts", "Графік і локації", MapPinned],
   ["/visit", "Вперше у нас", CircleHelp],
-  ["/contacts", "Локації", MapPinned],
   ["/groups", "Домашні групи", MapPinned],
   ["/online", "Онлайн", CirclePlay],
-  ["/about", "Про церкву", BookOpenText],
+  ["/news", "Новини", Newspaper],
+  ["/team", "Служителі", Users],
 ];
 
 function NavLinks({ active }: { active?: string }) {
@@ -21,22 +22,109 @@ function NavLinks({ active }: { active?: string }) {
 }
 
 export function Brand({ light = false }: { light?: boolean }) {
-  return <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці"><img src="/emmanuil-logo-hq.png" width="2172" height="216" alt="Християнська церква Еммануїл Чернівці" /></Link>;
+  return (
+    <Link className={`brand ${light ? "brand-light" : ""}`} href="/" aria-label="Християнська церква Еммануїл Чернівці">
+      <img
+        src={light ? "/emmanuil-logo-brand-light.png?v=2" : "/emmanuil-logo-brand.png?v=2"}
+        width="360"
+        height="60"
+        alt="Християнська церква Еммануїл Чернівці"
+        decoding="async"
+        fetchPriority="high"
+      />
+    </Link>
+  );
+}
+
+/** Same-page # links: smooth scrollIntoView for Safari/Chrome; no wheel hijacking. */
+function useSmoothHashLinks() {
+  useLayoutEffect(() => {
+    const reduceMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const scrollToId = (hash: string) => {
+      if (!hash || hash === "#") return false;
+      let id = hash.slice(1);
+      try {
+        id = decodeURIComponent(id);
+      } catch {
+        /* keep raw id */
+      }
+      const el = document.getElementById(id);
+      if (!el) return false;
+      el.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+      return true;
+    };
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const anchor = (event.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+      const href = anchor.getAttribute("href");
+      if (!href || href.startsWith("mailto:") || href.startsWith("tel:")) return;
+      let url: URL;
+      try {
+        url = new URL(href, window.location.href);
+      } catch {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+      if (url.pathname !== window.location.pathname || url.search !== window.location.search) return;
+      if (!url.hash) return;
+      if (!scrollToId(url.hash)) return;
+      event.preventDefault();
+      if (history.pushState) history.pushState(null, "", `${url.pathname}${url.search}${url.hash}`);
+      else window.location.hash = url.hash;
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+}
+
+function applyHeaderCompact(next: boolean) {
+  document.documentElement.classList.toggle("hdr-compact", next);
+}
+
+function readHeaderCompact() {
+  const y = window.scrollY || document.documentElement.scrollTop;
+  let current = document.documentElement.classList.contains("hdr-compact");
+  if (!current && y >= 72) current = true;
+  if (current && y <= 28) current = false;
+  return current;
 }
 
 export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(false);
-  const sentinelRef = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(([entry]) => setCompact(!entry.isIntersecting));
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, []);
+  useLayoutEffect(() => {
+    let frame = 0;
+    const current = readHeaderCompact();
+    applyHeaderCompact(current);
+    setCompact(current);
+    const bootFrame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => document.documentElement.classList.remove("hdr-boot"));
+    });
+
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY || document.documentElement.scrollTop;
+      setCompact((prev) => {
+        let next = prev;
+        if (!prev && y >= 72) next = true;
+        if (prev && y <= 28) next = false;
+        if (next !== prev) applyHeaderCompact(next);
+        return next;
+      });
+    };
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(bootFrame);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [active]);
   return <>
-    <span ref={sentinelRef} className="header-sentinel" aria-hidden="true" />
-    <header className={`site-header ${compact ? "is-compact" : ""}`}>
+    <header className="site-header">
       <div className="header-inner">
         <div className="desktop-header-shell">
           <div className="header-layer header-layer-default" aria-hidden={compact}>
@@ -57,7 +145,9 @@ export function SiteHeader({ active }: { active?: string }) {
         <div className="mobile-header-shell">
           <Brand />
           <details className="mobile-menu">
-            <summary>Меню</summary>
+            <summary aria-label="Меню">
+              <span className="menu-burger" aria-hidden="true"><i /><i /><i /></span>
+            </summary>
             <nav aria-label="Мобільна навігація"><NavLinks active={active} /><a href="/donate">Пожертвувати</a></nav>
           </details>
         </div>
@@ -70,26 +160,22 @@ export function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-top">
-        <div className="footer-main"><Brand light /></div>
-        <nav className="footer-column" aria-label="Розділи сайту"><span>Розділи</span><a href="/visit">Вперше у нас</a><a href="/contacts">Локації та контакти</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a><a href="/about">Про церкву</a></nav>
-        <nav className="footer-column" aria-label="Додаткові розділи"><span>Додатково</span><a href="/news">Архів життя церкви</a><a href="/team">Команда</a><a href="/donate">Пожертвувати</a><a href="/privacy">Конфіденційність</a></nav>
+        <nav className="footer-column" aria-label="Розділи сайту"><span>Розділи</span><a href="/about">Про нас</a><a href="/contacts">Графік служінь та локації</a><a href="/visit">Вперше у нас</a><a href="/groups">Домашні групи</a><a href="/online">Онлайн</a><a href="/news">Новини</a></nav>
+        <nav className="footer-column" aria-label="Додаткові розділи"><span>Додатково</span><a href="/team">Служителі</a><a href="/virovchennja">Основи віровчення УЦХВЄ</a><a href="/donate">Пожертвувати</a><a href="/contacts">Контактна інформація</a><a href="/privacy">Конфіденційність</a></nav>
         <address className="footer-column"><span>Контакти</span><a href="tel:+380669509977">{site.phones[0]}</a><a href="tel:+380969509977">{site.phones[1]}</a><a href={`mailto:${site.email}`}>{site.email}</a><div className="social-links"><SocialLink network="facebook" href={site.socials.facebook} /><SocialLink network="instagram" href={site.socials.instagram} /><SocialLink network="youtube" href={site.socials.youtube} /><SocialLink network="telegram" href={site.socials.telegram} /></div></address>
       </div>
-      <section className="footer-service-section" aria-labelledby="footer-services-title">
-        <div className="footer-section-heading"><span>Щонеділі</span><h2 id="footer-services-title">Локації служінь</h2></div>
-        <div className="footer-locations">{serviceLocations.map((location, index) => <article className="footer-location" key={location.label}><span className="footer-location-number">0{index + 1}</span><div><strong>{location.label}</strong><time>{location.time}</time><p>{location.address}</p></div><a className="footer-route" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(location.coordinates)}`} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${location.label}`}>Маршрут <span aria-hidden="true">↗</span></a></article>)}</div>
-      </section>
       <div className="footer-bottom"><span>© 2026 {site.shortName}</span><a href="/privacy">Політика конфіденційності</a><span>Християнська церква у Чернівцях</span></div>
     </footer>
   );
 }
 
 export function Page({ children, active }: { children: ReactNode; active?: string }) {
+  useSmoothHashLinks();
   return <><a className="skip-link" href="#main-content">Перейти до вмісту</a><SiteHeader active={active} /><div id="main-content" tabIndex={-1}>{children}</div><Footer /></>;
 }
 
-export function PageIntro({ eyebrow, title, text, children, image, imageAlt = "" }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; image?: string; imageAlt?: string }) {
-  return <section className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className="page-intro-media"><img src={image} alt={imageAlt} fetchPriority="high" decoding="async" /></div> : null}</section>;
+export function PageIntro({ eyebrow, title, text, children, image, imageAlt = "", mediaClassName = "" }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; image?: string; imageAlt?: string; mediaClassName?: string }) {
+  return <section className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className={`page-intro-media ${mediaClassName}`.trim()}><img src={image} alt={imageAlt} fetchPriority="high" decoding="async" /></div> : null}</section>;
 }
 
 export function SectionTitle({ kicker, title, text }: { kicker?: string; title: ReactNode; text?: ReactNode }) {

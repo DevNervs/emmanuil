@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import { JsonLd } from "../components/JsonLd";
 import { Page, PageIntro } from "../components/SiteShell";
 import { BeliefsScroll } from "../components/BeliefsScroll";
 import { team } from "../content";
+import { breadcrumbFor, pageMetadata } from "../seo";
 
-export const metadata: Metadata = { title: "Про християнську церкву", description: "Історія спільноти, команда та основи віровчення християнської євангельської церкви Еммануїл у Чернівцях.", alternates: { canonical: "/about" } };
+export const metadata = pageMetadata({
+  path: "/about",
+  title: "Про церкву Еммануїл у Чернівцях",
+  description:
+    "Хто ми: поклоніння, учнівство, команда служителів і основи віровчення християнської євангельської церкви Еммануїл у Чернівцях.",
+});
 
 const beliefs = [
   ["У єдиного істинного і святого Бога, Який відкривається у трьох Особах: Отець, Син і Святий Дух.", "«Отож ідіть, і навчіть всі народи, хрестячи їх в Ім’я Отця, і Сина, і Святого Духа» (Мт. 28:19)."],
@@ -21,9 +27,17 @@ const beliefs = [
 ];
 
 export default function AboutPage() {
-  return <Page active="/about"><main><PageIntro eyebrow="Чернівці · Україна" title="Про церкву" text={<><h2>Спільнота для духовного зростання</h2><p>Церква Еммануїл — це спільнота, де люди можуть зростати духовно у поклонінні, учнівстві та спілкуванні.</p></>} image="/media/baptism.webp" imageAlt="Водне хрещення церкви Еммануїл" />
+  return <Page active="/about"><main><JsonLd data={breadcrumbFor("/about", "Про церкву")} /><PageIntro eyebrow="Чернівці · Україна" title="Про церкву" text={<><h2>Спільнота для духовного зростання</h2><p>Церква Еммануїл — це спільнота, де люди можуть зростати духовно у поклонінні, учнівстві та спілкуванні.</p></>} image="/media/baptism-editorial-color.webp?v=q2" imageAlt="Учасники водного хрещення церкви Еммануїл" />
     <section className="about-values"><div><span>01</span><h2>Поклоніння</h2></div><div><span>02</span><h2>Учнівство</h2></div><div><span>03</span><h2>Духовний ріст</h2></div></section>
-    <section className="about-team-preview"><div className="about-team-heading"><p className="overline">Служителі</p><h2>Команда церкви</h2><p>Познайомтеся зі служителями церкви Еммануїл.</p><a className="button button-wine" href="/team">Уся команда</a></div><div className="about-team-list">{team.slice(0, 3).map((person) => <article key={person.name}><img src={person.image} width="300" height="300" alt={person.name} loading="lazy" decoding="async" /><div><h3>{person.name}</h3><p>{person.role}</p></div></article>)}</div></section>
+    <section className="about-team-preview"><div className="about-team-heading"><p className="overline">Служителі</p><h2>Команда церкви</h2><p>Познайомтеся зі служителями церкви Еммануїл.</p><a className="button button-wine" href="/team">Уся команда</a></div><div className="about-team-list">{team.slice(0, 3).map((person) => <article key={person.name}><img src={person.image} width="735" height="1024" alt={person.name} loading="lazy" decoding="async" /><div><h3>{person.name}</h3><p>{person.role}</p></div></article>)}</div></section>
     <BeliefsScroll beliefs={beliefs} />
+    <section className="about-doctrine-link" aria-labelledby="about-doctrine-title">
+      <div>
+        <p className="overline">УЦХВЄ</p>
+        <h2 id="about-doctrine-title">Основи віровчення союзу</h2>
+        <p>Повний офіційний документ Української Церкви Християн Віри Євангельської — у PDF.</p>
+        <a className="button button-wine" href="/virovchennja">Відкрити документ</a>
+      </div>
+    </section>
   </main></Page>;
 }

@@ -1,0 +1,36 @@
+# Християнська церква Еммануїл
+
+> Офіційний сайт християнської євангельської церкви Еммануїл у Чернівцях (Україна): адреси служінь, домашні групи, онлайн-трансляції, новини та контакти.
+
+- Site: https://emmanuil.pages.dev
+- Language: Ukrainian (uk-UA)
+- City: Чернівці / Chernivtsi, Ukraine
+- Email: emmanuil.cv@gmail.com
+- Phones: +380669509977, +380969509977
+
+## Main pages
+
+- [Головна](https://emmanuil.pages.dev/): огляд церкви, найближче служіння, локації
+- [Вперше у нас](https://emmanuil.pages.dev/visit): що очікувати на першому візиті, FAQ
+- [Локації та контакти](https://emmanuil.pages.dev/contacts): адреси Криворучка, Кобилянська, Садгора, Сторожинець
+- [Домашні групи](https://emmanuil.pages.dev/groups): розклад і реєстрація
+- [Онлайн](https://emmanuil.pages.dev/online): недільні трансляції
+- [Про церкву](https://emmanuil.pages.dev/about): хто ми та основи віри
+- [Команда](https://emmanuil.pages.dev/team): пастори та служителі
+- [Новини](https://emmanuil.pages.dev/news): архів подій
+- [Віровчення](https://emmanuil.pages.dev/virovchennja): основи віровчення УЦХВЄ
+- [Пожертвувати](https://emmanuil.pages.dev/donate): офіційні реквізити
+- [Конфіденційність](https://emmanuil.pages.dev/privacy): політика обробки даних
+
+## Social
+
+- Facebook: https://www.facebook.com/emmanuil.cv.ua
+- Instagram: https://www.instagram.com/emmanuilcv/
+- YouTube: https://www.youtube.com/@EmmanuilCV
+- Telegram: https://t.me/emmanuilcv
+
+## Notes for crawlers
+
+- Canonical host: https://emmanuil.pages.dev
+- Sitemap: https://emmanuil.pages.dev/sitemap.xml
+- Do not invent reviews, ratings, or service claims not stated on the site.

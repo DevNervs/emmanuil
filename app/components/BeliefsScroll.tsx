@@ -10,6 +10,7 @@ export function BeliefsScroll({ beliefs }: { beliefs: string[][] }) {
       <p className="overline">Основи віровчення</p>
       <h2 id="beliefs-heading">У що ми віримо</h2>
       <span>{beliefs.length} положень</span>
+      <a className="inline-link" href="/virovchennja">Офіційний документ УЦХВЄ (PDF)</a>
     </div>
     <div className="manuscript-scroll">
       <span className="scroll-dowel scroll-dowel-top" aria-hidden="true" />
