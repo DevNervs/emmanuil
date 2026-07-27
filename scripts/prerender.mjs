@@ -92,7 +92,7 @@ async function main() {
       prerendered.push(pathname);
     }
 
-    await cp(join(root, "public"), out, { recursive: true });
+    await cp(join(root, "dist/client"), out, { recursive: true });
 
     console.log(`Prerendered ${prerendered.length} routes:`);
     for (const p of prerendered) console.log(`  - ${p}`);
