@@ -144,7 +144,7 @@ export function SiteHeader({ active }: { active?: string }) {
           </div>
         </div>
         <div className="mobile-header-shell">
-          <Brand />
+          <Brand light />
           <details className="mobile-menu">
             <summary aria-label="Меню">
               <span className="menu-burger" aria-hidden="true"><i /><i /><i /></span>
