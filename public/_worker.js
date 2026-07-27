@@ -23,7 +23,7 @@ const legacyRedirects = {
   "/about-us/team": "/team",
   "/about-us/mi-virimo": "/about#beliefs",
   "/about-us/virovchennja-chve": "/virovchennja",
-  "/departments": "/about",
+
   "/live": "/online",
 };
 
