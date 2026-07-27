@@ -3,19 +3,19 @@
 import type { ReactNode } from "react";
 import { useLayoutEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpenText, Building2, CircleHelp, CirclePlay, Globe, Heart, MapPinned, Users, type LucideIcon } from "lucide-react";
+import { CalendarClock, Church, Globe, HandHeart, Heart, LayoutGrid, Radio, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
 import { site } from "../content";
 import { SocialLink } from "./SocialLink";
 
 const nav: Array<[string, string, LucideIcon]> = [
-  ["/about", "Про нас", BookOpenText],
-  ["/contacts", "Графік і локації", MapPinned],
-  ["/visit", "Вперше у нас", CircleHelp],
-  ["/groups", "Домашні групи", MapPinned],
-  ["/online", "Онлайн", CirclePlay],
-  ["/team", "Служителі", Users],
+  ["/about", "Про нас", Church],
+  ["/contacts", "Графік і локації", CalendarClock],
+  ["/visit", "Вперше у нас", HandHeart],
+  ["/groups", "Домашні групи", UsersRound],
+  ["/online", "Онлайн", Radio],
+  ["/team", "Служителі", ShieldCheck],
   ["/europe", "Церкви в Європі", Globe],
-  ["/departments", "Департаменти", Building2],
+  ["/departments", "Департаменти", LayoutGrid],
 ];
 
 function NavLinks({ active }: { active?: string }) {
