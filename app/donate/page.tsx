@@ -6,7 +6,7 @@ import { breadcrumbFor, pageMetadata } from "../seo";
 
 export const metadata = pageMetadata({
   path: "/donate",
-  title: "Підтримати церкву",
+  title: "Підтримати служіння церкви",
   description: "Офіційні реквізити для добровільних пожертвувань християнській церкві Еммануїл у Чернівцях.",
 });
 

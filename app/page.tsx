@@ -135,7 +135,7 @@ export default function Home() {
         <section className="donation-band">
           <div>
             <p className="overline overline-light">Пожертвування</p>
-            <h2>Підтримати<br />церкву</h2>
+            <h2>Підтримати<br />служіння церкви</h2>
           </div>
           <div>
             <p>Дякуємо кожному, хто підтримує нас молитовно чи фінансово у розповсюдженні Божого слова.</p>
