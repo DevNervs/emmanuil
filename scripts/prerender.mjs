@@ -49,10 +49,11 @@ async function main() {
   const root = process.cwd();
   const out = join(root, "dist/pages");
 
+  await runBuild();
+
   await rm(out, { recursive: true, force: true });
   await mkdir(out, { recursive: true });
-
-  await runBuild();
+  await cp(join(root, "dist/client"), out, { recursive: true });
 
   const server = spawn("npm", ["run", "start"], {
     stdio: "pipe",
@@ -91,8 +92,6 @@ async function main() {
       await writeFile(targetFile, html);
       prerendered.push(pathname);
     }
-
-    await cp(join(root, "dist/client"), out, { recursive: true });
 
     console.log(`Prerendered ${prerendered.length} routes:`);
     for (const p of prerendered) console.log(`  - ${p}`);
