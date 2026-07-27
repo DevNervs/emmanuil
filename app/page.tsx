@@ -50,8 +50,7 @@ export default function Home() {
               <div className="hero-locations-grid">
                 {serviceLocations.map((loc) => (
                   <a key={loc.label} className="hero-location-card" href="/contacts">
-                    <strong>{loc.label}</strong>
-                    <span>{loc.streetAddress}</span>
+                    <strong>{loc.streetAddress}</strong>
                     <time>{loc.time}</time>
                   </a>
                 ))}
