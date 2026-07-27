@@ -9,13 +9,13 @@ import { SocialLink } from "./SocialLink";
 
 const nav: Array<[string, string, LucideIcon]> = [
   ["/about", "Про нас", Church],
-  ["/contacts", "Графік і локації", CalendarClock],
-  ["/visit", "Вперше у нас", HandHeart],
-  ["/groups", "Домашні групи", UsersRound],
+  ["/contacts", "Локації", CalendarClock],
+  ["/visit", "Вперше", HandHeart],
+  ["/groups", "Групи", UsersRound],
   ["/online", "Онлайн", Radio],
   ["/team", "Служителі", ShieldCheck],
-  ["/europe", "Церкви в Європі", Globe],
-  ["/departments", "Департаменти", LayoutGrid],
+  ["/europe", "Європа", Globe],
+  ["/departments", "Служіння", LayoutGrid],
 ];
 
 function NavLinks({ active }: { active?: string }) {

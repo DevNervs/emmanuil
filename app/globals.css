@@ -38,8 +38,8 @@ h1 em,h2 em { color:var(--wine); font-style:normal; font-weight:700; }
 .brand { display:block; width:clamp(14rem,28vw,22rem); }
 .brand img { width:100%; height:auto; }
 .desktop-header-actions { display:grid; grid-template-columns:1fr auto; align-items:center; gap:2rem; min-width:0; }
-.main-nav { display:flex; justify-content:center; gap:clamp(.25rem,.7vw,.85rem); }
-.main-nav a { display:flex; min-height:2.8rem; align-items:center; border-bottom:1px solid transparent; padding:.3rem .15rem; font-family:var(--serif); font-size:clamp(.7rem,.76vw,.8rem); font-weight:600; text-transform:uppercase; letter-spacing:.02em; white-space:nowrap; transition:color .18s ease-out,border-color .18s ease-out; }
+.main-nav { display:flex; justify-content:center; gap:clamp(.18rem,.55vw,.65rem); }
+.main-nav a { display:flex; min-height:2.8rem; align-items:center; border-bottom:1px solid transparent; padding:.3rem .1rem; font-family:var(--serif); font-size:clamp(.66rem,.72vw,.78rem); font-weight:600; text-transform:uppercase; letter-spacing:.02em; white-space:nowrap; transition:color .18s ease-out,border-color .18s ease-out; }
 .main-nav a:hover,.main-nav a[aria-current="page"] { border-color:var(--wine); color:var(--wine); }
 .donate-link,.button { display:inline-flex; min-height:3.5rem; align-items:center; justify-content:center; gap:.55rem; border:1px solid transparent; border-radius:10rem; padding:.9rem 1.7rem; font-size:1.05rem; font-weight:700; letter-spacing:.01em; transition:background .2s cubic-bezier(.2,.7,.2,1),color .2s ease-out,border-color .2s ease-out,box-shadow .2s ease-out,transform .18s cubic-bezier(.2,.7,.2,1),filter .18s ease-out; }
 .donate-link,.button-wine { background:var(--wine); color:var(--white); }
@@ -949,8 +949,8 @@ html.hdr-compact .site-header .header-layer-compact .brand { grid-column:2; just
 .site-header .header-layer-default .desktop-header-actions,
 html.hdr-compact .site-header .header-layer-default .desktop-header-actions { grid-column:2; grid-row:1; display:grid; grid-template-columns:1fr auto; align-items:center; gap:2rem; justify-self:stretch; }
 .header-layer-compact .compact-header-actions { grid-column:3; display:flex; align-items:center; justify-self:end; gap:.45rem; }
-.site-header .header-layer-default .main-nav { gap:clamp(.55rem,1.25vw,1.3rem); }
-.header-layer-default .main-nav a { width:auto!important; min-width:0!important; min-height:2.8rem!important; height:auto!important; flex:none!important; border:0!important; border-radius:0!important; padding:.3rem .15rem!important; background:transparent!important; box-shadow:none!important; }
+.site-header .header-layer-default .main-nav { gap:clamp(.18rem,.55vw,.65rem); }
+.header-layer-default .main-nav a { width:auto!important; min-width:0!important; min-height:2.8rem!important; height:auto!important; flex:none!important; border:0!important; border-radius:0!important; padding:.3rem .1rem!important; background:transparent!important; box-shadow:none!important; }
 .header-layer-default .nav-label { position:static!important; width:auto!important; max-width:none!important; height:auto!important; overflow:visible!important; clip:auto!important; opacity:1!important; }
 .header-layer-default .nav-icon { display:none!important; width:0!important; opacity:0!important; }
 .site-header .header-layer-default .header-donate { width:auto; min-width:0; height:auto; min-height:3.25rem; flex:none; aspect-ratio:auto; padding:.75rem 1.35rem; }
