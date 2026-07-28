@@ -39,7 +39,6 @@ export default function Home() {
         <section className="video-hero" aria-label="Християнська церква Еммануїл">
           <div className="video-hero-media">
             <HeroVideo />
-            <div className="video-grain-overlay" aria-hidden="true" />
           </div>
 
           <div className="video-hero-overlay">

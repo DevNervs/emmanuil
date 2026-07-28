@@ -80,12 +80,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .video-hero { position:relative; display:flex; flex-direction:column; justify-content:space-between; align-items:center; min-height:100svh; margin-top:-5.4rem; padding-top:5.4rem; overflow:hidden; background:#0c121a; color:#fff; }
 .video-hero-media { position:absolute; inset:0; z-index:0; }
 .hero-video-stage,.hero-video-poster,.hero-video-element { position:absolute; inset:0; width:100%; height:100%; }
-.hero-video-poster { background:url("/media/hero-worship-poster.jpg?v=calm-film-cut") center/cover no-repeat; filter:contrast(1.03) saturate(.92) brightness(.7) sepia(2%); }
+.hero-video-poster { background:url("/media/hero-worship-poster.jpg?v=organic-grain") center/cover no-repeat; filter:contrast(1.03) saturate(.92) brightness(.7) sepia(2%); }
 .video-hero-media video { filter:contrast(1.03) saturate(.92) brightness(.7) sepia(2%); }
 .hero-video-element { opacity:0; object-fit:cover; transform:translateZ(0); transition:opacity .42s ease-out; }
 .hero-video-stage.is-playing .hero-video-element { opacity:1; }
-.video-grain-overlay { position:absolute; inset:-8%; z-index:1; pointer-events:none; background-image:url("/media/film-grain.png?v=1"); background-repeat:repeat; background-size:56px 56px; image-rendering:pixelated; mix-blend-mode:overlay; opacity:.65; will-change:transform; animation:hero-grain-shift .22s steps(2,end) infinite; }
-@keyframes hero-grain-shift { 0% { transform:translate3d(-3%,-2%,0); } 25% { transform:translate3d(2%,3%,0); } 50% { transform:translate3d(3%,-1%,0); } 75% { transform:translate3d(-2%,2%,0); } 100% { transform:translate3d(-3%,-2%,0); } }
 .video-hero-overlay { position:relative; z-index:2; display:flex; flex-direction:column; justify-content:flex-start; align-items:center; width:100%; min-height:calc(100svh - 5.4rem); padding:clamp(1.2rem,2.5vw,2.5rem) clamp(1rem,4vw,4rem) clamp(2rem,4vw,3.5rem); text-align:center; box-sizing:border-box; }
 .hero-locations-bar { width:100%; max-width:1400px; margin-top:auto; padding:0; }
 

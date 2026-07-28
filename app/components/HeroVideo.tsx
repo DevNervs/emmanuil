@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const hlsSrc = "/media/hero-hls/playlist.m3u8?v=1";
-const fallbackSrc = "/media/hero-worship-loop.mp4?v=calm-film-cut";
-const posterSrc = "/media/hero-worship-poster.jpg?v=calm-film-cut";
+const hlsSrc = "/media/hero-hls-organic/playlist.m3u8";
+const fallbackSrc = "/media/hero-worship-loop.mp4?v=organic-grain";
+const posterSrc = "/media/hero-worship-poster.jpg?v=organic-grain";
 
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
