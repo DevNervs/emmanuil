@@ -27,7 +27,7 @@ export default function TeamPage() {
           image="/media/team-ministry.webp?v=q3"
           imageAlt="Служитель церкви Еммануїл звертається до громади"
         />
-        <section className="team-page-section">
+        <section data-header-theme="light" className="team-page-section">
           <div className="team-page-grid">
             {team.map((person, index) => (
               <article className="team-person" key={person.name}>

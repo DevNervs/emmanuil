@@ -18,7 +18,7 @@ export function NextService() {
     locationCount === 1 ? "1 локація" : `${locationCount} локації`;
 
   return (
-    <section className="home-now" aria-labelledby="home-next-title">
+    <section data-header-theme="light" className="home-now" aria-labelledby="home-next-title">
       <div className="home-now-heading">
         <div>
           <p className="overline">Найближче служіння</p>

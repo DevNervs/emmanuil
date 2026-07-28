@@ -101,8 +101,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:image" content={ogImage} />
-        <link rel="preload" href="/fonts/Moula.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/Unbounded-Medium.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Moula.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Unbounded-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/Unbounded-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var d=document.documentElement;d.classList.add("hdr-boot");if((window.scrollY||d.scrollTop)>=72)d.classList.add("hdr-compact");}catch(e){}})();`,

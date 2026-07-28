@@ -97,7 +97,7 @@ export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group
     }
   }
 
-  return <section className={launcherOnly ? "group-registration-launcher" : "groups-explorer"} id={launcherOnly ? undefined : "groups-map"}>
+  return <section data-header-theme="light" className={launcherOnly ? "group-registration-launcher" : "groups-explorer"} id={launcherOnly ? undefined : "groups-map"}>
     {launcherOnly ? (
       <button className="button button-wine" type="button" onClick={openRegistration}>Записатися на групу</button>
     ) : <>

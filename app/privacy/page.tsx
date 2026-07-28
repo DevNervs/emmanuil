@@ -26,7 +26,7 @@ export default function PrivacyPage() {
           text={<p>Ця сторінка пояснює, які дані передаються через форми сайту та для чого вони використовуються.</p>}
         />
         <article className="privacy-content">
-          <section>
+          <section data-header-theme="light">
             <span>01</span>
             <div>
               <h2>Які дані ми отримуємо</h2>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
               </p>
             </div>
           </section>
-          <section>
+          <section data-header-theme="light">
             <span>02</span>
             <div>
               <h2>Для чого потрібні дані</h2>
@@ -46,7 +46,7 @@ export default function PrivacyPage() {
               </p>
             </div>
           </section>
-          <section>
+          <section data-header-theme="light">
             <span>03</span>
             <div>
               <h2>Як передаються звернення</h2>
@@ -57,14 +57,14 @@ export default function PrivacyPage() {
               </p>
             </div>
           </section>
-          <section>
+          <section data-header-theme="light">
             <span>04</span>
             <div>
               <h2>Продаж і використання даних</h2>
               <p>Церква не продає дані, отримані через сайт, і не використовує їх для сторонньої реклами.</p>
             </div>
           </section>
-          <section>
+          <section data-header-theme="light">
             <span>05</span>
             <div>
               <h2>Запит на видалення</h2>

@@ -46,7 +46,7 @@ export default function ContactsPage() {
           locations={locations}
         />
 
-        <section className="contacts-layout">
+        <section data-header-theme="light" className="contacts-layout">
           <div className="contact-block">
             <h2>Наші контакти</h2>
             <address>
@@ -83,7 +83,7 @@ export default function ContactsPage() {
           </div>
         </section>
 
-        <section className="form-section">
+        <section data-header-theme="light" className="form-section">
           <div>
             <p className="overline">Написати нам</p>
             <h2>Контактна форма</h2>

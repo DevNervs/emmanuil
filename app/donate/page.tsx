@@ -31,7 +31,7 @@ export default function DonatePage() {
             Пожертвувати через ПриватБанк ↗
           </a>
         </PageIntro>
-        <section className="donation-section">
+        <section data-header-theme="light" className="donation-section">
           <div className="card-number">
             <span>Картка ПриватБанк</span>
             <strong>{donation.card}</strong>

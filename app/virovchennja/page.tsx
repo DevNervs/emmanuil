@@ -40,7 +40,7 @@ export default function VirobchennjaPage() {
             </>
           }
         />
-        <section className="doctrine-document" aria-label="PDF основ віровчення УЦХВЄ">
+        <section data-header-theme="light" className="doctrine-document" aria-label="PDF основ віровчення УЦХВЄ">
           <iframe
             className="doctrine-pdf"
             src="/media/osnovy_viry.pdf#view=FitH"

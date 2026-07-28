@@ -27,7 +27,7 @@ export default function OnlinePage() {
             </>
           }
         />
-        <section className="video-section">
+        <section data-header-theme="light" className="video-section">
           <LiveStream />
         </section>
       </main>

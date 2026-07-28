@@ -36,7 +36,7 @@ export default function Home() {
   return (
     <Page active="/">
       <main>
-        <section className="video-hero" aria-label="Християнська церква Еммануїл">
+        <section data-header-theme="dark" className="video-hero" aria-label="Християнська церква Еммануїл">
           <div className="video-hero-media">
             <HeroVideo />
           </div>
@@ -84,7 +84,7 @@ export default function Home() {
         </section>
 
         {announcement && (
-          <section className="announcement-bar">
+          <section data-header-theme="dark" className="announcement-bar">
             {announcement.href ? (
               <a href={announcement.href}>{announcement.text}</a>
             ) : (
@@ -94,7 +94,7 @@ export default function Home() {
         )}
 
         {/* Home Groups Section */}
-        <section className="home-season" aria-labelledby="home-season-title">
+        <section data-header-theme="light" className="home-season" aria-labelledby="home-season-title">
           <div className="home-season-copy">
             <p className="overline">{groupSeason.label}</p>
             <h2 id="home-season-title">{groupSeason.title}</h2>
@@ -123,7 +123,16 @@ export default function Home() {
               <div className="groups-carousel-track">
                 {[...carouselPhotos, ...carouselPhotos].map((src, idx) => (
                   <div className="groups-carousel-slide" key={idx}>
-                    <img src={src} alt="Домашня група Еммануїл" loading="lazy" decoding="async" />
+                    <img
+                      src={src}
+                      srcSet={`${src} 1200w, ${src.replace(".webp", "-800.webp")} 800w, ${src.replace(".webp", "-400.webp")} 400w`}
+                      sizes="(max-width: 1000px) 50vw, 18vw"
+                      width="1200"
+                      height="900"
+                      alt="Домашня група Еммануїл"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
                 ))}
               </div>
@@ -131,7 +140,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="first-visit-feature" aria-labelledby="home-expect-title">
+        <section data-header-theme="light" className="first-visit-feature" aria-labelledby="home-expect-title">
           <div>
             <p className="overline">Вперше в Еммануїл</p>
             <h2 id="home-expect-title">Що очікувати</h2>
@@ -145,7 +154,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="donation-band">
+        <section data-header-theme="dark" className="donation-band">
           <div>
             <p className="overline overline-light">Пожертвування</p>
             <h2>Підтримати<br />служіння церкви</h2>

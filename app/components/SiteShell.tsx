@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { useLayoutEffect, useState } from "react";
-import Link from "next/link";
 import { CalendarClock, Church, Globe, HandHeart, Heart, LayoutGrid, Radio, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
 import { site } from "../content";
 import { SocialLink } from "./SocialLink";
@@ -24,10 +23,13 @@ function NavLinks({ active }: { active?: string }) {
 
 export function Brand() {
   return (
+    // eslint-disable-next-line @next/next/no-html-link-for-pages
     <a className="brand" href="/" aria-label="Християнська церква Еммануїл Чернівці">
       <img
         className="brand-logo-dark"
-        src="/emmanuil-logo-brand.png?v=2"
+        src="/emmanuil-logo-brand.png"
+        srcSet="/emmanuil-logo-brand-720.png 720w, /emmanuil-logo-brand.png 5776w"
+        sizes="(max-width: 1000px) 14rem, 22rem"
         width="360"
         height="60"
         alt="Християнська церква Еммануїл Чернівці"
@@ -36,7 +38,9 @@ export function Brand() {
       />
       <img
         className="brand-logo-light"
-        src="/emmanuil-logo-brand-light.png?v=2"
+        src="/emmanuil-logo-brand-light.png"
+        srcSet="/emmanuil-logo-brand-light-720.png 720w, /emmanuil-logo-brand-light.png 5776w"
+        sizes="(max-width: 1000px) 14rem, 22rem"
         width="360"
         height="60"
         alt="Християнська церква Еммануїл Чернівці"
@@ -47,186 +51,51 @@ export function Brand() {
   );
 }
 
-function parseColor(color: string): { r: number; g: number; b: number; a: number } | null {
-  const match = color.match(/rgba?\(([^)]+)\)/);
-  if (!match) return null;
-  const parts = match[1].split(",").map((v) => parseFloat(v.trim()));
-  if (parts.length < 3 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1]) || !Number.isFinite(parts[2])) return null;
-  return { r: parts[0], g: parts[1], b: parts[2], a: Number.isFinite(parts[3]) ? parts[3] : 1 };
-}
-
-function relativeLuminance({ r, g, b }: { r: number; g: number; b: number }): number {
-  const [lr, lg, lb] = [r, g, b].map((v) => {
-    v /= 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
-}
-
-function colorLuminance(color: string): number {
-  const rgb = parseColor(color);
-  return rgb ? relativeLuminance(rgb) : 0.5;
-}
-
-function surfaceLuminance(el: Element): number {
-  let node: Element | null = el;
-  while (node && node !== document.body) {
-    const style = window.getComputedStyle(node);
-    if (style.backgroundImage !== "none") {
-      // Gradients and images cannot be sampled through computed styles. Their
-      // authored foreground color is the reliable contrast contract.
-      return colorLuminance(style.color) > 0.55 ? 0 : 1;
-    }
-    const background = parseColor(style.backgroundColor);
-    if (background && background.a >= 0.72) return relativeLuminance(background);
-    node = node.parentElement;
-  }
-  const bodyBackground = parseColor(window.getComputedStyle(document.body).backgroundColor);
-  return bodyBackground ? relativeLuminance(bodyBackground) : 1;
-}
-
-type MediaSample = {
-  capturedAt: number;
-  height: number;
-  pixels: Uint8ClampedArray;
-  width: number;
-};
-
-const mediaSamples = new WeakMap<HTMLImageElement | HTMLVideoElement, MediaSample>();
-let mediaSampleCanvas: HTMLCanvasElement | null = null;
-
-function getMediaSample(media: HTMLImageElement | HTMLVideoElement): MediaSample | null {
-  const isVideo = media instanceof HTMLVideoElement;
-  const sourceWidth = isVideo ? media.videoWidth : media.naturalWidth;
-  const sourceHeight = isVideo ? media.videoHeight : media.naturalHeight;
-  if (!sourceWidth || !sourceHeight) return null;
-
-  const now = performance.now();
-  const cached = mediaSamples.get(media);
-  if (cached && (!isVideo || now - cached.capturedAt < 400)) return cached;
-
-  try {
-    const canvas = mediaSampleCanvas ?? document.createElement("canvas");
-    mediaSampleCanvas = canvas;
-    canvas.width = 48;
-    canvas.height = 27;
-    const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (!context) return null;
-    context.drawImage(media, 0, 0, canvas.width, canvas.height);
-    const sample = {
-      capturedAt: now,
-      height: canvas.height,
-      pixels: context.getImageData(0, 0, canvas.width, canvas.height).data,
-      width: canvas.width,
-    };
-    mediaSamples.set(media, sample);
-    return sample;
-  } catch {
-    return null;
-  }
-}
-
-function mediaLuminanceAtPoint(
-  media: HTMLImageElement | HTMLVideoElement,
-  x: number,
-  y: number,
-): number | null {
-  const rect = media.getBoundingClientRect();
-  const sourceWidth = media instanceof HTMLImageElement ? media.naturalWidth : media.videoWidth;
-  const sourceHeight = media instanceof HTMLImageElement ? media.naturalHeight : media.videoHeight;
-  if (!sourceWidth || !sourceHeight || rect.width <= 0 || rect.height <= 0) return null;
-  const sample = getMediaSample(media);
-  if (!sample) return null;
-
-  const style = window.getComputedStyle(media);
-  const fit = style.objectFit || "fill";
-  let scaleX = rect.width / sourceWidth;
-  let scaleY = rect.height / sourceHeight;
-  let offsetX = 0;
-  let offsetY = 0;
-  if (fit === "cover" || fit === "contain") {
-    const scale = fit === "cover" ? Math.max(scaleX, scaleY) : Math.min(scaleX, scaleY);
-    scaleX = scale;
-    scaleY = scale;
-    offsetX = (rect.width - sourceWidth * scale) / 2;
-    offsetY = (rect.height - sourceHeight * scale) / 2;
-  }
-
-  const sourceX = Math.min(sourceWidth - 1, Math.max(0, (x - rect.left - offsetX) / scaleX));
-  const sourceY = Math.min(sourceHeight - 1, Math.max(0, (y - rect.top - offsetY) / scaleY));
-  const sampleX = Math.min(sample.width - 1, Math.max(0, Math.floor(sourceX / sourceWidth * sample.width)));
-  const sampleY = Math.min(sample.height - 1, Math.max(0, Math.floor(sourceY / sourceHeight * sample.height)));
-  const offset = (sampleY * sample.width + sampleX) * 4;
-  const r = sample.pixels[offset];
-  const g = sample.pixels[offset + 1];
-  const b = sample.pixels[offset + 2];
-  const a = sample.pixels[offset + 3];
-  return a < 184 ? null : relativeLuminance({ r, g, b });
-}
-
-function headerSampleXs(header: Element): number[] {
-  const compact = document.documentElement.classList.contains("hdr-compact");
-  const layer = header.querySelector(compact ? ".header-layer-compact" : ".header-layer-default");
-  const brand = layer?.querySelector(".brand");
-  const donate = layer?.querySelector(compact ? ".compact-donate" : ".header-donate");
-  if (!brand || !donate) return [];
-  const brandRect = brand.getBoundingClientRect();
-  const donateRect = donate.getBoundingClientRect();
-  const left = Math.max(0, brandRect.left);
-  const right = Math.min(window.innerWidth, donateRect.right);
-  if (right <= left) return [];
-  const sampleCount = 13;
-  return Array.from({ length: sampleCount }, (_, index) =>
-    Math.floor(left + (right - left) * (index / (sampleCount - 1))),
-  );
-}
-
-function luminanceAtPoint(header: Element, x: number, y: number): number | null {
-  const clampedX = Math.min(Math.max(0, Math.floor(x)), Math.max(0, window.innerWidth - 1));
-  const elements = document.elementsFromPoint(clampedX, y)
-    .filter((element) => !element.closest(".site-header"));
-  for (const element of elements) {
-    if (element instanceof HTMLImageElement || element instanceof HTMLVideoElement) {
-      const luminance = mediaLuminanceAtPoint(element, clampedX, y);
-      if (luminance !== null) return luminance;
-    }
-  }
-  for (const element of elements) {
-    return surfaceLuminance(element);
-  }
-  return null;
-}
-
-function getHeaderTheme(): "dark" | "light" {
-  const header = document.querySelector(".site-header");
-  if (!header) return "dark";
-  const rect = header.getBoundingClientRect();
-  const ys = [
-    Math.floor(rect.top + rect.height * 0.33),
-    Math.floor(rect.top + rect.height * 0.67),
-  ];
-  const points = headerSampleXs(header);
-  if (!points.length) points.push(Math.floor(window.innerWidth / 2));
-  let total = 0;
-  let count = 0;
-  for (const y of ys) {
-    for (const x of points) {
-      if (y < 0) continue;
-      const luminance = luminanceAtPoint(header, x, y);
-      if (luminance === null) continue;
-      total += luminance;
-      count++;
-    }
-  }
-  const average = count > 0 ? total / count : 0.5;
-  const current = document.documentElement.getAttribute("data-header-theme") === "light" ? "light" : "dark";
-  if (current === "dark" && average >= 0.6) return "light";
-  if (current === "light" && average <= 0.42) return "dark";
-  return current;
-}
-
 function applyHeaderTheme(next: "dark" | "light") {
   document.documentElement.setAttribute("data-header-theme", next);
+}
+
+function useHeaderTheme() {
+  useLayoutEffect(() => {
+    const headerOffset = 88;
+    const observed = new Set<Element>();
+    let active: "dark" | "light" = "dark";
+
+    const updateTheme = () => {
+      const candidates = Array.from(observed)
+        .map((el) => ({ el, rect: el.getBoundingClientRect() }))
+        .filter(({ rect }) => rect.top < headerOffset && rect.bottom > headerOffset);
+      if (!candidates.length) return;
+      candidates.sort((a, b) => a.rect.top - b.rect.top);
+      const theme = candidates[0].el.getAttribute("data-header-theme");
+      if ((theme === "dark" || theme === "light") && theme !== active) {
+        active = theme;
+        applyHeaderTheme(active);
+      }
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) observed.add(entry.target);
+        else observed.delete(entry.target);
+      }
+      updateTheme();
+    }, { rootMargin: `-${headerOffset}px 0px 0px 0px`, threshold: 0 });
+
+    const sections = document.querySelectorAll("[data-header-theme]");
+    sections.forEach((section) => observer.observe(section));
+    updateTheme();
+
+    const onChange = () => updateTheme();
+    window.addEventListener("scroll", onChange, { passive: true });
+    window.addEventListener("resize", onChange, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onChange);
+      window.removeEventListener("resize", onChange);
+    };
+  }, []);
 }
 
 /** Same-page # links: smooth scrollIntoView for Safari/Chrome; no wheel hijacking. */
@@ -285,32 +154,14 @@ function readHeaderCompact() {
 
 export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(false);
+  useHeaderTheme();
   useLayoutEffect(() => {
     let frame = 0;
-    let themeTimer = 0;
-    let lastThemeUpdate = 0;
-    const themeInterval = 160;
-    const current = readHeaderCompact();
-    applyHeaderCompact(current);
-    setCompact(current);
-    applyHeaderTheme(getHeaderTheme());
+    applyHeaderCompact(readHeaderCompact());
     const bootFrame = requestAnimationFrame(() => {
       requestAnimationFrame(() => document.documentElement.classList.remove("hdr-boot"));
     });
 
-    const updateTheme = () => {
-      themeTimer = 0;
-      lastThemeUpdate = performance.now();
-      applyHeaderTheme(getHeaderTheme());
-    };
-    const scheduleTheme = () => {
-      const remaining = themeInterval - (performance.now() - lastThemeUpdate);
-      if (remaining <= 0) {
-        updateTheme();
-      } else if (!themeTimer) {
-        themeTimer = window.setTimeout(updateTheme, remaining);
-      }
-    };
     const updateCompact = () => {
       frame = 0;
       const y = window.scrollY || document.documentElement.scrollTop;
@@ -321,30 +172,19 @@ export function SiteHeader({ active }: { active?: string }) {
         if (next !== prev) applyHeaderCompact(next);
         return next;
       });
-      scheduleTheme();
     };
     const onScroll = () => {
       if (frame) return;
       frame = window.requestAnimationFrame(updateCompact);
     };
-    const media = Array.from(document.querySelectorAll("img, video"));
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
-    window.addEventListener("load", onScroll, { passive: true });
-    for (const element of media) {
-      element.addEventListener(element instanceof HTMLVideoElement ? "loadeddata" : "load", onScroll, { passive: true });
-    }
     onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
-      window.removeEventListener("load", onScroll);
-      for (const element of media) {
-        element.removeEventListener(element instanceof HTMLVideoElement ? "loadeddata" : "load", onScroll);
-      }
       cancelAnimationFrame(bootFrame);
       if (frame) window.cancelAnimationFrame(frame);
-      if (themeTimer) window.clearTimeout(themeTimer);
     };
   }, [active]);
   return <>
@@ -399,7 +239,7 @@ export function Page({ children, active }: { children: ReactNode; active?: strin
 }
 
 export function PageIntro({ eyebrow, title, text, children, image, imageAlt = "", mediaClassName = "" }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; image?: string; imageAlt?: string; mediaClassName?: string }) {
-  return <section className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className={`page-intro-media ${mediaClassName}`.trim()}><img src={image} alt={imageAlt} fetchPriority="high" decoding="async" /></div> : null}</section>;
+  return <section data-header-theme="dark" className={`page-intro ${image ? "page-intro-visual" : ""}`}><div className="page-intro-copy">{eyebrow ? <p className="overline">{eyebrow}</p> : null}<h1>{title}</h1>{text ? <div className="intro-text">{text}</div> : null}{children}</div>{image ? <div className={`page-intro-media ${mediaClassName}`.trim()}><img src={image} alt={imageAlt} fetchPriority="high" decoding="async" /></div> : null}</section>;
 }
 
 export function SectionTitle({ kicker, title, text }: { kicker?: string; title: ReactNode; text?: ReactNode }) {

@@ -28,10 +28,10 @@ const beliefs = [
 
 export default function AboutPage() {
   return <Page active="/about"><main><JsonLd data={breadcrumbFor("/about", "Про церкву")} /><PageIntro eyebrow="Чернівці · Україна" title="Про церкву" text={<><h2>Спільнота для духовного зростання</h2><p>Церква Еммануїл — це спільнота, де люди можуть зростати духовно у поклонінні, учнівстві та спілкуванні.</p></>} image="/media/baptism-editorial-color.webp?v=q2" imageAlt="Учасники водного хрещення церкви Еммануїл" />
-    <section className="about-values"><div><span>01</span><h2>Поклоніння</h2></div><div><span>02</span><h2>Учнівство</h2></div><div><span>03</span><h2>Духовний ріст</h2></div></section>
-    <section className="about-team-preview"><div className="about-team-heading"><p className="overline">Служителі</p><h2>Команда церкви</h2><p>Познайомтеся зі служителями церкви Еммануїл.</p><a className="button button-wine" href="/team">Уся команда</a></div><div className="about-team-list">{team.slice(0, 3).map((person) => <article key={person.name}><img src={person.image} width="735" height="1024" alt={person.name} loading="lazy" decoding="async" /><div><h3>{person.name}</h3><p>{person.role}</p></div></article>)}</div></section>
+    <section data-header-theme="dark" className="about-values"><div><span>01</span><h2>Поклоніння</h2></div><div><span>02</span><h2>Учнівство</h2></div><div><span>03</span><h2>Духовний ріст</h2></div></section>
+    <section data-header-theme="light" className="about-team-preview"><div className="about-team-heading"><p className="overline">Служителі</p><h2>Команда церкви</h2><p>Познайомтеся зі служителями церкви Еммануїл.</p><a className="button button-wine" href="/team">Уся команда</a></div><div className="about-team-list">{team.slice(0, 3).map((person) => <article key={person.name}><img src={person.image} width="735" height="1024" alt={person.name} loading="lazy" decoding="async" /><div><h3>{person.name}</h3><p>{person.role}</p></div></article>)}</div></section>
     <BeliefsScroll beliefs={beliefs} />
-    <section className="about-doctrine-link" aria-labelledby="about-doctrine-title">
+    <section data-header-theme="dark" className="about-doctrine-link" aria-labelledby="about-doctrine-title">
       <div>
         <p className="overline">УЦХВЄ</p>
         <h2 id="about-doctrine-title">Основи віровчення союзу</h2>

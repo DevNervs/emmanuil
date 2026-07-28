@@ -31,7 +31,7 @@ export function InteractiveMap({ id, eyebrow, title, description, locations, dar
   const markerKey = location.coordinates ?? mapQuery;
 
   return (
-    <section id={id} className={`interactive-map ${dark ? "interactive-map-dark" : ""}`}>
+    <section id={id} data-header-theme={dark ? "dark" : "light"} className={`interactive-map ${dark ? "interactive-map-dark" : ""}`}>
       <div className="interactive-map-panel">
         <p className={`overline ${dark ? "overline-light" : ""}`}>{eyebrow}</p>
         <h2>{title}</h2>

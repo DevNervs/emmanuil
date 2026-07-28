@@ -37,7 +37,7 @@ export default function VisitPage() {
           </div>
         </PageIntro>
 
-        <section className="visit-steps" aria-labelledby="visit-expect-title">
+        <section data-header-theme="light" className="visit-steps" aria-labelledby="visit-expect-title">
           <div className="visit-steps-heading">
             <p className="overline">Ваш перший візит</p>
             <h2 id="visit-expect-title">Що вас чекає</h2>
@@ -67,7 +67,7 @@ export default function VisitPage() {
           </ol>
         </section>
 
-        <section className="visit-faq" id="visit-faq" aria-labelledby="visit-faq-title">
+        <section data-header-theme="light" className="visit-faq" id="visit-faq" aria-labelledby="visit-faq-title">
           <div className="visit-faq-heading">
             <p className="overline">Перед візитом</p>
             <h2 id="visit-faq-title">Практичний FAQ</h2>
@@ -90,7 +90,7 @@ export default function VisitPage() {
           </div>
         </section>
 
-        <section className="visit-help">
+        <section data-header-theme="light" className="visit-help">
           <div>
             <p className="overline">Готові прийти?</p>
             <h2>Оберіть локацію на карті</h2>
