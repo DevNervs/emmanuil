@@ -32,12 +32,11 @@ export const siteRoutes = [
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
 ];
 
-/** Canonical social share image (1200×630 JPEG in public/). Query busts Telegram/Facebook caches. */
-export const OG_SHARE_IMAGE_PATH = "/share-card.jpg";
-export const OG_SHARE_IMAGE_VERSION = "20260724";
+/** Canonical social share image (1200×630 JPEG in public/). A new physical filename busts messenger caches. */
+export const OG_SHARE_IMAGE_PATH = "/share-card-20260729.jpg";
 
 export function shareImageUrl(): string {
-  return absoluteUrl(`${OG_SHARE_IMAGE_PATH}?v=${OG_SHARE_IMAGE_VERSION}`);
+  return absoluteUrl(OG_SHARE_IMAGE_PATH);
 }
 
 function defaultOgImages() {

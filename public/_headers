@@ -20,6 +20,9 @@
 /share-card.jpg
   Cache-Control: public, max-age=3600
 
+/share-card-20260729.jpg
+  Cache-Control: public, max-age=3600
+
 /og-card.jpg
   Cache-Control: public, max-age=86400
 

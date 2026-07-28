@@ -38,6 +38,7 @@ yarn-error.log*
 
 # typescript
 next-env.d.ts
+tsconfig.tsbuildinfo
 /dist/
 /.wrangler/
 /.wrangler/state/
@@ -52,3 +53,4 @@ public/tmp-contact-opts/
 # generated static assets
 /public/sitemap.xml
 /public/robots.txt
+/public/_worker.js

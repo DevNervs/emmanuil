@@ -44,7 +44,7 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /emmanuil-logo-brand\.png/);
   assert.match(home, /favicon-emmanuil-dark-32\.png/);
   assert.match(home, /application\/ld\+json/);
-  assert.match(home, /emmanuil\.pages\.dev\/share-card\.jpg/);
+  assert.match(home, /emmanuil\.pages\.dev\/share-card-20260729\.jpg/);
   assert.match(home, /property="og:image"/);
   assert.match(home, /og:image:type" content="image\/jpeg"/);
   assert.match(home, /Церква Еммануїл у Чернівцях \| Християнська євангельська церква/);
@@ -138,7 +138,10 @@ test("ships every responsive home-group carousel image", async () => {
 
 test("keeps the mobile group application scrollable and group-first", async () => {
   const groupSource = await readFile(new URL("../app/components/GroupsExplorer.tsx", import.meta.url), "utf8");
+  const shellSource = await readFile(new URL("../app/components/SiteShell.tsx", import.meta.url), "utf8");
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(shellSource, /querySelectorAll\("#main-content \[data-header-theme\]"\)/);
+  assert.doesNotMatch(shellSource, /querySelectorAll\("\[data-header-theme\]"\)/);
   assert.ok(groupSource.indexOf('className="group-form-groups"') < groupSource.indexOf('className="group-form-contact-fields"'));
   assert.match(groupSource, /group\.address \|\| "Адресу уточнюйте у ведучого"/);
   assert.match(styles, /height:100dvh; max-height:100dvh; overflow-x:hidden; overflow-y:auto;/);

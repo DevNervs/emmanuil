@@ -82,7 +82,7 @@ function useHeaderTheme() {
       updateTheme();
     }, { rootMargin: `-${headerOffset}px 0px 0px 0px`, threshold: 0 });
 
-    const sections = document.querySelectorAll("[data-header-theme]");
+    const sections = document.querySelectorAll("#main-content [data-header-theme]");
     sections.forEach((section) => observer.observe(section));
     updateTheme();
 

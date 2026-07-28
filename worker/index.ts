@@ -1,7 +1,7 @@
-/** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { handleGroupRegistration } from "./groupRegistration";
+import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import { handleYouTubeLive } from "./youtubeLive";
 import type { Env } from "./env";
 
@@ -9,6 +9,8 @@ interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
   passThroughOnException(): void;
 }
+
+type RouteHandler = (request: Request, env: Env, ctx: ExecutionContext, url: URL) => Response | Promise<Response>;
 
 const LEGACY_REDIRECTS: Record<string, string> = {
   "/about-us": "/about",
@@ -23,22 +25,28 @@ function handleVinextImage(request: Request, env: Env) {
   return handleImageOptimization(request, {
     fetchAsset: (path) => env.ASSETS.fetch(new Request(new URL(path, request.url))),
     transformImage: async (body, { width, format, quality }) => {
-      const result = await env.IMAGES.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
+      const result = await env.IMAGES!.input(body).transform(width > 0 ? { width } : {}).output({ format, quality });
       return result.response();
     },
   }, allowedWidths);
 }
 
-type RouteHandler = (request: Request, env: Env, ctx: ExecutionContext, url: URL) => Response | Promise<Response>;
-
 const routes: { match: (pathname: string) => boolean; handler: RouteHandler }[] = [
   {
     match: (pathname) => pathname === "/api/group-registration",
-    handler: (request, env) => handleGroupRegistration(request, env ?? {}),
+    handler: (request, env) => handleGroupRegistration(request, env),
   },
   {
     match: (pathname) => pathname === "/api/youtube-live",
     handler: (request) => handleYouTubeLive(request),
+  },
+  {
+    match: (pathname) => pathname === "/api/telegram",
+    handler: (request, env) => handleTelegramWebhook(request, env),
+  },
+  {
+    match: (pathname) => pathname === "/api/setup-telegram",
+    handler: (request, env) => setupTelegramWebhook(request, env),
   },
   {
     match: (pathname) => pathname === "/_vinext/image",

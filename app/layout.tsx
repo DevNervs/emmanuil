@@ -95,12 +95,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="color-scheme" content="light only" />
         <meta name="darkreader-lock" />
         <link rel="image_src" href={ogImage} />
-        <meta property="og:image" content={ogImage} />
-        <meta property="og:image:secure_url" content={ogImage} />
-        <meta property="og:image:type" content="image/jpeg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:image" content={ogImage} />
         <link rel="preload" href="/fonts/Moula.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Unbounded-Medium.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/Unbounded-Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
