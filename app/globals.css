@@ -963,7 +963,8 @@ html[data-header-theme="light"] .compact-nav a,html[data-header-theme="light"] .
 .compact-nav .nav-icon { display:block!important; width:1.12rem!important; height:1.12rem; overflow:visible; opacity:1!important; transform:none!important; }
 .compact-nav a:hover { border-color:rgba(255,255,255,.45); background:rgba(255,255,255,.18); color:var(--header-fg); }
 html[data-header-theme="light"] .compact-nav a:hover { border-color:rgba(18,26,36,.35); background:rgba(18,26,36,.18); }
-.compact-nav a[aria-current="page"] { border-color:var(--header-fg); background:var(--header-fg); color:var(--header-active-icon); }
+.compact-nav a[aria-current="page"] { border-color:var(--header-fg); background:color-mix(in srgb,var(--header-fg) 12%,transparent); color:var(--header-fg); box-shadow:inset 0 0 0 1px var(--header-fg); }
+html[data-header-theme="light"] .compact-nav a[aria-current="page"] { border-color:var(--header-fg); background:color-mix(in srgb,var(--header-fg) 12%,transparent); color:var(--header-fg); }
 .compact-donate { border-color:rgba(255,255,255,.22); background:rgba(255,255,255,.06); color:var(--header-fg); }
 .compact-donate svg { width:1.2rem; height:1.2rem; }
 .compact-donate::after,

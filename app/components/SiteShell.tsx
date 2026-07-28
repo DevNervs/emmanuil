@@ -47,12 +47,12 @@ export function Brand() {
   );
 }
 
-function parseColor(color: string): { r: number; g: number; b: number } | null {
+function parseColor(color: string): { r: number; g: number; b: number; a: number } | null {
   const match = color.match(/rgba?\(([^)]+)\)/);
   if (!match) return null;
   const parts = match[1].split(",").map((v) => parseFloat(v.trim()));
   if (parts.length < 3 || !Number.isFinite(parts[0]) || !Number.isFinite(parts[1]) || !Number.isFinite(parts[2])) return null;
-  return { r: parts[0], g: parts[1], b: parts[2] };
+  return { r: parts[0], g: parts[1], b: parts[2], a: Number.isFinite(parts[3]) ? parts[3] : 1 };
 }
 
 function relativeLuminance({ r, g, b }: { r: number; g: number; b: number }): number {
@@ -68,15 +68,41 @@ function colorLuminance(color: string): number {
   return rgb ? relativeLuminance(rgb) : 0.5;
 }
 
-function sectionTextColor(el: Element): string {
-  const sectionTags = new Set(["section", "main", "article", "header", "footer"]);
+function surfaceLuminance(el: Element): number {
   let node: Element | null = el;
   while (node && node !== document.body) {
-    const tag = node.tagName.toLowerCase();
-    if (sectionTags.has(tag)) return window.getComputedStyle(node).color;
+    const style = window.getComputedStyle(node);
+    if (style.backgroundImage !== "none") {
+      // Gradients and images cannot be sampled through computed styles. Their
+      // authored foreground color is the reliable contrast contract.
+      return colorLuminance(style.color) > 0.55 ? 0 : 1;
+    }
+    const background = parseColor(style.backgroundColor);
+    if (background && background.a >= 0.72) return relativeLuminance(background);
     node = node.parentElement;
   }
-  return window.getComputedStyle(document.body).color;
+  const bodyBackground = parseColor(window.getComputedStyle(document.body).backgroundColor);
+  return bodyBackground ? relativeLuminance(bodyBackground) : 1;
+}
+
+function headerSampleXs(header: Element): number[] {
+  const compact = document.documentElement.classList.contains("hdr-compact");
+  const selectors = compact
+    ? [".header-layer-compact .brand", ".compact-nav", ".compact-donate"]
+    : [".header-layer-default .brand", ".main-nav-default", ".header-donate"];
+  const points: number[] = [];
+  for (const selector of selectors) {
+    const element = header.querySelector(selector);
+    if (!element) continue;
+    const rect = element.getBoundingClientRect();
+    if (rect.width <= 0) continue;
+    points.push(Math.floor(rect.left + rect.width / 2));
+    if (rect.width > 240) {
+      points.push(Math.floor(rect.left + rect.width * 0.25));
+      points.push(Math.floor(rect.left + rect.width * 0.75));
+    }
+  }
+  return points;
 }
 
 function getHeaderTheme(): "dark" | "light" {
@@ -84,12 +110,8 @@ function getHeaderTheme(): "dark" | "light" {
   if (!header) return "dark";
   const rect = header.getBoundingClientRect();
   const y = Math.floor(rect.top + rect.height / 2);
-  const w = window.innerWidth;
-  const points = [
-    Math.max(0, Math.floor(w * 0.15)),
-    Math.max(0, Math.floor(w * 0.5)),
-    Math.min(Math.max(0, w - 1), Math.floor(w * 0.85)),
-  ];
+  const points = headerSampleXs(header);
+  if (!points.length) points.push(Math.floor(window.innerWidth / 2));
   let total = 0;
   let count = 0;
   for (const x of points) {
@@ -97,13 +119,13 @@ function getHeaderTheme(): "dark" | "light" {
     const elements = document.elementsFromPoint(x, y);
     for (const el of elements) {
       if (el.closest(".site-header")) continue;
-      total += colorLuminance(sectionTextColor(el));
+      total += surfaceLuminance(el);
       count++;
       break;
     }
   }
   const average = count > 0 ? total / count : 0.5;
-  return average > 0.55 ? "dark" : "light";
+  return average > 0.55 ? "light" : "dark";
 }
 
 function applyHeaderTheme(next: "dark" | "light") {
