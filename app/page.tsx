@@ -38,8 +38,8 @@ export default function Home() {
         <section className="video-hero" aria-label="Християнська церква Еммануїл">
           <div className="video-hero-media">
             <video
-              src="/media/hero-worship-loop.mp4"
-              poster="/media/hero-worship-poster.jpg"
+              src="/media/hero-worship-loop.mp4?v=ensemble-start"
+              poster="/media/hero-worship-poster.jpg?v=ensemble-start"
               preload="auto"
               autoPlay
               muted
