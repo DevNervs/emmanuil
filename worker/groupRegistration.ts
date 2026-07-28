@@ -62,14 +62,15 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
     disable_web_page_preview: true,
     reply_markup: {
       inline_keyboard: [
-        [{ text: "Детальніше", callback_data: `app:${id}` }],
+        [{ text: "📋 Детальніше", callback_data: `app:${id}` }],
       ],
     },
   };
-  // If the admin chat is a private chat, show a delete button as well.
+  // If the admin chat is a private chat, show call and delete buttons as well.
   if (isAdmin(adminUserId, env)) {
-    (notificationPayload.reply_markup as { inline_keyboard: Array<Array<{ text: string; callback_data: string }>> }).inline_keyboard.push([
-      { text: "Видалити", callback_data: `delete:${id}` },
+    (notificationPayload.reply_markup as { inline_keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> }).inline_keyboard.push([
+      { text: "📞 Подзвонити", url: `tel:${phone.replace(/[^\d+]/g, "")}` },
+      { text: "🗑 Видалити", callback_data: `delete:${id}` },
     ]);
   }
   const response = await sendTelegramMessage(env, notificationPayload);
