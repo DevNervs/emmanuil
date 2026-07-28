@@ -38,16 +38,16 @@
 /fonts/*
   Cache-Control: public, max-age=31536000, immutable
 
-/media/hero-hls-adaptive/master.m3u8
+/media/hero-hls-grade2/master.m3u8
   Cache-Control: public, max-age=86400, stale-while-revalidate=31536000
 
-/media/hero-hls-adaptive/*/playlist.m3u8
+/media/hero-hls-grade2/*/playlist.m3u8
   Cache-Control: public, max-age=86400, stale-while-revalidate=31536000
 
-/media/hero-hls-adaptive/*/init.mp4
+/media/hero-hls-grade2/*/init.mp4
   Cache-Control: public, max-age=31536000, immutable
 
-/media/hero-hls-adaptive/*/segment-*.m4s
+/media/hero-hls-grade2/*/segment-*.m4s
   Cache-Control: public, max-age=31536000, immutable
 
 /media/hero-worship-loop.mp4

@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const hlsSrc = "/media/hero-hls-adaptive/master.m3u8";
-const fallbackSrc = "/media/hero-worship-loop.mp4?v=adaptive";
-const posterSrc = "/media/hero-worship-poster.jpg?v=adaptive";
+const hlsSrc = "/media/hero-hls-grade2/master.m3u8";
+const fallbackSrc = "/media/hero-worship-loop.mp4?v=grade2";
+const posterSrc = "/media/hero-worship-poster.jpg?v=grade2";
 const posterSrcSet =
-  "/media/hero-worship-poster-1200.webp?v=adaptive 1200w, /media/hero-worship-poster-1440.webp?v=adaptive 1440w, /media/hero-worship-poster.jpg?v=adaptive 1920w";
+  "/media/hero-worship-poster-800.webp?v=grade2 800w, /media/hero-worship-poster-1200.webp?v=grade2 1200w, /media/hero-worship-poster-1440.webp?v=grade2 1440w, /media/hero-worship-poster.jpg?v=grade2 1920w";
 
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
