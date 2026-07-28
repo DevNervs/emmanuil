@@ -38,6 +38,8 @@ export default function Home() {
           <div className="video-hero-media">
             <video
               src="/media/hero-worship-loop.mp4"
+              poster="/media/hero-worship-poster.jpg"
+              preload="auto"
               autoPlay
               muted
               loop
