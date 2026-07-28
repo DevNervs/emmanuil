@@ -10,12 +10,10 @@ const posterSrcSet =
 
 export function HeroVideo() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const posterRef = useRef<HTMLImageElement>(null);
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    const poster = posterRef.current;
     if (!video) return;
     let disposed = false;
     let hlsInstance: { destroy: () => void } | null = null;
@@ -89,41 +87,19 @@ export function HeroVideo() {
         .catch(enableFallback);
     };
 
-    if (poster) {
-      if (poster.complete) {
-        initHls();
-      } else {
-        const onLoad = () => {
-          if (!disposed) initHls();
-          poster.onload = null;
-          poster.onerror = null;
-        };
-        const onError = () => {
-          if (!disposed) initHls();
-          poster.onload = null;
-          poster.onerror = null;
-        };
-        poster.onload = onLoad;
-        poster.onerror = onError;
-      }
-    } else {
-      initHls();
-    }
+    // Start fetching the stream immediately and let the eager poster load in
+    // parallel. The poster remains visible until the video actually plays.
+    initHls();
 
     return () => {
       disposed = true;
       hlsInstance?.destroy();
-      if (poster) {
-        poster.onload = null;
-        poster.onerror = null;
-      }
     };
   }, []);
 
   return (
     <div className={`hero-video-stage${playing ? " is-playing" : ""}`}>
       <img
-        ref={posterRef}
         className="hero-video-poster"
         src={posterSrc}
         srcSet={posterSrcSet}
