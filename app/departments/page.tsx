@@ -12,7 +12,6 @@ export default function DepartmentsPage() {
     <Page active="/departments">
       <main className="placeholder-page">
         <section className="placeholder-content">
-          <span className="placeholder-badge">Бета</span>
           <p className="overline">Департаменти</p>
           <h1>Розділ в розробці</h1>
           <p>Інформація про департаменти та напрямки служіння церкви Еммануїл буде доступна найближчим часом.</p>
