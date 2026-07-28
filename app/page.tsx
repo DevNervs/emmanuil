@@ -28,9 +28,6 @@ const carouselPhotos = [
   "/media/homegroups/homegroup-gallery-13.webp",
   "/media/homegroups/homegroup-gallery-14.webp",
   "/media/homegroups/homegroup-gallery-15.webp",
-  "/media/homegroups/homegroup-gallery-16.webp",
-  "/media/homegroups/homegroup-gallery-17.webp",
-  "/media/homegroups/homegroup-gallery-18.webp",
 ];
 
 export default function Home() {
