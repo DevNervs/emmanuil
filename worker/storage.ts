@@ -24,9 +24,10 @@ export async function getApplication(
   kv: KVNamespace,
   id: string,
 ): Promise<GroupApplication | null> {
-  const { keys } = await kv.list<Record<string, unknown>>({ prefix: `${PREFIX}${id}` });
-  if (!keys.length) return null;
-  const value = await kv.get(keys[0].name);
+  const { keys } = await kv.list<{ id: string }>({ prefix: PREFIX });
+  const key = keys.find((k) => k.metadata?.id === id) ?? keys.find((k) => k.name.endsWith(`:${id}`));
+  if (!key) return null;
+  const value = await kv.get(key.name);
   if (!value) return null;
   return JSON.parse(value) as GroupApplication;
 }
@@ -90,6 +91,7 @@ export async function deleteApplication(
     await kv.delete(appKey(id, createdAt));
     return;
   }
-  const { keys } = await kv.list<Record<string, unknown>>({ prefix: `${PREFIX}${id}` });
-  if (keys.length) await kv.delete(keys[0].name);
+  const { keys } = await kv.list<{ id: string }>({ prefix: PREFIX });
+  const key = keys.find((k) => k.metadata?.id === id) ?? keys.find((k) => k.name.endsWith(`:${id}`));
+  if (key) await kv.delete(key.name);
 }
