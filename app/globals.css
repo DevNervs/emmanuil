@@ -250,6 +250,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 .home-groups-feature > div > p strong { color:var(--ink); }
 
 .page-intro { display:grid; min-height:34rem; grid-template-columns:1fr; max-width:1600px; margin:0 auto; background:var(--wine-dark); color:var(--white); }
+#main-content > main > .page-intro { margin-top:-5.4rem; padding-top:5.4rem; }
+#main-content > main.placeholder-page { margin-top:-5.4rem; padding-top:5.4rem; }
 .page-intro-visual { position:relative; grid-template-columns:.72fr 1.28fr; min-height:43rem; background:var(--ink); color:var(--white); }
 .page-intro-copy { display:flex; flex-direction:column; justify-content:center; padding:clamp(3rem,6vw,6rem) clamp(1rem,6vw,6rem); }
 .page-intro h1 { max-width:54rem; margin-bottom:1.5rem; font-size:clamp(4rem,7vw,7.6rem); line-height:.8; }
@@ -439,6 +441,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 
 @media (max-width:1000px) {
+  #main-content > main > .page-intro { margin-top:-4.8rem; padding-top:4.8rem; }
+  #main-content > main.placeholder-page { margin-top:-4.8rem; padding-top:4.8rem; }
   .desktop-header-actions { display:none; }
   .header-inner { grid-template-columns:1fr auto; gap:1rem; min-height:4.8rem; }
   .mobile-menu { display:block; position:relative; z-index:50; }
@@ -485,6 +489,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 
 @media (max-width:680px) {
+  #main-content > main > .page-intro { margin-top:-4.5rem; padding-top:4.5rem; }
+  #main-content > main.placeholder-page { margin-top:-4.5rem; padding-top:4.5rem; }
   .brand { width:min(14rem,62vw); }
   .photo-hero { min-height:min(72svh, 34rem); }
   .photo-hero-copy { padding:1.5rem 1.15rem 1.8rem; }
