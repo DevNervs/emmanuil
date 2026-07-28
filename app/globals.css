@@ -953,6 +953,16 @@ html.hdr-compact .site-header .header-layer-default .desktop-header-actions { gr
 .header-layer-compact .compact-header-actions { grid-column:3; display:flex; align-items:center; justify-self:end; gap:.45rem; }
 .site-header .header-layer-default .main-nav { gap:clamp(.12rem,.42vw,.5rem); }
 .header-layer-default .main-nav a { width:auto!important; min-width:0!important; min-height:2.55rem!important; height:auto!important; flex:none!important; border:0!important; border-radius:0!important; padding:.25rem .06rem!important; background:transparent!important; box-shadow:none!important; }
+.header-layer-default .main-nav a[aria-current="page"]::after {
+  content:""!important;
+  display:block!important;
+  position:absolute;
+  right:.06rem;
+  bottom:.12rem;
+  left:.06rem;
+  height:1px;
+  background:var(--gold);
+}
 .header-layer-default .nav-label { position:static!important; width:auto!important; max-width:none!important; height:auto!important; overflow:visible!important; clip:auto!important; opacity:1!important; }
 .header-layer-default .nav-icon { display:none!important; width:0!important; opacity:0!important; }
 .site-header .header-layer-default .header-donate { width:auto; min-width:0; height:auto; min-height:2.55rem; flex:none; aspect-ratio:auto; padding:.55rem 1.1rem; }
