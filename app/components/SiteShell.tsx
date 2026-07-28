@@ -85,47 +85,106 @@ function surfaceLuminance(el: Element): number {
   return bodyBackground ? relativeLuminance(bodyBackground) : 1;
 }
 
+function mediaLuminanceAtPoint(
+  media: HTMLImageElement | HTMLVideoElement,
+  x: number,
+  y: number,
+): number | null {
+  const rect = media.getBoundingClientRect();
+  const sourceWidth = media instanceof HTMLImageElement ? media.naturalWidth : media.videoWidth;
+  const sourceHeight = media instanceof HTMLImageElement ? media.naturalHeight : media.videoHeight;
+  if (!sourceWidth || !sourceHeight || rect.width <= 0 || rect.height <= 0) return null;
+
+  const style = window.getComputedStyle(media);
+  const fit = style.objectFit || "fill";
+  let scaleX = rect.width / sourceWidth;
+  let scaleY = rect.height / sourceHeight;
+  let offsetX = 0;
+  let offsetY = 0;
+  if (fit === "cover" || fit === "contain") {
+    const scale = fit === "cover" ? Math.max(scaleX, scaleY) : Math.min(scaleX, scaleY);
+    scaleX = scale;
+    scaleY = scale;
+    offsetX = (rect.width - sourceWidth * scale) / 2;
+    offsetY = (rect.height - sourceHeight * scale) / 2;
+  }
+
+  const sourceX = Math.min(sourceWidth - 1, Math.max(0, (x - rect.left - offsetX) / scaleX));
+  const sourceY = Math.min(sourceHeight - 1, Math.max(0, (y - rect.top - offsetY) / scaleY));
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return null;
+    context.drawImage(media, sourceX, sourceY, 1, 1, 0, 0, 1, 1);
+    const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
+    return a < 184 ? null : relativeLuminance({ r, g, b });
+  } catch {
+    return null;
+  }
+}
+
 function headerSampleXs(header: Element): number[] {
   const compact = document.documentElement.classList.contains("hdr-compact");
-  const selectors = compact
-    ? [".header-layer-compact .brand", ".compact-nav", ".compact-donate"]
-    : [".header-layer-default .brand", ".main-nav-default", ".header-donate"];
-  const points: number[] = [];
-  for (const selector of selectors) {
-    const element = header.querySelector(selector);
-    if (!element) continue;
-    const rect = element.getBoundingClientRect();
-    if (rect.width <= 0) continue;
-    points.push(Math.floor(rect.left + rect.width / 2));
-    if (rect.width > 240) {
-      points.push(Math.floor(rect.left + rect.width * 0.25));
-      points.push(Math.floor(rect.left + rect.width * 0.75));
+  const layer = header.querySelector(compact ? ".header-layer-compact" : ".header-layer-default");
+  const brand = layer?.querySelector(".brand");
+  const donate = layer?.querySelector(compact ? ".compact-donate" : ".header-donate");
+  if (!brand || !donate) return [];
+  const brandRect = brand.getBoundingClientRect();
+  const donateRect = donate.getBoundingClientRect();
+  const left = Math.max(0, brandRect.left);
+  const right = Math.min(window.innerWidth, donateRect.right);
+  if (right <= left) return [];
+  const sampleCount = 25;
+  return Array.from({ length: sampleCount }, (_, index) =>
+    Math.floor(left + (right - left) * (index / (sampleCount - 1))),
+  );
+}
+
+function luminanceAtPoint(header: Element, x: number, y: number): number | null {
+  const clampedX = Math.min(Math.max(0, Math.floor(x)), Math.max(0, window.innerWidth - 1));
+  const elements = document.elementsFromPoint(clampedX, y)
+    .filter((element) => !element.closest(".site-header"));
+  for (const element of elements) {
+    if (element instanceof HTMLImageElement || element instanceof HTMLVideoElement) {
+      const luminance = mediaLuminanceAtPoint(element, clampedX, y);
+      if (luminance !== null) return luminance;
     }
   }
-  return points;
+  for (const element of elements) {
+    return surfaceLuminance(element);
+  }
+  return null;
 }
 
 function getHeaderTheme(): "dark" | "light" {
   const header = document.querySelector(".site-header");
   if (!header) return "dark";
   const rect = header.getBoundingClientRect();
-  const y = Math.floor(rect.top + rect.height / 2);
+  const ys = [
+    Math.floor(rect.top + rect.height * 0.25),
+    Math.floor(rect.top + rect.height * 0.5),
+    Math.floor(rect.top + rect.height * 0.75),
+  ];
   const points = headerSampleXs(header);
   if (!points.length) points.push(Math.floor(window.innerWidth / 2));
   let total = 0;
   let count = 0;
-  for (const x of points) {
-    if (y < 0) continue;
-    const elements = document.elementsFromPoint(x, y);
-    for (const el of elements) {
-      if (el.closest(".site-header")) continue;
-      total += surfaceLuminance(el);
+  for (const y of ys) {
+    for (const x of points) {
+      if (y < 0) continue;
+      const luminance = luminanceAtPoint(header, x, y);
+      if (luminance === null) continue;
+      total += luminance;
       count++;
-      break;
     }
   }
   const average = count > 0 ? total / count : 0.5;
-  return average > 0.55 ? "light" : "dark";
+  const current = document.documentElement.getAttribute("data-header-theme") === "light" ? "light" : "dark";
+  if (current === "dark" && average >= 0.6) return "light";
+  if (current === "light" && average <= 0.42) return "dark";
+  return current;
 }
 
 function applyHeaderTheme(next: "dark" | "light") {
@@ -214,11 +273,21 @@ export function SiteHeader({ active }: { active?: string }) {
       if (frame) return;
       frame = window.requestAnimationFrame(update);
     };
+    const media = Array.from(document.querySelectorAll("img, video"));
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("load", onScroll, { passive: true });
+    for (const element of media) {
+      element.addEventListener(element instanceof HTMLVideoElement ? "loadeddata" : "load", onScroll, { passive: true });
+    }
+    onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", onScroll);
+      for (const element of media) {
+        element.removeEventListener(element instanceof HTMLVideoElement ? "loadeddata" : "load", onScroll);
+      }
       cancelAnimationFrame(bootFrame);
       if (frame) window.cancelAnimationFrame(frame);
     };
