@@ -58,9 +58,9 @@ html[data-header-theme="light"] .brand-logo-light { display:none; }
 .skip-link:focus { transform:translateY(0); }
 a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible { outline:3px solid #6a90b8; outline-offset:3px; }
 
-.overline { display:inline-flex; flex-direction:column; gap:.35rem; margin-bottom:1.25rem; color:var(--wine); font-size:.82rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase; }
+.overline { display:inline-flex; flex-direction:column; gap:.15rem; margin-bottom:1rem; color:var(--wine); font-size:.82rem; font-weight:800; letter-spacing:.2em; text-transform:uppercase; }
 .overline::before { content:none; }
-.overline::after { content:""; width:100%; height:2px; background:currentColor; border-radius:1px; }
+.overline::after { content:""; width:100%; height:1px; background:currentColor; }
 .overline-light { color:#fff; }
 .hero-actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:2rem; }
 
