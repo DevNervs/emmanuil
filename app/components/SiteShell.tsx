@@ -85,6 +85,47 @@ function surfaceLuminance(el: Element): number {
   return bodyBackground ? relativeLuminance(bodyBackground) : 1;
 }
 
+type MediaSample = {
+  capturedAt: number;
+  height: number;
+  pixels: Uint8ClampedArray;
+  width: number;
+};
+
+const mediaSamples = new WeakMap<HTMLImageElement | HTMLVideoElement, MediaSample>();
+let mediaSampleCanvas: HTMLCanvasElement | null = null;
+
+function getMediaSample(media: HTMLImageElement | HTMLVideoElement): MediaSample | null {
+  const isVideo = media instanceof HTMLVideoElement;
+  const sourceWidth = isVideo ? media.videoWidth : media.naturalWidth;
+  const sourceHeight = isVideo ? media.videoHeight : media.naturalHeight;
+  if (!sourceWidth || !sourceHeight) return null;
+
+  const now = performance.now();
+  const cached = mediaSamples.get(media);
+  if (cached && (!isVideo || now - cached.capturedAt < 400)) return cached;
+
+  try {
+    const canvas = mediaSampleCanvas ?? document.createElement("canvas");
+    mediaSampleCanvas = canvas;
+    canvas.width = 48;
+    canvas.height = 27;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return null;
+    context.drawImage(media, 0, 0, canvas.width, canvas.height);
+    const sample = {
+      capturedAt: now,
+      height: canvas.height,
+      pixels: context.getImageData(0, 0, canvas.width, canvas.height).data,
+      width: canvas.width,
+    };
+    mediaSamples.set(media, sample);
+    return sample;
+  } catch {
+    return null;
+  }
+}
+
 function mediaLuminanceAtPoint(
   media: HTMLImageElement | HTMLVideoElement,
   x: number,
@@ -94,6 +135,8 @@ function mediaLuminanceAtPoint(
   const sourceWidth = media instanceof HTMLImageElement ? media.naturalWidth : media.videoWidth;
   const sourceHeight = media instanceof HTMLImageElement ? media.naturalHeight : media.videoHeight;
   if (!sourceWidth || !sourceHeight || rect.width <= 0 || rect.height <= 0) return null;
+  const sample = getMediaSample(media);
+  if (!sample) return null;
 
   const style = window.getComputedStyle(media);
   const fit = style.objectFit || "fill";
@@ -111,18 +154,14 @@ function mediaLuminanceAtPoint(
 
   const sourceX = Math.min(sourceWidth - 1, Math.max(0, (x - rect.left - offsetX) / scaleX));
   const sourceY = Math.min(sourceHeight - 1, Math.max(0, (y - rect.top - offsetY) / scaleY));
-  try {
-    const canvas = document.createElement("canvas");
-    canvas.width = 1;
-    canvas.height = 1;
-    const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (!context) return null;
-    context.drawImage(media, sourceX, sourceY, 1, 1, 0, 0, 1, 1);
-    const [r, g, b, a] = context.getImageData(0, 0, 1, 1).data;
-    return a < 184 ? null : relativeLuminance({ r, g, b });
-  } catch {
-    return null;
-  }
+  const sampleX = Math.min(sample.width - 1, Math.max(0, Math.floor(sourceX / sourceWidth * sample.width)));
+  const sampleY = Math.min(sample.height - 1, Math.max(0, Math.floor(sourceY / sourceHeight * sample.height)));
+  const offset = (sampleY * sample.width + sampleX) * 4;
+  const r = sample.pixels[offset];
+  const g = sample.pixels[offset + 1];
+  const b = sample.pixels[offset + 2];
+  const a = sample.pixels[offset + 3];
+  return a < 184 ? null : relativeLuminance({ r, g, b });
 }
 
 function headerSampleXs(header: Element): number[] {
@@ -136,7 +175,7 @@ function headerSampleXs(header: Element): number[] {
   const left = Math.max(0, brandRect.left);
   const right = Math.min(window.innerWidth, donateRect.right);
   if (right <= left) return [];
-  const sampleCount = 25;
+  const sampleCount = 13;
   return Array.from({ length: sampleCount }, (_, index) =>
     Math.floor(left + (right - left) * (index / (sampleCount - 1))),
   );
@@ -163,9 +202,8 @@ function getHeaderTheme(): "dark" | "light" {
   if (!header) return "dark";
   const rect = header.getBoundingClientRect();
   const ys = [
-    Math.floor(rect.top + rect.height * 0.25),
-    Math.floor(rect.top + rect.height * 0.5),
-    Math.floor(rect.top + rect.height * 0.75),
+    Math.floor(rect.top + rect.height * 0.33),
+    Math.floor(rect.top + rect.height * 0.67),
   ];
   const points = headerSampleXs(header);
   if (!points.length) points.push(Math.floor(window.innerWidth / 2));
@@ -249,6 +287,9 @@ export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(false);
   useLayoutEffect(() => {
     let frame = 0;
+    let themeTimer = 0;
+    let lastThemeUpdate = 0;
+    const themeInterval = 160;
     const current = readHeaderCompact();
     applyHeaderCompact(current);
     setCompact(current);
@@ -257,7 +298,20 @@ export function SiteHeader({ active }: { active?: string }) {
       requestAnimationFrame(() => document.documentElement.classList.remove("hdr-boot"));
     });
 
-    const update = () => {
+    const updateTheme = () => {
+      themeTimer = 0;
+      lastThemeUpdate = performance.now();
+      applyHeaderTheme(getHeaderTheme());
+    };
+    const scheduleTheme = () => {
+      const remaining = themeInterval - (performance.now() - lastThemeUpdate);
+      if (remaining <= 0) {
+        updateTheme();
+      } else if (!themeTimer) {
+        themeTimer = window.setTimeout(updateTheme, remaining);
+      }
+    };
+    const updateCompact = () => {
       frame = 0;
       const y = window.scrollY || document.documentElement.scrollTop;
       setCompact((prev) => {
@@ -267,11 +321,11 @@ export function SiteHeader({ active }: { active?: string }) {
         if (next !== prev) applyHeaderCompact(next);
         return next;
       });
-      applyHeaderTheme(getHeaderTheme());
+      scheduleTheme();
     };
     const onScroll = () => {
       if (frame) return;
-      frame = window.requestAnimationFrame(update);
+      frame = window.requestAnimationFrame(updateCompact);
     };
     const media = Array.from(document.querySelectorAll("img, video"));
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -290,6 +344,7 @@ export function SiteHeader({ active }: { active?: string }) {
       }
       cancelAnimationFrame(bootFrame);
       if (frame) window.cancelAnimationFrame(frame);
+      if (themeTimer) window.clearTimeout(themeTimer);
     };
   }, [active]);
   return <>

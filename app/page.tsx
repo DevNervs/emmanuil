@@ -1,5 +1,6 @@
 import { Page } from "./components/SiteShell";
 import { GroupsExplorer } from "./components/GroupsExplorer";
+import { HeroVideo } from "./components/HeroVideo";
 import { announcement, groupSeason, groups, serviceLocations } from "./content";
 import { pageMetadata } from "./seo";
 
@@ -37,16 +38,7 @@ export default function Home() {
       <main>
         <section className="video-hero" aria-label="Християнська церква Еммануїл">
           <div className="video-hero-media">
-            <video
-              src="/media/hero-worship-loop.mp4?v=calm-film-cut"
-              poster="/media/hero-worship-poster.jpg?v=calm-film-cut"
-              preload="auto"
-              autoPlay
-              muted
-              loop
-              playsInline
-              aria-hidden="true"
-            />
+            <HeroVideo />
             <div className="video-grain-overlay" aria-hidden="true" />
           </div>
 

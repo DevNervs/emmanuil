@@ -31,3 +31,15 @@
 
 /og-editorial.png
   Cache-Control: public, max-age=86400
+
+/media/hero-hls/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/media/hero-worship-loop.mp4
+  Cache-Control: public, max-age=31536000, immutable
+
+/media/hero-worship-poster.jpg
+  Cache-Control: public, max-age=31536000, immutable
+
+/media/film-grain.png
+  Cache-Control: public, max-age=31536000, immutable

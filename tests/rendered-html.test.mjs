@@ -26,6 +26,7 @@ test("renders every public route in Ukrainian", async () => {
 test("ships brand, SEO and primary interactions", async () => {
   const home = await (await render("/")).text();
   assert.match(home, /video-hero/);
+  assert.match(home, /\/media\/hero-hls\/playlist\.m3u8/);
   assert.match(home, /\/media\/hero-worship-loop\.mp4/);
   assert.doesNotMatch(home, /<h1>Еммануїл<\/h1>/);
   assert.match(home, /hero-locations-grid/);
