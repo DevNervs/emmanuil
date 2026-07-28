@@ -1054,7 +1054,7 @@ html[data-header-theme="light"] .compact-nav a:hover { border-color:rgba(18,26,3
 .home-visit-compact .home-visit-grid p { margin:.55rem 0 0; }
 .home-season { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0; max-width:1600px; margin:0 auto; background:var(--paper); }
 .home-season-copy { display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-start; padding:clamp(2.5rem,5vw,5rem) clamp(1rem,5vw,5rem); background:var(--paper); }
-.home-season-copy .first-visit-actions { margin-top:auto; }
+.home-season-copy .first-visit-actions { margin-top:1.25rem; }
 .home-season-copy h2 { margin-bottom:.85rem; font-size:clamp(3.2rem,5.5vw,5.8rem); line-height:.92; }
 .home-season-period { margin:0 0 1.1rem; color:var(--wine); font-size:.78rem; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
 .home-season-copy > p:not(.overline):not(.home-season-period) { max-width:34rem; margin-bottom:0; color:var(--muted); line-height:1.7; }
