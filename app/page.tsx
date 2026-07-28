@@ -125,8 +125,6 @@ export default function Home() {
                   <div className="groups-carousel-slide" key={idx}>
                     <img
                       src={src}
-                      srcSet={`${src} 1200w, ${src.replace(".webp", "-800.webp")} 800w, ${src.replace(".webp", "-400.webp")} 400w`}
-                      sizes="(max-width: 1000px) 50vw, 18vw"
                       width="1200"
                       height="900"
                       alt="Домашня група Еммануїл"

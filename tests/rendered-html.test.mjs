@@ -60,6 +60,7 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /Що очікувати/);
   assert.match(home, /Підтримати/);
   assert.match(home, /groups-carousel/);
+  assert.doesNotMatch(home, /homegroup-gallery-\d{2}-(?:400|800)\.webp/);
   assert.doesNotMatch(home, /Архів подій/);
   assert.doesNotMatch(home, /href="\/news"/);
   assert.doesNotMatch(home, /Зробіть перший крок спокійно/);
