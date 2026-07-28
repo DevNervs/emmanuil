@@ -1060,7 +1060,7 @@ html[data-header-theme="light"] .compact-nav a:hover { border-color:rgba(18,26,3
 .home-season-copy > p:not(.overline):not(.home-season-period) { max-width:34rem; margin-bottom:0; color:var(--muted); line-height:1.7; }
 .home-season-media-wrapper { display:flex; flex-direction:column; justify-content:flex-start; gap:1.5rem; padding:0 0 clamp(3rem,6vw,6rem) 0; align-self:stretch; max-width:100%; width:100%; box-sizing:border-box; }
 .home-season-media { margin:0; width:100%; flex:1 1 auto; min-height:0; border-radius:.85rem; overflow:hidden; }
-.home-season-media img { width:100%; height:100%; object-fit:cover; object-position:center 42%; filter:var(--photo-filter); border-radius:.85rem; }
+.home-season-media img { width:100%; height:100%; object-fit:contain; object-position:center; filter:var(--photo-filter); border-radius:.85rem; }
 
 /* Continuous Infinite Marquee Auto-Scroll */
 @keyframes marquee-slide {
