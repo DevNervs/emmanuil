@@ -4,8 +4,8 @@ export const groupSeason = {
   title: "Домашні групи",
   period: "Зустрічі протягом тижня",
   summary: "Відкрита реєстрація: 15 груп у Чернівцях, Садгорі та Сторожинці. Оберіть напрямок, день і локацію.",
-  ctaLabel: "Обрати групу",
-  ctaHref: "/groups",
+  ctaLabel: "Записатися на групу",
+  ctaHref: "/groups?register=1",
 };
 
 export type Group = { title: string; leaders: string; time: string; address?: string; coordinates?: string };

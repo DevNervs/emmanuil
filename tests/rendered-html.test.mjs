@@ -278,7 +278,7 @@ test("rejects more than two selected groups without sending a real request", asy
   const request = new Request("http://localhost/api/group-registration", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: "Тестовий користувач", telegram: "@test", groups: [0, 1, 2], startedAt: Date.now() - 5_000 }),
+    body: JSON.stringify({ name: "Тестовий користувач", phone: "0669509977", groups: [0, 1, 2], startedAt: Date.now() - 5_000 }),
   });
   const response = await handleGroupRegistration(request, {});
   assert.equal(response.status, 400);
@@ -295,11 +295,11 @@ test("sends a valid group application through a mocked Telegram request", async 
     const request = new Request("http://localhost/api/group-registration", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "Тест Мобільний", telegram: "@mobile_test", groups: [7, 8], startedAt: Date.now() - 5_000 }),
+      body: JSON.stringify({ name: "Тест Мобільний", phone: "+380669509977", groups: [7, 8], startedAt: Date.now() - 5_000 }),
     });
     const response = await handleGroupRegistration(request, { TELEGRAM_BOT_TOKEN: "test-token", TELEGRAM_ADMIN_CHAT_ID: "test-chat" });
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { message: "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram." });
+    assert.deepEqual(await response.json(), { message: "Заявку надіслано. Адміністратор зв’яжеться з вами." });
     assert.equal(telegramRequest.url, "https://api.telegram.org/bottest-token/sendMessage");
     const payload = JSON.parse(telegramRequest.init.body);
     assert.equal(payload.chat_id, "test-chat");

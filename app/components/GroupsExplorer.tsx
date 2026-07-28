@@ -16,11 +16,22 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
   const [formOpen, setFormOpen] = useState(false);
   const [chosenGroups, setChosenGroups] = useState<number[]>([]);
   const [name, setName] = useState("");
-  const [telegram, setTelegram] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitMessage, setSubmitMessage] = useState("");
   const closeButton = useRef<HTMLButtonElement>(null);
   const startedAt = useRef(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("register") === "1") {
+      openRegistration();
+      const url = new URL(window.location.href);
+      url.searchParams.delete("register");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
   const days = [
     ...Array.from(new Set(groups.map((group) => group.time.split(",")[0]).filter(Boolean)))
       .sort((first, second) => weekdayOrder.indexOf(first) - weekdayOrder.indexOf(second)),
@@ -71,14 +82,14 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
       const response = await fetch("/api/group-registration", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ name, telegram, groups: chosenGroups, website: data.get("website"), startedAt: startedAt.current }),
+        body: JSON.stringify({ name, phone, groups: chosenGroups, website: data.get("website"), startedAt: startedAt.current }),
       });
       const result = await response.json() as { message?: string };
       if (!response.ok) throw new Error(result.message || "Не вдалося надіслати заявку.");
       setSubmitState("sent");
-      setSubmitMessage(result.message || "Заявку надіслано. Адміністратор зв’яжеться з вами у Telegram.");
+      setSubmitMessage(result.message || "Заявку надіслано. Адміністратор зв’яжеться з вами.");
       setName("");
-      setTelegram("");
+      setPhone("");
       setChosenGroups([]);
     } catch (error) {
       setSubmitState("error");
@@ -112,7 +123,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
           <aside className="group-form-intro">
             <p className="overline overline-light">Домашні групи</p>
             <h2 id="group-form-title">Знайдіть<br />своїх людей</h2>
-            <p>Заповніть коротку анкету. Після надсилання адміністратор зв’яжеться з вами у Telegram та підтвердить участь.</p>
+            <p>Заповніть коротку анкету. Після надсилання адміністратор зв’яжеться з вами та підтвердить участь.</p>
             <div><span>01</span><b>Ваші контакти</b></div><div><span>02</span><b>До двох груп</b></div><div><span>03</span><b>Підтвердження</b></div>
           </aside>
           {submitState === "sent" ? <div className="group-form-success"><span><Check aria-hidden="true" /></span><p className="overline">Заявку прийнято</p><h3>Дякуємо!</h3><p>{submitMessage}</p><button className="button button-wine" type="button" onClick={() => setFormOpen(false)}>Готово</button></div> :
@@ -125,7 +136,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
             })}</div></fieldset>
             <div className="group-form-contact-fields">
               <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
-              <label className="group-form-field"><span>Ваш Telegram *</span><input value={telegram} onChange={(event) => setTelegram(event.target.value)} name="telegram" autoComplete="tel" minLength={3} maxLength={80} placeholder="@username або номер телефону" required /><small>Вкажіть нік із символом @ або номер, прив’язаний до Telegram.</small></label>
+              <label className="group-form-field"><span>Номер телефону *</span><input value={phone} onChange={(event) => setPhone(event.target.value)} name="phone" type="tel" autoComplete="tel" minLength={9} maxLength={20} placeholder="066 950 99 77" required /><small>Вкажіть номер, за яким адміністратор зможе з вами зв’язатися.</small></label>
             </div>
             <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі, та приймаю <a href="/privacy" target="_blank" rel="noreferrer">політику конфіденційності</a>.</span></label>
             <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
