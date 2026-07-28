@@ -927,6 +927,14 @@ html.hdr-compact .site-header {
     0 14px 36px rgba(18,26,36,.12),
     0 3px 10px rgba(18,26,36,.05);
 }
+html.hdr-compact[data-header-theme="dark"] .site-header {
+  background:rgba(12,18,26,.46);
+  border-bottom:1px solid rgba(255,255,255,.11);
+}
+html.hdr-compact[data-header-theme="light"] .site-header {
+  background:rgba(246,246,246,.58);
+  border-bottom:1px solid rgba(18,26,36,.1);
+}
 html.hdr-compact .site-header::after { height:4.05rem; opacity:.28; }
 .header-inner { position:relative; z-index:1; display:block; height:5.4rem; min-height:0; max-width:1600px; margin:0 auto; padding:0 clamp(1rem,4vw,4rem); pointer-events:auto; transition:height .28s cubic-bezier(.22,.75,.2,1); }
 html.hdr-compact .site-header .header-inner { height:4.05rem; min-height:0; }
