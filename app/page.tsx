@@ -64,8 +64,18 @@ export default function Home() {
               </div>
               <div className="hero-locations-grid">
                 {serviceLocations.map((loc) => (
-                  <a key={loc.label} className="hero-location-card" href="/contacts">
+                  <a
+                    key={loc.label}
+                    className="hero-location-card"
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(loc.coordinates)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Прокласти маршрут у Google Maps: ${loc.address}`}
+                  >
                     <strong>{loc.streetAddress}</strong>
+                    {loc.addressLocality !== "Чернівці" && (
+                      <span className="hero-location-city">м. {loc.addressLocality}</span>
+                    )}
                     <time>{loc.time}</time>
                   </a>
                 ))}

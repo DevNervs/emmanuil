@@ -30,6 +30,9 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /\/media\/hero-worship-loop\.mp4/);
   assert.doesNotMatch(home, /<h1>Еммануїл<\/h1>/);
   assert.match(home, /hero-locations-grid/);
+  assert.match(home, /google\.com\/maps\/dir\/\?api=1&amp;destination=48\.278415%2C25\.919215/);
+  assert.match(home, /Прокласти маршрут у Google Maps/);
+  assert.match(home, /м\. Сторожинець/);
   assert.match(home, /Існуємо, щоб ви дізналися про Бога більше/);
   assert.match(home, /hero-locations-bar/);
   assert.doesNotMatch(home, /Наші церкви та графік служінь/);
