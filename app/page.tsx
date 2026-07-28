@@ -13,12 +13,24 @@ export const metadata = pageMetadata({
 });
 
 const carouselPhotos = [
-  "/media/homegroup-how.webp?v=q2",
-  "/media/home-group.webp?v=q2",
-  "/media/about-community.webp",
-  "/media/contacts-church-hall.webp",
-  "/media/jatva-2024.webp",
-  "/media/visit-worship.webp",
+  "/media/homegroups/homegroup-gallery-01.webp",
+  "/media/homegroups/homegroup-gallery-02.webp",
+  "/media/homegroups/homegroup-gallery-03.webp",
+  "/media/homegroups/homegroup-gallery-04.webp",
+  "/media/homegroups/homegroup-gallery-05.webp",
+  "/media/homegroups/homegroup-gallery-06.webp",
+  "/media/homegroups/homegroup-gallery-07.webp",
+  "/media/homegroups/homegroup-gallery-08.webp",
+  "/media/homegroups/homegroup-gallery-09.webp",
+  "/media/homegroups/homegroup-gallery-10.webp",
+  "/media/homegroups/homegroup-gallery-11.webp",
+  "/media/homegroups/homegroup-gallery-12.webp",
+  "/media/homegroups/homegroup-gallery-13.webp",
+  "/media/homegroups/homegroup-gallery-14.webp",
+  "/media/homegroups/homegroup-gallery-15.webp",
+  "/media/homegroups/homegroup-gallery-16.webp",
+  "/media/homegroups/homegroup-gallery-17.webp",
+  "/media/homegroups/homegroup-gallery-18.webp",
 ];
 
 export default function Home() {
