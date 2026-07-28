@@ -53,10 +53,11 @@ export function HeroVideo() {
             return;
           }
           const hls = new Hls({
-            backBufferLength: 2,
-            maxBufferLength: 4,
-            maxMaxBufferLength: 6,
-            startFragPrefetch: false,
+            backBufferLength: 45,
+            maxBufferLength: 45,
+            maxMaxBufferLength: 45,
+            maxBufferSize: 100_000_000,
+            startFragPrefetch: true,
             capLevelToPlayerSize: false,
             startLevel: 0,
             abrEwmaDefaultEstimate: 1_500_000,
@@ -139,7 +140,7 @@ export function HeroVideo() {
         className="hero-video-element"
         data-stream-src={hlsSrc}
         data-fallback-src={fallbackSrc}
-        preload="none"
+        preload="auto"
         autoPlay
         muted
         loop

@@ -113,7 +113,8 @@ export default function Home() {
                 width="1440"
                 height="729"
                 alt="Домашні групи церкви Еммануїл"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="low"
                 decoding="async"
               />
             </figure>
@@ -128,7 +129,8 @@ export default function Home() {
                       width="1200"
                       height="900"
                       alt="Домашня група Еммануїл"
-                      loading="lazy"
+                      loading="eager"
+                      fetchPriority="low"
                       decoding="async"
                     />
                   </div>

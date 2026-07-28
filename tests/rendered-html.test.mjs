@@ -27,6 +27,7 @@ test("ships brand, SEO and primary interactions", async () => {
   const home = await (await render("/")).text();
   assert.match(home, /video-hero/);
   assert.match(home, /data-stream-src="\/media\/hero-hls-grade2\/master\.m3u8"/);
+  assert.match(home, /preload="auto"/);
   assert.match(home, /\/media\/hero-worship-loop\.mp4/);
   assert.doesNotMatch(home, /video-grain-overlay/);
   assert.doesNotMatch(home, /film-grain\.png/);
@@ -61,6 +62,7 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /Підтримати/);
   assert.match(home, /groups-carousel/);
   assert.doesNotMatch(home, /homegroup-gallery-\d{2}-(?:400|800)\.webp/);
+  assert.match(home, /homegroup-gallery-01\.webp[^>]*loading="eager"[^>]*fetchPriority="low"/);
   assert.doesNotMatch(home, /Архів подій/);
   assert.doesNotMatch(home, /href="\/news"/);
   assert.doesNotMatch(home, /Зробіть перший крок спокійно/);
