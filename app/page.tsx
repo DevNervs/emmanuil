@@ -105,9 +105,9 @@ export default function Home() {
           <div className="home-season-media-wrapper">
             <figure className="home-season-media">
               <img
-                src="/media/homegroup-how.webp?v=q2"
+                src="/media/homegroup-how-home.webp?v=q2"
                 width="1440"
-                height="1440"
+                height="729"
                 alt="Домашні групи церкви Еммануїл"
                 loading="lazy"
                 decoding="async"
