@@ -9,6 +9,7 @@ const localBindingConfig = {
   compatibility_flags: ["nodejs_compat"],
   d1_databases: [],
   r2_buckets: [],
+  kv_namespaces: [{ binding: "GROUP_APPLICATIONS" }],
 };
 
 export default defineConfig(async () => {
