@@ -1052,14 +1052,15 @@ html[data-header-theme="light"] .compact-nav a:hover { border-color:rgba(18,26,3
 .home-visit-compact .home-visit-heading { display:grid; grid-template-columns:auto 1fr auto; align-items:end; gap:1rem 1.5rem; }
 .home-visit-compact .home-visit-grid article { min-height:11.5rem; }
 .home-visit-compact .home-visit-grid p { margin:.55rem 0 0; }
-.home-season { display:grid; grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr); gap:0; max-width:1600px; margin:0 auto; background:var(--paper); }
-.home-season-copy { display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding:clamp(3rem,6vw,6rem) clamp(1rem,5vw,5rem); background:var(--paper); }
+.home-season { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:0; max-width:1600px; margin:0 auto; background:var(--paper); }
+.home-season-copy { display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-start; padding:clamp(3rem,6vw,6rem) clamp(1rem,5vw,5rem); background:var(--paper); }
+.home-season-copy .first-visit-actions { margin-top:auto; }
 .home-season-copy h2 { margin-bottom:.85rem; font-size:clamp(3.2rem,5.5vw,5.8rem); line-height:.92; }
 .home-season-period { margin:0 0 1.1rem; color:var(--wine); font-size:.78rem; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
 .home-season-copy > p:not(.overline):not(.home-season-period) { max-width:34rem; margin-bottom:0; color:var(--muted); line-height:1.7; }
-.home-season-media-wrapper { display:flex; flex-direction:column; justify-content:center; gap:1.5rem; padding:clamp(2rem,4vw,4rem); align-self:stretch; max-width:100%; width:100%; box-sizing:border-box; }
-.home-season-media { margin:0; width:100%; flex:1 1 55%; min-height:18rem; max-height:32rem; border-radius:.85rem; overflow:hidden; }
-.home-season-media img { width:100%; height:100%; max-height:32rem; object-fit:cover; object-position:center 42%; filter:var(--photo-filter); border-radius:.85rem; }
+.home-season-media-wrapper { display:flex; flex-direction:column; justify-content:flex-start; gap:1.5rem; padding:0 0 clamp(3rem,6vw,6rem) 0; align-self:stretch; max-width:100%; width:100%; box-sizing:border-box; }
+.home-season-media { margin:0; width:100%; flex:1 1 auto; min-height:0; border-radius:.85rem; overflow:hidden; }
+.home-season-media img { width:100%; height:100%; object-fit:cover; object-position:center 42%; filter:var(--photo-filter); border-radius:.85rem; }
 
 /* Continuous Infinite Marquee Auto-Scroll */
 @keyframes marquee-slide {
@@ -1204,6 +1205,7 @@ html[data-header-theme="light"] .compact-nav a:hover { border-color:rgba(18,26,3
   .page-intro-visual { grid-template-columns:1fr; min-height:0; }
   .page-intro-media { min-height:30rem; }
   .first-visit-feature,.home-online-section,.home-connect,.home-season,.home-live,.about-team-preview,.visit-steps,.visit-help { grid-template-columns:1fr; }
+  .home-season-media-wrapper { padding-top:clamp(3rem,6vw,6rem); }
   .home-visit-compact .home-visit-heading,.home-now-heading { grid-template-columns:1fr; }
   .home-connect-media { min-height:26rem; }
   .visit-location-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
