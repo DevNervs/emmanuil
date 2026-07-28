@@ -122,6 +122,17 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(departments, /Департаменти/);
 });
 
+test("ships every responsive home-group carousel image", async () => {
+  for (let index = 1; index <= 15; index += 1) {
+    const number = String(index).padStart(2, "0");
+    for (const suffix of ["", "-800", "-400"]) {
+      const imagePath = `../public/media/homegroups/homegroup-gallery-${number}${suffix}.webp`;
+      const image = await readFile(new URL(imagePath, import.meta.url));
+      assert.ok(image.length > 0, imagePath);
+    }
+  }
+});
+
 test("keeps the mobile group application scrollable and group-first", async () => {
   const groupSource = await readFile(new URL("../app/components/GroupsExplorer.tsx", import.meta.url), "utf8");
   const styles = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
