@@ -9,7 +9,7 @@ import type { Group } from "../content";
 type SubmitState = "idle" | "sending" | "sent" | "error";
 const weekdayOrder = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
 
-export function GroupsExplorer({ groups }: { groups: Group[] }) {
+export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group[]; launcherOnly?: boolean }) {
   const [query, setQuery] = useState("");
   const [day, setDay] = useState("Усі дні");
   const [selected, setSelected] = useState(0);
@@ -19,7 +19,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
   const [phone, setPhone] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitMessage, setSubmitMessage] = useState("");
-  const closeButton = useRef<HTMLButtonElement>(null);
+  const dialog = useRef<HTMLDivElement>(null);
   const startedAt = useRef(0);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
     if (!formOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    closeButton.current?.focus();
+    dialog.current?.focus({ preventScroll: true });
     return () => { document.body.style.overflow = previousOverflow; };
   }, [formOpen]);
 
@@ -97,7 +97,10 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
     }
   }
 
-  return <section className="groups-explorer" id="groups-map">
+  return <section className={launcherOnly ? "group-registration-launcher" : "groups-explorer"} id={launcherOnly ? undefined : "groups-map"}>
+    {launcherOnly ? (
+      <button className="button button-wine" type="button" onClick={openRegistration}>Записатися на групу</button>
+    ) : <>
     <div className="groups-explorer-head"><div><p className="overline overline-light">Місця зустрічей</p><h2>Домашні групи</h2></div><p>Знайдіть групу за днем, назвою, ведучим або адресою та відкрийте точний маршрут.</p></div>
     <button className="groups-register-cta" type="button" onClick={openRegistration}>
       <span><b>Записатися на домашню групу</b><small>Оберіть одну або дві групи — адміністратор зв’яжеться з вами у Telegram</small></span>
@@ -115,11 +118,12 @@ export function GroupsExplorer({ groups }: { groups: Group[] }) {
         {active?.coordinates ? <><div className="group-map-info"><div><span>Обрана група</span><strong>{active.title}</strong><small>{active.address}</small></div><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.coordinates)}`} target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div><iframe key={active.coordinates} src={`https://www.google.com/maps?q=${encodeURIComponent(active.coordinates)}&z=17&output=embed`} title={`${active.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></> : <div className="map-unavailable"><strong>{active?.title}</strong><p>Адресу цієї групи потрібно уточнити у ведучого.</p></div>}
       </div>
     </div>
+    </>}
 
     {formOpen && typeof document !== "undefined" ? createPortal(
       <div className="group-form-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFormOpen(false); }} onKeyDown={(event) => { if (event.key === "Escape") setFormOpen(false); }}>
-        <div className="group-form-dialog" role="dialog" aria-modal="true" aria-labelledby="group-form-title">
-          <button ref={closeButton} className="group-form-close" type="button" onClick={() => setFormOpen(false)} aria-label="Закрити анкету"><X aria-hidden="true" /></button>
+        <div ref={dialog} className="group-form-dialog" role="dialog" aria-modal="true" aria-labelledby="group-form-title" tabIndex={-1}>
+          <button className="group-form-close" type="button" onClick={() => setFormOpen(false)} aria-label="Закрити анкету"><X aria-hidden="true" /></button>
           <aside className="group-form-intro">
             <p className="overline overline-light">Домашні групи</p>
             <h2 id="group-form-title">Знайдіть<br />своїх людей</h2>

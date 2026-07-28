@@ -1,4 +1,5 @@
 import { Page } from "./components/SiteShell";
+import { GroupsExplorer } from "./components/GroupsExplorer";
 import { announcement, groupSeason, groups, serviceLocations } from "./content";
 import { pageMetadata } from "./seo";
 
@@ -99,7 +100,7 @@ export default function Home() {
             <p className="home-season-period">{groupSeason.period} · {groups.length} груп</p>
             <p>{groupSeason.summary}</p>
             <div className="first-visit-actions">
-              <a className="button button-wine" href={groupSeason.ctaHref}>{groupSeason.ctaLabel}</a>
+              <GroupsExplorer groups={groups} launcherOnly />
               <a className="inline-link" href="/groups">Розклад груп</a>
             </div>
           </div>

@@ -729,6 +729,8 @@ body { background:var(--paper); font-size:16px; }
 
 .group-form-backdrop { position:fixed; z-index:90; inset:0; display:grid; place-items:center; background:rgba(12,18,26,.76); padding:clamp(.75rem,3vw,2.5rem); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); overscroll-behavior:contain; }
 .group-form-dialog { position:relative; display:grid; grid-template-columns:minmax(20rem,.9fr) minmax(0,1.1fr); width:min(1180px,100%); height:min(880px,92vh); max-height:min(880px,92vh); overflow:hidden; border:1px solid rgba(255,255,255,.18); border-radius:1.15rem; background:var(--white); box-shadow:0 40px 120px rgba(0,0,0,.42); color:var(--ink); }
+.group-form-dialog:focus { outline:none; }
+.group-registration-launcher { display:contents; }
 .group-form-close { position:absolute; z-index:3; top:1rem; right:1rem; display:grid; width:2.75rem; height:2.75rem; place-items:center; border:1px solid rgba(18,26,36,.13); border-radius:50%; background:rgba(255,255,255,.82); color:var(--wine-dark); cursor:pointer; }
 .group-form-close svg { width:1.15rem; }
 .group-form-intro { position:relative; overflow:hidden; background:radial-gradient(circle at 10% 90%,#2a5580 0,transparent 18rem),linear-gradient(145deg,#122a44,#0c1e36); padding:clamp(2.5rem,5vw,5rem) clamp(2rem,3.5vw,3.6rem) clamp(2.5rem,5vw,5rem) clamp(1.6rem,3vw,3.2rem); color:#fff; }
