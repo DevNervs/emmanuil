@@ -69,6 +69,9 @@ async function main() {
     const sitemap = await fetchText("http://localhost:3000/sitemap.xml");
     await writeFile(join(out, "sitemap.xml"), sitemap);
     const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/gi)].map((m) => m[1]);
+    if (!locs.includes("http://localhost:3000/admin")) {
+      locs.push("http://localhost:3000/admin");
+    }
 
     const robots = await fetchText("http://localhost:3000/robots.txt");
     await writeFile(join(out, "robots.txt"), robots);
