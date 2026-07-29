@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useLayoutEffect, useState } from "react";
 import { CalendarClock, Church, Globe, HandHeart, Heart, LayoutGrid, Radio, ShieldCheck, UsersRound, type LucideIcon } from "lucide-react";
 import { site } from "../content";
+import { SiteConfigProvider } from "./SiteConfig";
 import { SocialLink } from "./SocialLink";
 
 const nav: Array<[string, string, LucideIcon]> = [
@@ -235,7 +236,14 @@ export function Footer() {
 
 export function Page({ children, active }: { children: ReactNode; active?: string }) {
   useSmoothHashLinks();
-  return <><a className="skip-link" href="#main-content">Перейти до вмісту</a><SiteHeader active={active} /><div id="main-content" tabIndex={-1}>{children}</div><Footer /></>;
+  return (
+    <SiteConfigProvider>
+      <a className="skip-link" href="#main-content">Перейти до вмісту</a>
+      <SiteHeader active={active} />
+      <div id="main-content" tabIndex={-1}>{children}</div>
+      <Footer />
+    </SiteConfigProvider>
+  );
 }
 
 export function PageIntro({ eyebrow, title, text, children, image, imageAlt = "", mediaClassName = "" }: { eyebrow?: string; title: ReactNode; text?: ReactNode; children?: ReactNode; image?: string; imageAlt?: string; mediaClassName?: string }) {

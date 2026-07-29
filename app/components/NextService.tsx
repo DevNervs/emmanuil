@@ -2,16 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { getNextService, serviceLocations, type NextServiceSlot } from "../content";
+import { useSiteConfig } from "./SiteConfig";
 
 export function NextService() {
-  const [slot, setSlot] = useState<NextServiceSlot>(() => getNextService());
+  const { config } = useSiteConfig();
+  const [slot, setSlot] = useState<NextServiceSlot>(() =>
+    getNextService(undefined, config.serviceLocations ?? serviceLocations),
+  );
 
   useEffect(() => {
-    const tick = () => setSlot(getNextService());
+    const tick = () => setSlot(getNextService(undefined, config.serviceLocations ?? serviceLocations));
     tick();
     const id = window.setInterval(tick, 60_000);
     return () => window.clearInterval(id);
-  }, []);
+  }, [config.serviceLocations]);
 
   const locationCount = slot.locations.length;
   const locationPhrase =

@@ -8,6 +8,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Copy,
   Download,
   FileText,
@@ -17,12 +18,15 @@ import {
   Plus,
   Save,
   Search,
+  Settings,
   Shield,
   Trash2,
   Users,
   X,
 } from "lucide-react";
+import { LogsPanel } from "./LogsPanel";
 import { MapPicker, MapPickerValue } from "./MapPicker";
+import { SiteConfigEditor } from "./SiteConfigEditor";
 
 type Group = {
   id: number;
@@ -96,8 +100,8 @@ async function api<T>(
 
 export function AdminClient() {
   const [auth, setAuth] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"groups" | "apps" | "admins">("groups");
-  const [message, setMessage] = useState("");
+  const [tab, setTab] = useState<"groups" | "apps" | "admins" | "site" | "logs">("groups");
+  const [toasts, setToasts] = useState<{ id: number; text: string; error: boolean }[]>([]);
   const [password, setPassword] = useState("");
 
   const [groups, setGroups] = useState<Group[]>([]);
@@ -130,8 +134,10 @@ export function AdminClient() {
   }, [auth, tab, appOffset]);
 
   function show(msg: string) {
-    setMessage(msg);
-    setTimeout(() => setMessage(""), 4000);
+    const id = Date.now();
+    const error = msg.includes("Помилка") || msg.toLowerCase().includes("error");
+    setToasts((prev) => [...prev, { id, text: msg, error }]);
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   }
 
   async function checkAuth() {
@@ -373,13 +379,39 @@ export function AdminClient() {
     }
   }
 
-  const isError =
-    message.includes("Помилка") || message.toLowerCase().includes("error");
-
   const inputClass =
     "w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]";
   const inputErrorClass =
     "w-full rounded-lg border border-red-400 bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200";
+
+  function ToastContainer() {
+    if (!toasts.length) return null;
+    return (
+      <div className="fixed bottom-4 right-4 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className={`rounded-xl border px-4 py-3 text-sm shadow-lg ${
+              t.error
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-[var(--wine)]/20 bg-[var(--rose)] text-[var(--wine-dark)]"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span>{t.text}</span>
+              <button
+                onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+                className="shrink-0 text-[var(--muted)] hover:text-[var(--ink)]"
+                aria-label="Закрити"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (auth === null) {
     return (
@@ -391,45 +423,36 @@ export function AdminClient() {
 
   if (!auth) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[var(--paper)] p-6 font-[var(--sans)] text-[var(--ink)]">
-        <div className="w-full max-w-md rounded-2xl border border-[var(--line)] bg-white p-8 shadow-lg">
-          <h1 className="mb-2 text-center font-[var(--serif)] text-2xl font-semibold uppercase tracking-widest text-[var(--wine)]">
-            Адміністрація
-          </h1>
-          <p className="mb-6 text-center text-sm text-[var(--muted)]">
-            Увійдіть, щоб продовжити
-          </p>
+      <>
+        <main className="flex min-h-screen items-center justify-center bg-[var(--paper)] p-6 font-[var(--sans)] text-[var(--ink)]">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--line)] bg-white p-8 shadow-lg">
+            <h1 className="mb-2 text-center font-[var(--serif)] text-2xl font-semibold uppercase tracking-widest text-[var(--wine)]">
+              Адміністрація
+            </h1>
+            <p className="mb-6 text-center text-sm text-[var(--muted)]">
+              Увійдіть, щоб продовжити
+            </p>
 
-          {message && (
-            <div
-              className={`mb-4 rounded-lg border px-4 py-3 text-sm ${
-                isError
-                  ? "border-red-200 bg-red-50 text-red-700"
-                  : "border-[var(--line)] bg-[var(--rose)] text-[var(--wine-dark)]"
-              }`}
-            >
-              {message}
-            </div>
-          )}
-
-          <form onSubmit={login} className="space-y-4">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Пароль"
-              className={inputClass}
-              required
-            />
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-[var(--wine)] p-3 font-[var(--serif)] text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[var(--wine-dark)]"
-            >
-              Увійти
-            </button>
-          </form>
-        </div>
-      </main>
+            <form onSubmit={login} className="space-y-4">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Пароль"
+                className={inputClass}
+                required
+              />
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-[var(--wine)] p-3 font-[var(--serif)] text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[var(--wine-dark)]"
+              >
+                Увійти
+              </button>
+            </form>
+          </div>
+        </main>
+        <ToastContainer />
+      </>
     );
   }
 
@@ -437,6 +460,8 @@ export function AdminClient() {
     { key: "groups" as const, label: "Групи", icon: Users },
     { key: "apps" as const, label: "Заявки", icon: FileText },
     { key: "admins" as const, label: "Адміни", icon: Shield },
+    { key: "site" as const, label: "Сайт", icon: Settings },
+    { key: "logs" as const, label: "Логи", icon: Clock },
   ];
 
   return (
@@ -487,18 +512,6 @@ export function AdminClient() {
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-8">
-          {message && (
-            <div
-              className={`mb-5 rounded-lg border px-4 py-3 text-sm ${
-                isError
-                  ? "border-red-200 bg-red-50 text-red-700"
-                  : "border-[var(--wine)]/20 bg-[var(--rose)] text-[var(--wine-dark)]"
-              }`}
-            >
-              {message}
-            </div>
-          )}
-
           {tab === "groups" && (
             <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -831,7 +844,12 @@ export function AdminClient() {
               </div>
             </section>
           )}
+
+          {tab === "site" && <SiteConfigEditor />}
+
+          {tab === "logs" && <LogsPanel />}
         </main>
+        <ToastContainer />
       </div>
 
       {editingGroup && (

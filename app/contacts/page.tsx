@@ -2,8 +2,8 @@ import { JsonLd } from "../components/JsonLd";
 import { Page, PageIntro } from "../components/SiteShell";
 import { SocialLink } from "../components/SocialLink";
 import { ContactForm } from "../components/InteractionTools";
-import { InteractiveMap } from "../components/InteractiveMap";
-import { serviceLocations, site } from "../content";
+import { ContactMap } from "../components/ContactMap";
+import { site } from "../content";
 import { breadcrumbFor, pageMetadata } from "../seo";
 
 export const metadata = pageMetadata({
@@ -13,11 +13,6 @@ export const metadata = pageMetadata({
     "Адреси та карта церкви Еммануїл: Криворучка, Кобилянська, Садгора, Сторожинець. Телефони, маршрути Google Maps і контактна форма.",
   ogTitle: "Локації церкви Еммануїл у Чернівцях",
 });
-
-const locations = [
-  ...serviceLocations.map((location) => ({ ...location, mapQuery: location.address })),
-  { label: "Реабілітаційний центр", address: "с. Великий Кучурів, Чернівецька обл.", mapQuery: "Великий Кучурів, Чернівецький район, Чернівецька область, Україна", coordinates: "48.21543,25.910825", mapsUrl: "https://maps.app.goo.gl/C65CdZUqP8ChXojk8" },
-];
 
 export default function ContactsPage() {
   return (
@@ -38,13 +33,7 @@ export default function ContactsPage() {
           </div>
         </PageIntro>
 
-        <InteractiveMap
-          id="contacts-map"
-          eyebrow="Місцезнаходження"
-          title="Знайти нас на карті"
-          description="Оберіть потрібну адресу в Чернівцях або Чернівецькій області. Для кожної точки можна одразу відкрити точний маршрут."
-          locations={locations}
-        />
+        <ContactMap />
 
         <section data-header-theme="light" className="contacts-layout">
           <div className="contact-block">

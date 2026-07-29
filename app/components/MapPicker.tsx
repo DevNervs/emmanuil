@@ -39,6 +39,12 @@ function formatAddress(feature: any): string {
   return parts.join(", ") || p.name || "";
 }
 
+const pinSvg =
+  `<svg width="28" height="42" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));">` +
+  `<path d="M12 0C5.373 0 0 5.373 0 12c0 9 12 20 12 20s12-11 12-20c0-6.627-5.373-12-12-12Z" fill="#8B2635"/>` +
+  `<circle cx="12" cy="12" r="5" fill="white"/>` +
+  `</svg>`;
+
 export function MapPicker({
   initialAddress = "",
   initialCoordinates = "",
@@ -51,8 +57,9 @@ export function MapPicker({
 
   const [address, setAddress] = useState(initialAddress);
   const [coordinates, setCoordinates] = useState(initialCoordinates);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialAddress);
   const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<any[]>([]);
 
   const defaultCenter: [number, number] = [48.2864, 25.9392];
 
@@ -72,6 +79,21 @@ export function MapPicker({
     } catch {
       // ignore reverse-geocoding errors
     }
+  };
+
+  const applyFeature = (feature: any, map?: any, m?: any) => {
+    const [lon, lat] = feature.geometry.coordinates;
+    if (map && m) {
+      m.setLatLng([lat, lon]);
+      map.setView([lat, lon], 16);
+    }
+    setCoordinates(formatCoords(lat, lon));
+    const addr = formatAddress(feature);
+    if (addr) {
+      setAddress(addr);
+      setQuery(addr);
+    }
+    setResults([]);
   };
 
   useEffect(() => {
@@ -94,7 +116,14 @@ export function MapPicker({
         maxZoom: 19,
       }).addTo(map);
 
-      const m = L.marker(center, { draggable: true }).addTo(map);
+      const pinIcon = L.divIcon({
+        className: "",
+        html: pinSvg,
+        iconSize: [28, 42],
+        iconAnchor: [14, 42],
+      });
+
+      const m = L.marker(center, { icon: pinIcon, draggable: true }).addTo(map);
       marker.current = m;
 
       map.on("click", async (e: any) => {
@@ -126,22 +155,18 @@ export function MapPicker({
     if (!q) return;
 
     setLoading(true);
+    setResults([]);
     try {
       const res = await fetch(
-        `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`,
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6`,
       );
       if (!res.ok) throw new Error("geocoding failed");
       const data = await res.json();
-      const feature = data.features?.[0];
-      if (feature) {
-        const [lon, lat] = feature.geometry.coordinates;
-        if (leafletMap.current && marker.current) {
-          marker.current.setLatLng([lat, lon]);
-          leafletMap.current.setView([lat, lon], 16);
-        }
-        setCoordinates(formatCoords(lat, lon));
-        const addr = formatAddress(feature);
-        if (addr) setAddress(addr);
+      const list = data.features || [];
+      if (list.length === 1) {
+        applyFeature(list[0], leafletMap.current, marker.current);
+      } else {
+        setResults(list);
       }
     } catch {
       // ignore search errors
@@ -160,7 +185,7 @@ export function MapPicker({
       <div className="flex w-full max-w-4xl flex-col rounded-2xl border border-[var(--line)] bg-white p-4 shadow-xl">
         <form
           onSubmit={handleSearch}
-          className="mb-3 flex flex-wrap items-end gap-2"
+          className="mb-2 flex flex-wrap items-end gap-2"
         >
           <input
             type="text"
@@ -177,6 +202,21 @@ export function MapPicker({
             {loading ? "Пошук..." : "Знайти"}
           </button>
         </form>
+
+        {results.length > 0 && (
+          <div className="mb-2 max-h-32 overflow-y-auto rounded-lg border border-[var(--line)] bg-[var(--paper)]">
+            {results.map((feature, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => applyFeature(feature, leafletMap.current, marker.current)}
+                className="w-full border-b border-[var(--line)] px-3 py-2 text-left text-sm text-[var(--ink)] transition-colors last:border-0 hover:bg-[var(--rose)]"
+              >
+                {formatAddress(feature)}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div
           ref={mapRef}

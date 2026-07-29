@@ -1,5 +1,6 @@
 import {
   addAdmin,
+  addLog,
   archiveCurrentSeason,
   countApplications,
   deleteApplication,
@@ -7,6 +8,7 @@ import {
   getAdmins,
   getCurrentGroups,
   getCurrentSeason,
+  getLogs,
   getSeasons,
   getSiteConfig,
   listApplications,
@@ -140,6 +142,7 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
         showOnHome: Boolean(g.showOnHome),
       })).filter((g) => g.title);
       await setCurrentGroups(kv, groups);
+      await addLog(kv, "groups_updated", `${groups.length} груп`);
       return withCors(json({ groups }), request);
     }
     return withCors(json({ message: "Method not allowed" }, 405), request);
@@ -229,6 +232,7 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
       const body = await parseJson<{ userId?: number }>(request);
       if (!body?.userId || !Number.isInteger(body.userId)) return withCors(badRequest("Invalid userId"), request);
       await addAdmin(kv, body.userId);
+      await addLog(kv, "admin_added", `ID: ${body.userId}`);
       return withCors(json({ admins: await getAdmins(kv) }), request);
     }
     return withCors(json({ message: "Method not allowed" }, 405), request);
@@ -240,7 +244,20 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
     if (!Number.isInteger(userId)) return withCors(badRequest("Invalid userId"), request);
     if (request.method === "DELETE") {
       await removeAdmin(kv, userId);
+      await addLog(kv, "admin_removed", `ID: ${userId}`);
       return withCors(json({ admins: await getAdmins(kv) }), request);
+    }
+    return withCors(json({ message: "Method not allowed" }, 405), request);
+  }
+
+  if (pathname === "/admin/api/logs") {
+    if (request.method === "GET") {
+      const logs = await getLogs(kv, 50);
+      return withCors(json({ logs }), request);
+    }
+    if (request.method === "DELETE") {
+      await kv.delete(`${CONFIG_PREFIX}logs`);
+      return withCors(json({ ok: true }), request);
     }
     return withCors(json({ message: "Method not allowed" }, 405), request);
   }
@@ -254,6 +271,7 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
       const body = await parseJson<SiteConfig>(request);
       if (!body) return withCors(badRequest("Invalid config"), request);
       await setSiteConfig(kv, body);
+      await addLog(kv, "site_config_updated");
       return withCors(json({ ok: true }), request);
     }
     return withCors(json({ message: "Method not allowed" }, 405), request);

@@ -3,6 +3,7 @@ import handler from "vinext/server/app-router-entry";
 import { handleAdminApi } from "./adminApi";
 import { handleGroupRegistration } from "./groupRegistration";
 import { handleGroupsApi } from "./apiGroups";
+import { handleSiteApi } from "./apiSite";
 import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import { handleYouTubeLive } from "./youtubeLive";
 import type { Env } from "./env";
@@ -53,6 +54,10 @@ const routes: { match: (pathname: string) => boolean; handler: RouteHandler }[] 
   {
     match: (pathname) => pathname === "/api/groups",
     handler: (request, env) => handleGroupsApi(request, env),
+  },
+  {
+    match: (pathname) => pathname === "/api/site",
+    handler: (request, env) => handleSiteApi(request, env),
   },
   {
     match: (pathname) => pathname.startsWith("/admin/api/"),

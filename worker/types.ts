@@ -67,23 +67,43 @@ export interface TelegramCallbackQuery {
 }
 
 export interface SiteConfig {
-  heroVideoUrl?: string;
-  heroAnnouncement?: string;
-  homeGroupLocations?: HomeGroupLocation[];
-  services?: ServiceSchedule[];
+  hero?: HeroConfig;
+  announcement?: Announcement | null;
+  serviceLocations?: ServiceLocationConfig[];
+  team?: TeamMemberConfig[];
 }
 
-export interface HomeGroupLocation {
+export interface HeroConfig {
+  hlsUrl?: string;
+  fallbackUrl?: string;
+  posterUrl?: string;
+  posterSrcSet?: string;
+}
+
+export interface Announcement {
+  text: string;
+  href?: string;
+  enabled: boolean;
+}
+
+export interface ServiceLocationConfig {
   id: number;
-  name: string;
+  label: string;
   address: string;
-  showOnHome: boolean;
+  streetAddress: string;
+  addressLocality: string;
+  addressRegion: string;
+  time: string;
+  coordinates: string;
+  mapsUrl: string;
+  showOnHome?: boolean;
 }
 
-export interface ServiceSchedule {
+export interface TeamMemberConfig {
   id: number;
   name: string;
-  time: string;
-  location: string;
-  showOnHome: boolean;
+  role: string;
+  image: string;
+  facebook?: string;
+  instagram?: string;
 }

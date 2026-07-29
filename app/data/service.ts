@@ -32,11 +32,11 @@ const kyivParts = (date: Date) => {
   };
 };
 
-const locationsForTime = (time: "10:00" | "17:00") =>
-  serviceLocations.filter((location) => location.time.includes(time));
-
 /** Next Sunday service in Europe/Kyiv (10:00 or 17:00). */
-export function getNextService(now = new Date()): NextServiceSlot {
+export function getNextService(
+  now = new Date(),
+  locations: ServiceLocation[] = serviceLocations,
+): NextServiceSlot {
   const kyiv = kyivParts(now);
   const minutesNow = kyiv.hour * 60 + kyiv.minute;
   const isSunday = kyiv.weekday === "Sun";
@@ -66,6 +66,6 @@ export function getNextService(now = new Date()): NextServiceSlot {
     isTomorrow,
     dayLabel,
     whenLabel,
-    locations: locationsForTime(time),
+    locations: locations.filter((location) => location.time.includes(time)),
   };
 }

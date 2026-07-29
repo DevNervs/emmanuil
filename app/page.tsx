@@ -1,7 +1,10 @@
 import { Page } from "./components/SiteShell";
 import { GroupsExplorer } from "./components/GroupsExplorer";
+import { HeroAnnouncement } from "./components/HeroAnnouncement";
+import { HeroLocations } from "./components/HeroLocations";
 import { HeroVideo } from "./components/HeroVideo";
-import { announcement, groupSeason, groups, serviceLocations } from "./content";
+import { HomeGroups } from "./components/HomeGroups";
+import { groupSeason, groups } from "./content";
 import { pageMetadata } from "./seo";
 
 export const metadata = pageMetadata({
@@ -54,44 +57,11 @@ export default function Home() {
             </div>
 
             {/* 4 Locations Overlay Bar (Ecclesia style) */}
-            <div className="hero-locations-bar">
-              <div className="hero-locations-header">
-                <span className="hero-locations-title">Найближчі служіння</span>
-                <a className="hero-locations-link" href="/contacts">
-                  Карта та маршрути →
-                </a>
-              </div>
-              <div className="hero-locations-grid">
-                {serviceLocations.map((loc) => (
-                  <a
-                    key={loc.label}
-                    className="hero-location-card"
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(loc.coordinates)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Прокласти маршрут у Google Maps: ${loc.address}`}
-                  >
-                    <strong>{loc.streetAddress}</strong>
-                    {loc.addressLocality !== "Чернівці" && (
-                      <span className="hero-location-city">м. {loc.addressLocality}</span>
-                    )}
-                    <time>{loc.time}</time>
-                  </a>
-                ))}
-              </div>
-            </div>
+            <HeroLocations />
           </div>
         </section>
 
-        {announcement && (
-          <section data-header-theme="dark" className="announcement-bar">
-            {announcement.href ? (
-              <a href={announcement.href}>{announcement.text}</a>
-            ) : (
-              <p>{announcement.text}</p>
-            )}
-          </section>
-        )}
+        <HeroAnnouncement />
 
         {/* Home Groups Section */}
         <section data-header-theme="light" className="home-season" aria-labelledby="home-season-title">
@@ -139,6 +109,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <HomeGroups propGroups={groups} />
 
         <section data-header-theme="light" className="first-visit-feature" aria-labelledby="home-expect-title">
           <div>

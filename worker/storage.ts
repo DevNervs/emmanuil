@@ -4,6 +4,7 @@ const APP_PREFIX = "app:";
 const ARCHIVE_PREFIX = "archive:";
 const CONFIG_PREFIX = "config:";
 const GROUPS_KEY = "groups:current";
+const LOGS_KEY = `${CONFIG_PREFIX}logs`;
 
 function appKey(app: GroupApplication): string {
   return `${APP_PREFIX}${String(app.createdAt).padStart(13, "0")}:${app.id}`;
@@ -105,6 +106,41 @@ export async function getSiteConfig(kv: KVNamespace): Promise<SiteConfig> {
 
 export async function setSiteConfig(kv: KVNamespace, config: SiteConfig): Promise<void> {
   await kv.put(`${CONFIG_PREFIX}site`, JSON.stringify(config));
+}
+
+export interface LogEntry {
+  id: string;
+  action: string;
+  details?: string;
+  timestamp: number;
+}
+
+const MAX_LOGS = 100;
+
+export async function getLogs(kv: KVNamespace, limit = 50): Promise<LogEntry[]> {
+  const value = await kv.get(LOGS_KEY);
+  if (!value) return [];
+  try {
+    const logs = JSON.parse(value) as LogEntry[];
+    return logs.slice(0, Math.max(1, limit));
+  } catch {
+    return [];
+  }
+}
+
+export async function addLog(
+  kv: KVNamespace,
+  action: string,
+  details?: string,
+): Promise<void> {
+  const logs = await getLogs(kv, MAX_LOGS);
+  logs.unshift({
+    id: crypto.randomUUID(),
+    action,
+    details,
+    timestamp: Date.now(),
+  });
+  await kv.put(LOGS_KEY, JSON.stringify(logs.slice(0, MAX_LOGS)));
 }
 
 export async function saveApplication(
