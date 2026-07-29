@@ -22,6 +22,7 @@
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "hls.js": "^1.6.16",
+    "leaflet": "^1.9.4",
     "lucide-react": "^1.27.0",
     "next": "^16.2.12",
     "react": "^19.2.8",
@@ -32,6 +33,7 @@
     "@cloudflare/vite-plugin": "^1.47.0",
     "@cloudflare/workers-types": "^5.20260728.1",
     "@tailwindcss/postcss": "^4.3.3",
+    "@types/leaflet": "^1.9.21",
     "@types/node": "^26.1.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

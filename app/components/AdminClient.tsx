@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-  Calendar,
   Download,
   FileText,
   LogOut,
@@ -12,6 +11,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
+import { MapPicker } from "./MapPicker";
 
 type Group = {
   id: number;
@@ -65,20 +65,16 @@ async function api<T>(
 
 export function AdminClient() {
   const [auth, setAuth] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"groups" | "seasons" | "apps" | "admins">("groups");
+  const [tab, setTab] = useState<"groups" | "apps" | "admins">("groups");
   const [message, setMessage] = useState("");
   const [password, setPassword] = useState("");
 
   const [groups, setGroups] = useState<Group[]>([]);
-  const [seasons, setSeasons] = useState<{ current: Season | null; seasons: Season[] }>({
-    current: null,
-    seasons: [],
-  });
-  const [seasonName, setSeasonName] = useState("");
   const [apps, setApps] = useState<{ apps: Application[]; total: number }>({ apps: [], total: 0 });
   const [appOffset, setAppOffset] = useState(0);
   const [admins, setAdmins] = useState<number[]>([]);
   const [newAdmin, setNewAdmin] = useState("");
+  const [mapGroupId, setMapGroupId] = useState<number | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -87,7 +83,6 @@ export function AdminClient() {
   useEffect(() => {
     if (!auth) return;
     if (tab === "groups") loadGroups();
-    if (tab === "seasons") loadSeasons();
     if (tab === "apps") loadApps();
     if (tab === "admins") loadAdmins();
   }, [auth, tab, appOffset]);
@@ -166,46 +161,6 @@ export function AdminClient() {
 
   function deleteGroup(id: number) {
     setGroups((g) => g.filter((gr) => gr.id !== id));
-  }
-
-  async function loadSeasons() {
-    try {
-      const data = await api<{ current: Season | null; seasons: Season[] }>("GET", "/seasons");
-      setSeasons(data);
-    } catch (err: any) {
-      show(`Помилка завантаження сезонів: ${err.message}`);
-    }
-  }
-
-  async function startSeason() {
-    try {
-      await api<{ season: Season }>("POST", "/seasons", { name: seasonName });
-      setSeasonName("");
-      await loadSeasons();
-      show("Сезон розпочато");
-    } catch (err: any) {
-      show(`Помилка: ${err.message}`);
-    }
-  }
-
-  async function archiveSeason() {
-    try {
-      await api<{ archived: Season | null }>("POST", "/seasons/archive");
-      await loadSeasons();
-      show("Сезон архівовано");
-    } catch (err: any) {
-      show(`Помилка: ${err.message}`);
-    }
-  }
-
-  async function deleteSeason(id: string) {
-    try {
-      await api<{ ok: true }>("DELETE", `/seasons/${id}`);
-      await loadSeasons();
-      show("Сезон видалено");
-    } catch (err: any) {
-      show(`Помилка: ${err.message}`);
-    }
   }
 
   async function loadApps() {
@@ -290,6 +245,9 @@ export function AdminClient() {
 
   const isError =
     message.includes("Помилка") || message.toLowerCase().includes("error");
+
+  const mapGroup =
+    mapGroupId !== null ? groups.find((g) => g.id === mapGroupId) : null;
 
   if (auth === null) {
     return (
@@ -386,17 +344,6 @@ export function AdminClient() {
             >
               <Users className="h-4 w-4" aria-hidden="true" />
               Групи
-            </button>
-            <button
-              onClick={() => setTab("seasons")}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                tab === "seasons"
-                  ? "border-b-2 border-[var(--wine)] text-[var(--wine)]"
-                  : "text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-              }`}
-            >
-              <Calendar className="h-4 w-4" aria-hidden="true" />
-              Сезони
             </button>
             <button
               onClick={() => setTab("apps")}
@@ -498,6 +445,13 @@ export function AdminClient() {
                         placeholder="Координати"
                         className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setMapGroupId(g.id)}
+                        className="inline-flex w-full items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+                      >
+                        🗺 Карта
+                      </button>
                       <textarea
                         value={g.description}
                         onChange={(e) => updateGroup(g.id, { description: e.target.value })}
@@ -528,79 +482,6 @@ export function AdminClient() {
                   Зберегти
                 </button>
               </div>
-            </div>
-          )}
-
-          {tab === "seasons" && (
-            <div className="space-y-5">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-[var(--wine)]" aria-hidden="true" />
-                <h2 className="font-[var(--serif)] text-xl font-semibold text-[var(--ink)]">
-                  Сезони
-                </h2>
-              </div>
-
-              {seasons.current ? (
-                <div className="rounded-xl border border-[var(--gold)] bg-[var(--gold-soft)] p-4">
-                  <p className="text-[var(--ink)]">
-                    <span className="font-semibold text-[var(--wine)]">Поточний:</span>{" "}
-                    {seasons.current.name} (
-                    {new Date(seasons.current.startedAt).toLocaleDateString("uk-UA")})
-                  </p>
-                </div>
-              ) : (
-                <div className="rounded-xl border border-[var(--line)] bg-[var(--paper)] p-4 text-[var(--muted)]">
-                  Немає поточного сезону.
-                </div>
-              )}
-
-              <div className="flex flex-wrap items-end gap-3">
-                <input
-                  value={seasonName}
-                  onChange={(e) => setSeasonName(e.target.value)}
-                  placeholder="Назва нового сезону"
-                  className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)] sm:w-auto"
-                />
-                <button
-                  onClick={startSeason}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[var(--wine)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wine-dark)]"
-                >
-                  <Plus className="h-4 w-4" aria-hidden="true" />
-                  Почати новий сезон
-                </button>
-                <button
-                  onClick={archiveSeason}
-                  className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
-                >
-                  Архівувати поточний
-                </button>
-              </div>
-
-              <h3 className="font-[var(--serif)] text-sm font-medium uppercase tracking-wider text-[var(--muted)]">
-                Архів
-              </h3>
-              <ul className="grid gap-3">
-                {seasons.seasons.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-white p-3 shadow-sm"
-                  >
-                    <span className="text-sm text-[var(--ink)]">
-                      {s.name} — {new Date(s.startedAt).toLocaleDateString("uk-UA")}
-                      {s.archivedAt
-                        ? ` (архівовано ${new Date(s.archivedAt).toLocaleDateString("uk-UA")})`
-                        : ""}
-                    </span>
-                    <button
-                      onClick={() => deleteSeason(s.id)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden="true" />
-                      Видалити
-                    </button>
-                  </li>
-                ))}
-              </ul>
             </div>
           )}
 
@@ -751,6 +632,17 @@ export function AdminClient() {
             </div>
           )}
         </section>
+
+        {mapGroup && (
+          <MapPicker
+            initialAddress={mapGroup.address}
+            initialCoordinates={mapGroup.coordinates}
+            onSave={({ address, coordinates }) =>
+              updateGroup(mapGroup.id, { address, coordinates })
+            }
+            onClose={() => setMapGroupId(null)}
+          />
+        )}
       </div>
     </main>
   );
