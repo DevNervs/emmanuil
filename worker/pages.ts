@@ -1,4 +1,6 @@
+import { handleAdminApi } from "./adminApi";
 import { handleGroupRegistration } from "./groupRegistration";
+import { handleGroupsApi } from "./apiGroups";
 import { json } from "./telegram";
 import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import type { Env } from "./env";
@@ -28,6 +30,8 @@ const worker = {
     if (pathname === "/api/youtube-live") return handleYouTubeLive(request);
     if (pathname === "/api/telegram") return handleTelegramWebhook(request, env);
     if (pathname === "/api/setup-telegram") return setupTelegramWebhook(request, env);
+    if (pathname === "/api/groups") return handleGroupsApi(request, env);
+    if (pathname.startsWith("/admin/api/")) return handleAdminApi(request, env);
 
     if (!env.ASSETS) return json({ message: "ASSETS binding not configured" }, 503);
     return env.ASSETS.fetch(request);

@@ -1,6 +1,8 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { handleAdminApi } from "./adminApi";
 import { handleGroupRegistration } from "./groupRegistration";
+import { handleGroupsApi } from "./apiGroups";
 import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import { handleYouTubeLive } from "./youtubeLive";
 import type { Env } from "./env";
@@ -47,6 +49,14 @@ const routes: { match: (pathname: string) => boolean; handler: RouteHandler }[] 
   {
     match: (pathname) => pathname === "/api/setup-telegram",
     handler: (request, env) => setupTelegramWebhook(request, env),
+  },
+  {
+    match: (pathname) => pathname === "/api/groups",
+    handler: (request, env) => handleGroupsApi(request, env),
+  },
+  {
+    match: (pathname) => pathname.startsWith("/admin/api/"),
+    handler: (request, env) => handleAdminApi(request, env),
   },
   {
     match: (pathname) => pathname === "/_vinext/image",

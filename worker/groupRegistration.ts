@@ -1,8 +1,20 @@
 import { groupNames } from "./data";
-import { saveApplication } from "./storage";
+import { getCurrentGroups, getCurrentSeason, saveApplication } from "./storage";
 import { escapeHtml, isAdmin, json, sendTelegramMessage } from "./telegram";
 import type { Env } from "./env";
-import type { GroupApplication } from "./types";
+import type { Group, GroupApplication } from "./types";
+
+function toGroupName(group: Group): string {
+  return `${group.title}${group.leaders ? ` — ${group.leaders}` : ""}`;
+}
+
+async function resolveCurrentGroups(env: Env): Promise<Group[]> {
+  if (env.GROUP_APPLICATIONS) {
+    const kvGroups = await getCurrentGroups(env.GROUP_APPLICATIONS);
+    if (kvGroups.length) return kvGroups;
+  }
+  return groupNames.map((title, index) => ({ id: index, title, leaders: "", description: "", time: "", address: "" }));
+}
 
 export async function handleGroupRegistration(request: Request, env: Env): Promise<Response> {
   if (request.method !== "POST") return json({ message: "Метод не підтримується." }, 405);
@@ -18,8 +30,10 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
   if (body.website) return json({ message: "Заявку прийнято." });
   const name = typeof body.name === "string" ? body.name.trim() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  const currentGroups = await resolveCurrentGroups(env);
+  const validGroupIds = new Set(currentGroups.map((g) => g.id));
   const groups = Array.isArray(body.groups)
-    ? [...new Set(body.groups.filter((item): item is number => Number.isInteger(item) && item >= 0 && item < groupNames.length))]
+    ? [...new Set(body.groups.filter((item): item is number => Number.isInteger(item) && validGroupIds.has(item)))]
     : [];
   const startedAt = typeof body.startedAt === "number" ? body.startedAt : 0;
   if (Date.now() - startedAt < 1_500 || Date.now() - startedAt > 86_400_000) {
@@ -32,9 +46,13 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
     return json({ message: "Надсилання заявок ще налаштовується. Спробуйте трохи пізніше." }, 503);
   }
 
+  const currentSeason = env.GROUP_APPLICATIONS ? (await getCurrentSeason(env.GROUP_APPLICATIONS)) : null;
   const id = crypto.randomUUID().slice(0, 8);
   const createdAt = Date.now();
-  const selectedGroupNames = groups.map((index) => groupNames[index]);
+  const selectedGroupNames = groups.map((groupId) => {
+    const group = currentGroups.find((g) => g.id === groupId);
+    return group ? toGroupName(group) : `Група №${groupId}`;
+  });
   const application: GroupApplication = {
     id,
     name,
@@ -42,6 +60,7 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
     groups,
     groupNames: selectedGroupNames,
     createdAt,
+    seasonId: currentSeason?.id ?? "default",
   };
 
   if (env.GROUP_APPLICATIONS) {
@@ -55,6 +74,7 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
   const groupList = selectedGroupNames.map((groupName, order) => `${order + 1}. ${escapeHtml(groupName)}`).join("\n");
   const message = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Телефон:</b> ${escapeHtml(phone)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з emmanuil.pages.dev</i>`;
   const adminUserId = Number(env.TELEGRAM_ADMIN_CHAT_ID);
+  const adminByUser = await isAdmin(adminUserId, env);
   const notificationPayload: Record<string, unknown> = {
     chat_id: env.TELEGRAM_ADMIN_CHAT_ID,
     text: message,
@@ -66,8 +86,7 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
       ],
     },
   };
-  // If the admin chat is a private chat, show call and delete buttons as well.
-  if (isAdmin(adminUserId, env)) {
+  if (adminByUser) {
     (notificationPayload.reply_markup as { inline_keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> }).inline_keyboard.push([
       { text: "📞 Подзвонити", url: `tel:${phone.replace(/[^\d+]/g, "")}` },
       { text: "🗑 Видалити", callback_data: `delete:${id}` },

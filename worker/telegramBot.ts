@@ -1,22 +1,29 @@
 import { groupNames } from "./data";
 import {
+  addAdmin,
   countApplications,
   deleteApplication,
   filterApplicationsByGroup,
+  getAdmins,
   getApplication,
+  getCurrentGroups,
+  getCurrentSeason,
   listApplications,
+  removeAdmin,
   searchApplications,
 } from "./storage";
 import { answerCallbackQuery, escapeHtml, isAdmin, json, sendTelegramMessage, verifyWebhookSecret } from "./telegram";
 import type { Env } from "./env";
-import type { GroupApplication, TelegramCallbackQuery, TelegramMessage, TelegramUpdate } from "./types";
+import type { Group, GroupApplication, TelegramCallbackQuery, TelegramMessage, TelegramUpdate } from "./types";
 
 const PAGE_SIZE = 5;
 
 const mainKeyboard = {
   keyboard: [
     [{ text: "🆕 Остання" }, { text: "📋 Список" }],
-    [{ text: "📊 Статистика" }, { text: "❓ Допомога" }],
+    [{ text: "📊 Статистика" }, { text: "👥 Адміни" }],
+    [{ text: "📅 Сезон" }, { text: "🏠 Групи" }],
+    [{ text: "❓ Допомога" }],
   ],
   resize_keyboard: true,
   one_time_keyboard: false,
@@ -27,8 +34,30 @@ const menuActions: Record<string, (env: Env, message: TelegramMessage) => Promis
   "🆕 Остання": handleLast,
   "📋 Список": (env, message) => handleList(env, message, ""),
   "📊 Статистика": handleStats,
+  "👥 Адміни": handleAdmins,
+  "📅 Сезон": handleSeason,
+  "🏠 Групи": handleGroups,
   "❓ Допомога": (env, message) => handleStart(env, message, ""),
 };
+
+async function resolveCurrentGroups(env: Env): Promise<Group[]> {
+  if (env.GROUP_APPLICATIONS) {
+    const kvGroups = await getCurrentGroups(env.GROUP_APPLICATIONS);
+    if (kvGroups.length) return kvGroups;
+  }
+  return groupNames.map((title, index) => ({
+    id: index,
+    title,
+    leaders: "",
+    description: "",
+    time: "",
+    address: "",
+  }));
+}
+
+function toGroupName(group: Group): string {
+  return `${group.title}${group.leaders ? ` — ${group.leaders}` : ""}`;
+}
 
 function formatApplication(app: GroupApplication, showDelete = false): { text: string; keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> } {
   const groups = app.groupNames.map((name, i) => `${i + 1}. ${escapeHtml(name)}`).join("\n");
@@ -110,14 +139,14 @@ async function handleStart(env: Env, message: TelegramMessage, args: string): Pr
   const chatId = message.chat.id;
   const appArg = args.startsWith("app_") ? args.slice(4) : "";
   if (appArg && env.GROUP_APPLICATIONS) {
-    const app = await getApplication(env.GROUP_APPLICATIONS, appArg);
+    const app = await getApplication(env.GROUP_APPLICATIONS, appArg, true);
     if (app) {
       const { text, keyboard } = formatApplication(app, true);
       await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
       return;
     }
   }
-  const text = `Привіт, ${escapeHtml(message.from.first_name)}!\n\nЯ бот для управління заявками на домашні групи.\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/delete &lt;id&gt; — видалити`;
+  const text = `Привіт, ${escapeHtml(message.from.first_name)}!\n\nЯ бот для управління заявками на домашні групи.\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/groups — список груп\n/season — поточний сезон\n/admins — адміни\n/delete &lt;id&gt; — видалити`;
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
 }
 
@@ -178,21 +207,59 @@ async function handleGroup(env: Env, message: TelegramMessage, args: string): Pr
     await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
     return;
   }
-  const groupIndex = Number(args) - 1;
-  if (!Number.isInteger(groupIndex) || groupIndex < 0 || groupIndex >= groupNames.length) {
-    await sendAdminMessage(env, message.chat.id, { text: `Вкажіть номер групи від 1 до ${groupNames.length}: /group 3` });
+  const groups = await resolveCurrentGroups(env);
+  const index = Number(args) - 1;
+  if (!Number.isInteger(index) || index < 0 || index >= groups.length) {
+    await sendAdminMessage(env, message.chat.id, { text: `Вкажіть номер групи від 1 до ${groups.length}: /group 3` });
     return;
   }
-  const results = await filterApplicationsByGroup(env.GROUP_APPLICATIONS, groupIndex);
+  const group = groups[index];
+  const results = await filterApplicationsByGroup(env.GROUP_APPLICATIONS, group.id);
   if (!results.length) {
-    await sendAdminMessage(env, message.chat.id, { text: `На групу №${groupIndex + 1} заявок немає.` });
+    await sendAdminMessage(env, message.chat.id, { text: `На групу №${index + 1} (${escapeHtml(group.title)}) заявок немає.` });
     return;
   }
   const limited = results.slice(0, 10);
   const lines = limited.map((app, i) => formatAppLine(app, i + 1)).join("\n");
-  const text = `<b>Група ${escapeHtml(groupNames[groupIndex])}</b>\nВсього заявок: ${results.length}\n\n${lines}`;
+  const text = `<b>Група ${escapeHtml(toGroupName(group))}</b>\nВсього заявок: ${results.length}\n\n${lines}`;
   const keyboard = buildSimpleAppKeyboard(limited);
   await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
+}
+
+async function handleGroups(env: Env, message: TelegramMessage): Promise<void> {
+  const groups = await resolveCurrentGroups(env);
+  if (!groups.length) {
+    await sendAdminMessage(env, message.chat.id, { text: "Групи ще не налаштовані." });
+    return;
+  }
+  const lines = groups.map((g, i) => `${i + 1}. <b>${escapeHtml(toGroupName(g))}</b>${g.address ? `\n   📍 ${escapeHtml(g.address)}` : ""}`).join("\n");
+  const text = `<b>Список груп</b>\n\n${lines}`;
+  await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML" });
+}
+
+async function handleSeason(env: Env, message: TelegramMessage): Promise<void> {
+  if (!env.GROUP_APPLICATIONS) {
+    await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
+    return;
+  }
+  const season = await getCurrentSeason(env.GROUP_APPLICATIONS);
+  if (!season) {
+    await sendAdminMessage(env, message.chat.id, { text: "Поточний сезон не налаштований." });
+    return;
+  }
+  const total = await countApplications(env.GROUP_APPLICATIONS);
+  const text = `<b>Поточний сезон</b>\n\nНазва: ${escapeHtml(season.name)}\nПочаток: ${new Date(season.startedAt).toLocaleString("uk-UA")}\nЗаявок: ${total}`;
+  await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML" });
+}
+
+async function handleAdmins(env: Env, message: TelegramMessage): Promise<void> {
+  if (!env.GROUP_APPLICATIONS) {
+    await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
+    return;
+  }
+  const admins = await getAdmins(env.GROUP_APPLICATIONS);
+  const text = `<b>Адміністратори</b>\n\n${admins.length ? admins.map((id) => `• ${id}`).join("\n") : "Адміністраторів не додано."}`;
+  await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML" });
 }
 
 async function handleStats(env: Env, message: TelegramMessage): Promise<void> {
@@ -224,8 +291,47 @@ async function handleDeleteCommand(env: Env, message: TelegramMessage, args: str
     await sendAdminMessage(env, message.chat.id, { text: "Вкажіть id заявки: /delete abc123" });
     return;
   }
-  await deleteApplication(env.GROUP_APPLICATIONS, args);
-  await sendAdminMessage(env, message.chat.id, { text: `Заявку #${args} видалено.` });
+  const app = await getApplication(env.GROUP_APPLICATIONS, args, true);
+  if (!app) {
+    await sendAdminMessage(env, message.chat.id, { text: `Заявку #${args} не знайдено.` });
+    return;
+  }
+  const text = `Ви впевнені, що хочете видалити заявку <b>#${args}</b> від ${escapeHtml(app.name)}?`;
+  const keyboard = [
+    [
+      { text: "✅ Так, видалити", callback_data: `confirm_delete:${args}` },
+      { text: "❌ Скасувати", callback_data: `cancel_delete:${args}` },
+    ],
+  ];
+  await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
+}
+
+async function handleAdminAddCommand(env: Env, message: TelegramMessage, args: string): Promise<void> {
+  if (!env.GROUP_APPLICATIONS) {
+    await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
+    return;
+  }
+  const id = Number(args);
+  if (!Number.isInteger(id)) {
+    await sendAdminMessage(env, message.chat.id, { text: "Вкажіть user id: /admin_add 123456789" });
+    return;
+  }
+  await addAdmin(env.GROUP_APPLICATIONS, id);
+  await sendAdminMessage(env, message.chat.id, { text: `Користувача ${id} додано до адміністраторів.` });
+}
+
+async function handleAdminRemoveCommand(env: Env, message: TelegramMessage, args: string): Promise<void> {
+  if (!env.GROUP_APPLICATIONS) {
+    await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
+    return;
+  }
+  const id = Number(args);
+  if (!Number.isInteger(id)) {
+    await sendAdminMessage(env, message.chat.id, { text: "Вкажіть user id: /admin_remove 123456789" });
+    return;
+  }
+  await removeAdmin(env.GROUP_APPLICATIONS, id);
+  await sendAdminMessage(env, message.chat.id, { text: `Користувача ${id} видалено з адміністраторів.` });
 }
 
 async function handleAppCallback(env: Env, query: TelegramCallbackQuery, id: string): Promise<void> {
@@ -233,7 +339,7 @@ async function handleAppCallback(env: Env, query: TelegramCallbackQuery, id: str
     await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
     return;
   }
-  const app = await getApplication(env.GROUP_APPLICATIONS, id);
+  const app = await getApplication(env.GROUP_APPLICATIONS, id, true);
   if (!app) {
     await answerCallbackQuery(env, query.id, "Заявку не знайдено");
     return;
@@ -269,15 +375,76 @@ async function handleDeleteCallback(env: Env, query: TelegramCallbackQuery, id: 
     await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
     return;
   }
-  await deleteApplication(env.GROUP_APPLICATIONS, id);
+  const app = await getApplication(env.GROUP_APPLICATIONS, id, true);
+  if (!app) {
+    await answerCallbackQuery(env, query.id, "Заявку не знайдено");
+    return;
+  }
+  await answerCallbackQuery(env, query.id);
+  const chatId = query.message?.chat.id ?? query.from.id;
+  const text = `Ви впевнені, що хочете видалити заявку <b>#${id}</b> від ${escapeHtml(app.name)}?`;
+  const keyboard = [
+    [
+      { text: "✅ Так, видалити", callback_data: `confirm_delete:${id}` },
+      { text: "❌ Скасувати", callback_data: `cancel_delete:${id}` },
+    ],
+  ];
+  await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
+}
+
+async function handleConfirmDeleteCallback(env: Env, query: TelegramCallbackQuery, id: string): Promise<void> {
+  if (!env.GROUP_APPLICATIONS) {
+    await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
+    return;
+  }
+  await deleteApplication(env.GROUP_APPLICATIONS, id, true);
   await answerCallbackQuery(env, query.id, "Заявку видалено");
   const chatId = query.message?.chat.id ?? query.from.id;
   await sendAdminMessage(env, chatId, { text: `Заявку #${id} видалено.` });
 }
 
+async function handleCancelDeleteCallback(env: Env, query: TelegramCallbackQuery, id: string): Promise<void> {
+  await answerCallbackQuery(env, query.id, "Видалення скасовано");
+  if (!env.GROUP_APPLICATIONS) return;
+  const app = await getApplication(env.GROUP_APPLICATIONS, id, true);
+  if (!app) return;
+  const chatId = query.message?.chat.id ?? query.from.id;
+  const { text, keyboard } = formatApplication(app, true);
+  await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
+}
+
+async function handleMenuCallback(env: Env, query: TelegramCallbackQuery): Promise<void> {
+  await answerCallbackQuery(env, query.id);
+  const chatId = query.message?.chat.id ?? query.from.id;
+  const text = `<b>Головне меню</b>\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/groups — список груп\n/season — поточний сезон\n/admins — адміни\n/delete &lt;id&gt; — видалити`;
+  await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
+}
+
+async function handleStatsCallback(env: Env, query: TelegramCallbackQuery): Promise<void> {
+  if (!env.GROUP_APPLICATIONS) {
+    await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
+    return;
+  }
+  await answerCallbackQuery(env, query.id);
+  const total = await countApplications(env.GROUP_APPLICATIONS);
+  const groupCounts: Record<string, number> = {};
+  const all = await listApplications(env.GROUP_APPLICATIONS, { limit: total });
+  for (const app of all.apps) {
+    for (const groupName of app.groupNames) {
+      groupCounts[groupName] = (groupCounts[groupName] ?? 0) + 1;
+    }
+  }
+  const groupLines = Object.entries(groupCounts)
+    .map(([name, count]) => `• ${escapeHtml(name.split(" — ")[0])}: ${count}`)
+    .join("\n");
+  const text = `<b>Статистика</b>\n\nВсього заявок: ${total}\n\n<b>За групами:</b>\n${groupLines}`;
+  const chatId = query.message?.chat.id ?? query.from.id;
+  await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: [[{ text: "🏠 Меню", callback_data: "menu" }]] } });
+}
+
 async function handleMessage(env: Env, message: TelegramMessage): Promise<void> {
   const userId = message.from.id;
-  if (!isAdmin(userId, env)) {
+  if (!(await isAdmin(userId, env))) {
     await sendNoAccess(env, message.chat.id);
     return;
   }
@@ -307,49 +474,35 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
     case "group":
       await handleGroup(env, message, args);
       break;
+    case "groups":
+      await handleGroups(env, message);
+      break;
     case "stats":
       await handleStats(env, message);
       break;
+    case "season":
+      await handleSeason(env, message);
+      break;
+    case "admins":
+      await handleAdmins(env, message);
+      break;
     case "delete":
       await handleDeleteCommand(env, message, args);
+      break;
+    case "admin_add":
+      await handleAdminAddCommand(env, message, args);
+      break;
+    case "admin_remove":
+      await handleAdminRemoveCommand(env, message, args);
       break;
     default:
       await sendAdminMessage(env, message.chat.id, { text: "Невідома команда. Використайте /help." });
   }
 }
 
-async function handleMenuCallback(env: Env, query: TelegramCallbackQuery): Promise<void> {
-  await answerCallbackQuery(env, query.id);
-  const chatId = query.message?.chat.id ?? query.from.id;
-  const text = `<b>Головне меню</b>\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/delete &lt;id&gt; — видалити`;
-  await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
-}
-
-async function handleStatsCallback(env: Env, query: TelegramCallbackQuery): Promise<void> {
-  if (!env.GROUP_APPLICATIONS) {
-    await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
-    return;
-  }
-  await answerCallbackQuery(env, query.id);
-  const total = await countApplications(env.GROUP_APPLICATIONS);
-  const groupCounts: Record<string, number> = {};
-  const all = await listApplications(env.GROUP_APPLICATIONS, { limit: total });
-  for (const app of all.apps) {
-    for (const groupName of app.groupNames) {
-      groupCounts[groupName] = (groupCounts[groupName] ?? 0) + 1;
-    }
-  }
-  const groupLines = Object.entries(groupCounts)
-    .map(([name, count]) => `• ${escapeHtml(name.split(" — ")[0])}: ${count}`)
-    .join("\n");
-  const text = `<b>Статистика</b>\n\nВсього заявок: ${total}\n\n<b>За групами:</b>\n${groupLines}`;
-  const chatId = query.message?.chat.id ?? query.from.id;
-  await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: [[{ text: "🏠 Меню", callback_data: "menu" }]] } });
-}
-
 async function handleCallback(env: Env, query: TelegramCallbackQuery): Promise<void> {
   const userId = query.from.id;
-  if (!isAdmin(userId, env)) {
+  if (!(await isAdmin(userId, env))) {
     await answerCallbackQuery(env, query.id, "У вас немає доступу");
     return;
   }
@@ -372,6 +525,12 @@ async function handleCallback(env: Env, query: TelegramCallbackQuery): Promise<v
       break;
     case "delete":
       await handleDeleteCallback(env, query, value);
+      break;
+    case "confirm_delete":
+      await handleConfirmDeleteCallback(env, query, value);
+      break;
+    case "cancel_delete":
+      await handleCancelDeleteCallback(env, query, value);
       break;
     default:
       await answerCallbackQuery(env, query.id, "Невідома дія");

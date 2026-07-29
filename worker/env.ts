@@ -13,4 +13,6 @@ export interface Env {
   TELEGRAM_ADMIN_CHAT_ID?: string;
   TELEGRAM_ADMIN_USER_IDS?: string;
   TELEGRAM_WEBHOOK_SECRET?: string;
+  ADMIN_PASSWORD?: string;
+  ADMIN_SESSION_SECRET?: string;
 }

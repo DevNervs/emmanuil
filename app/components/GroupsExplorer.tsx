@@ -4,12 +4,14 @@ import type { FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowRight, Check, Send, X } from "lucide-react";
-import type { Group } from "../content";
+import type { Group as LegacyGroup } from "../content";
 
+type ApiGroup = { id: number; title: string; leaders: string; description: string; time: string; day?: string; address?: string; coordinates?: string; showOnHome?: boolean; };
+type Group = ApiGroup;
 type SubmitState = "idle" | "sending" | "sent" | "error";
 const weekdayOrder = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
 
-export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group[]; launcherOnly?: boolean }) {
+export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { groups: LegacyGroup[]; launcherOnly?: boolean }) {
   const [query, setQuery] = useState("");
   const [day, setDay] = useState("Усі дні");
   const [selected, setSelected] = useState(0);
@@ -19,11 +21,27 @@ export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group
   const [phone, setPhone] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitMessage, setSubmitMessage] = useState("");
+  const [apiGroups, setApiGroups] = useState<Group[] | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const dialog = useRef<HTMLDivElement>(null);
   const startedAt = useRef(0);
 
+  const fallbackGroups = useMemo<Group[]>(() => propGroups.map((group, index) => ({ ...group, id: index + 1, description: "", day: group.time.split(",")[0].trim(), showOnHome: true } as Group)), [propGroups]);
+  const groups = apiGroups ?? fallbackGroups;
+
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    fetch("/api/groups")
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json() as { groups: Group[]; season: unknown | null };
+        if (data.groups?.length) setApiGroups(data.groups);
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!loaded || typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("register") === "1") {
       openRegistration();
@@ -31,15 +49,18 @@ export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group
       url.searchParams.delete("register");
       window.history.replaceState({}, "", url.toString());
     }
-  }, []);
-  const days = [
-    ...Array.from(new Set(groups.map((group) => group.time.split(",")[0]).filter(Boolean)))
+  }, [loaded]);
+
+  const groupDays = useMemo(() => groups.map((group) => (group.day ?? group.time.split(",")[0]).trim()).filter(Boolean), [groups]);
+  const days = useMemo(() => [
+    ...Array.from(new Set(groupDays))
       .sort((first, second) => weekdayOrder.indexOf(first) - weekdayOrder.indexOf(second)),
     "Усі дні",
-  ];
+  ], [groupDays]);
   const filtered = useMemo(() => groups.filter((group) => {
+    const groupDay = (group.day ?? group.time.split(",")[0]).trim();
     const haystack = `${group.title} ${group.leaders} ${group.address ?? ""}`.toLocaleLowerCase("uk");
-    return (day === "Усі дні" || group.time.startsWith(day)) && haystack.includes(query.trim().toLocaleLowerCase("uk"));
+    return (day === "Усі дні" || groupDay === day) && haystack.includes(query.trim().toLocaleLowerCase("uk"));
   }), [groups, query, day]);
   const active = filtered[selected] ?? filtered[0];
 
@@ -54,18 +75,17 @@ export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group
   function changeFilters(next?: string) { if (next !== undefined) setQuery(next); setSelected(0); }
 
   function openRegistration() {
-    const activeIndex = active ? groups.indexOf(active) : -1;
-    if (activeIndex >= 0) setChosenGroups([activeIndex]);
+    if (active) setChosenGroups([active.id]);
     startedAt.current = Date.now();
     setSubmitState("idle");
     setSubmitMessage("");
     setFormOpen(true);
   }
 
-  function toggleGroup(index: number) {
-    setChosenGroups((current) => current.includes(index)
-      ? current.filter((item) => item !== index)
-      : current.length < 2 ? [...current, index] : current);
+  function toggleGroup(id: number) {
+    setChosenGroups((current) => current.includes(id)
+      ? current.filter((item) => item !== id)
+      : current.length < 2 ? [...current, id] : current);
   }
 
   async function submitApplication(event: FormEvent<HTMLFormElement>) {
@@ -112,10 +132,10 @@ export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group
     </div>
     <div className="groups-explorer-layout">
       <div className="groups-results" aria-live="polite">
-        {filtered.length ? filtered.map((group, index) => <button type="button" className={`group-result ${active === group ? "is-active" : ""}`} onClick={() => setSelected(index)} key={`${group.title}-${group.address}`}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{group.title}</strong><small>{group.leaders}</small><b>{group.time}</b><address>{group.address || "Адресу уточнюйте у ведучого"}</address></div></button>) : <p className="empty-result">За цими параметрами груп не знайдено.</p>}
+        {filtered.length ? filtered.map((group, index) => <button type="button" className={`group-result ${active === group ? "is-active" : ""}`} onClick={() => setSelected(index)} key={group.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{group.title}</strong><small>{group.leaders}</small><b>{group.time}</b><address>{group.address || "Адресу уточнюйте у ведучого"}</address></div></button>) : <p className="empty-result">За цими параметрами груп не знайдено.</p>}
       </div>
       <div className="group-map-card">
-        {active?.coordinates ? <><div className="group-map-info"><div><span>Обрана група</span><strong>{active.title}</strong><small>{active.address}</small></div><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.coordinates)}`} target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div><iframe key={active.coordinates} src={`https://www.google.com/maps?q=${encodeURIComponent(active.coordinates)}&z=17&output=embed`} title={`${active.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></> : <div className="map-unavailable"><strong>{active?.title}</strong><p>Адресу цієї групи потрібно уточнити у ведучого.</p></div>}
+        {active?.coordinates ? <><div className="group-map-info"><div><span>Обрана група</span><strong>{active.title}</strong><small>{active.address || "Адресу уточнюйте у ведучого"}</small></div><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.coordinates)}`} target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div><iframe key={active.coordinates} src={`https://www.google.com/maps?q=${encodeURIComponent(active.coordinates)}&z=17&output=embed`} title={`${active.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></> : <div className="map-unavailable"><strong>{active?.title}</strong><p>Адресу цієї групи потрібно уточнити у ведучого.</p></div>}
       </div>
     </div>
     </>}
@@ -134,9 +154,9 @@ export function GroupsExplorer({ groups, launcherOnly = false }: { groups: Group
           <form className="group-application-form" onSubmit={submitApplication}>
             <div className="group-form-heading"><span>Коротка анкета</span><strong>{chosenGroups.length}/2 групи</strong></div>
             <fieldset className="group-form-groups"><legend>Оберіть одну або дві групи *</legend><p>Одночасно можна записатися максимум у дві домашні групи.</p><div>{groups.map((group, index) => {
-              const checked = chosenGroups.includes(index);
+              const checked = chosenGroups.includes(group.id);
               const disabled = !checked && chosenGroups.length >= 2;
-              return <button type="button" role="checkbox" aria-checked={checked} disabled={disabled} className={checked ? "is-selected" : disabled ? "is-disabled" : ""} onClick={() => toggleGroup(index)} key={`${group.title}-${index}`}><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small><em>{group.address || "Адресу уточнюйте у ведучого"}</em></span><Check aria-hidden="true" /></button>;
+              return <button type="button" role="checkbox" aria-checked={checked} disabled={disabled} className={checked ? "is-selected" : disabled ? "is-disabled" : ""} onClick={() => toggleGroup(group.id)} key={group.id}><span><i>{String(index + 1).padStart(2, "0")}</i><b>{group.title}</b><small>{group.leaders} · {group.time}</small><em>{group.address || "Адресу уточнюйте у ведучого"}</em></span><Check aria-hidden="true" /></button>;
             })}</div></fieldset>
             <div className="group-form-contact-fields">
               <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
