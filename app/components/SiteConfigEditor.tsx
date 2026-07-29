@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, ArrowDown, ArrowUp, Globe, Image, MapPin, Megaphone, Plus, Save, Trash2, Video, X } from "lucide-react";
+import { AlertCircle, ArrowDown, ArrowUp, Globe, Image, MapPin, Megaphone, Play, Plus, Save, Trash2, Video, X } from "lucide-react";
 import { MapPicker, MapPickerValue } from "./MapPicker";
 import { defaultConfig } from "./SiteConfig";
-import type { SiteConfig, ServiceLocationConfig, TeamMemberConfig, Announcement, HeroConfig } from "./SiteConfig";
+import type { SiteConfig, ServiceLocationConfig, TeamMemberConfig, Announcement, HeroConfig, PromoConfig } from "./SiteConfig";
 
-type SubTab = "hero" | "announcement" | "locations" | "team";
+type SubTab = "hero" | "announcement" | "promo" | "locations" | "team";
 
 const API_PREFIX = "/admin/api";
 
@@ -69,6 +69,7 @@ export function SiteConfigEditor() {
 
   const hero = config.hero ?? defaultConfig.hero;
   const announcement = config.announcement;
+  const promo = config.promo ?? defaultConfig.promo;
   const locations = config.serviceLocations ?? defaultConfig.serviceLocations ?? [];
   const team = config.team ?? defaultConfig.team ?? [];
 
@@ -113,6 +114,10 @@ export function SiteConfigEditor() {
 
   function updateHero(next: Partial<HeroConfig>) {
     setConfig((prev) => ({ ...prev, hero: { ...defaultConfig.hero, ...(prev.hero || {}), ...next } }));
+  }
+
+  function updatePromo(next: Partial<PromoConfig>) {
+    setConfig((prev) => ({ ...prev, promo: { ...defaultConfig.promo, ...(prev.promo || {}), ...next } }));
   }
 
   function updateAnnouncement(next: Partial<Announcement> | null) {
@@ -188,6 +193,7 @@ export function SiteConfigEditor() {
   const tabs: { key: SubTab; label: string; icon: typeof Video }[] = [
     { key: "hero", label: "Hero", icon: Video },
     { key: "announcement", label: "Анонс", icon: Megaphone },
+    { key: "promo", label: "Промо під hero", icon: Play },
     { key: "locations", label: "Локації", icon: MapPin },
     { key: "team", label: "Служителі", icon: Globe },
   ];
@@ -313,6 +319,63 @@ export function SiteConfigEditor() {
                   value={announcement.href || ""}
                   onChange={(e) => updateAnnouncement({ href: e.target.value })}
                   placeholder="/groups"
+                  className={inputClass}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {active === "promo" && (
+        <div className="space-y-4">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={!!promo.enabled}
+              onChange={(e) => updatePromo({ enabled: e.target.checked })}
+              className="h-4 w-4 rounded border-[var(--line)] accent-[var(--wine)]"
+            />
+            <span className="text-sm text-[var(--ink)]">Показувати блок під hero</span>
+          </label>
+          {promo.enabled && (
+            <>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Відео URL</label>
+                  <input
+                    value={promo.videoUrl || ""}
+                    onChange={(e) => updatePromo({ videoUrl: e.target.value })}
+                    placeholder="/media/promo.mp4"
+                    className={attempted && !promo.videoUrl.trim() ? inputErrorClass : inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Poster (необов’язково)</label>
+                  <input
+                    value={promo.posterUrl || ""}
+                    onChange={(e) => updatePromo({ posterUrl: e.target.value })}
+                    placeholder="/media/promo-poster.jpg"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Заголовок</label>
+                <input
+                  value={promo.title || ""}
+                  onChange={(e) => updatePromo({ title: e.target.value })}
+                  placeholder="Назва події"
+                  className={attempted && !promo.title.trim() ? inputErrorClass : inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Опис</label>
+                <textarea
+                  value={promo.description || ""}
+                  onChange={(e) => updatePromo({ description: e.target.value })}
+                  rows={4}
+                  placeholder="Короткий опис..."
                   className={inputClass}
                 />
               </div>

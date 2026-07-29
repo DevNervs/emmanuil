@@ -69,8 +69,17 @@ export interface TelegramCallbackQuery {
 export interface SiteConfig {
   hero?: HeroConfig;
   announcement?: Announcement | null;
+  promo?: PromoConfig;
   serviceLocations?: ServiceLocationConfig[];
   team?: TeamMemberConfig[];
+}
+
+export interface PromoConfig {
+  enabled: boolean;
+  videoUrl: string;
+  posterUrl?: string;
+  title: string;
+  description: string;
 }
 
 export interface HeroConfig {

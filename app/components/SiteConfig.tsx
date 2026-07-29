@@ -17,6 +17,14 @@ export type Announcement = {
   enabled: boolean;
 };
 
+export type PromoConfig = {
+  enabled: boolean;
+  videoUrl: string;
+  posterUrl?: string;
+  title: string;
+  description: string;
+};
+
 export type TeamMember = {
   id: number;
   name: string;
@@ -29,6 +37,7 @@ export type TeamMember = {
 export type SiteConfig = {
   hero?: HeroConfig;
   announcement?: Announcement | null;
+  promo?: PromoConfig;
   serviceLocations?: ServiceLocation[];
   team?: TeamMember[];
 };
@@ -44,6 +53,13 @@ export const defaultConfig: Required<SiteConfig> = {
     posterSrcSet: defaultPosterSrcSet,
   },
   announcement: defaultAnnouncement,
+  promo: {
+    enabled: false,
+    videoUrl: "",
+    posterUrl: "",
+    title: "",
+    description: "",
+  },
   serviceLocations: defaultServiceLocations,
   team: defaultTeam as TeamMember[],
 };
@@ -63,6 +79,7 @@ function mergeConfig(api: SiteConfig): Required<SiteConfig> {
     hero: { ...defaultConfig.hero, ...(api.hero || {}) },
     announcement:
       api.announcement !== undefined ? api.announcement : defaultConfig.announcement,
+    promo: api.promo ? { ...defaultConfig.promo, ...api.promo } : defaultConfig.promo,
     serviceLocations:
       api.serviceLocations?.length ? api.serviceLocations : defaultConfig.serviceLocations,
     team: api.team?.length ? api.team : defaultConfig.team,

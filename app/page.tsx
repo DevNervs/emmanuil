@@ -3,6 +3,7 @@ import { GroupsExplorer } from "./components/GroupsExplorer";
 import { HeroAnnouncement } from "./components/HeroAnnouncement";
 import { HeroLocations } from "./components/HeroLocations";
 import { HeroVideo } from "./components/HeroVideo";
+import { PromoSection } from "./components/PromoSection";
 import { groupSeason, groups } from "./content";
 import { pageMetadata } from "./seo";
 
@@ -61,6 +62,8 @@ export default function Home() {
         </section>
 
         <HeroAnnouncement />
+
+        <PromoSection />
 
         {/* Home Groups Section */}
         <section data-header-theme="light" className="home-season" aria-labelledby="home-season-title">
