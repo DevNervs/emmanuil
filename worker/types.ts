@@ -77,7 +77,6 @@ export interface SiteConfig {
 export interface PromoConfig {
   enabled: boolean;
   videoUrl: string;
-  posterUrl?: string;
   title: string;
   description: string;
 }

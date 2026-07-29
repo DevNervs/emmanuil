@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Calendar, MapPin, Users, Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { useSiteConfig } from "./SiteConfig";
 
 export function PromoSection() {
@@ -32,13 +32,12 @@ export function PromoSection() {
 
   return (
     <section data-header-theme="light" className="promo-section overflow-hidden border-b border-[var(--line)] bg-[var(--paper)]">
-      <div className="grid h-[80vh] min-h-[28rem] grid-cols-1 lg:grid-cols-[auto_1fr] lg:h-[90vh] lg:min-h-[36rem]">
-        <div className="relative flex h-[50vh] min-h-[20rem] items-center justify-center bg-black lg:h-full lg:min-h-0">
+      <div className="grid h-auto min-h-[32rem] grid-cols-1 lg:min-h-[40rem] lg:grid-cols-[auto_1fr]">
+        <div className="relative flex h-[55vh] min-h-[18rem] items-center justify-center bg-black lg:h-full lg:min-h-0">
           <video
             ref={videoRef}
-            className="h-full max-h-full w-auto max-w-full object-contain"
+            className="h-full w-auto max-w-full object-contain"
             src={promo.videoUrl}
-            poster={promo.posterUrl || undefined}
             autoPlay
             muted={muted}
             loop
@@ -56,49 +55,15 @@ export function PromoSection() {
           </button>
         </div>
 
-        <div className="flex h-full min-h-0 flex-col justify-center overflow-y-auto bg-[var(--paper)] p-6 lg:justify-start lg:p-10">
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
+        <div className="flex h-auto min-h-0 flex-col justify-center bg-[var(--paper)] p-6 lg:h-full lg:p-10">
+          <div className="flex w-full max-w-2xl flex-col gap-4">
             <p className="overline">Анонс</p>
-            <h2 className="font-[var(--serif)] text-3xl font-semibold leading-tight text-[var(--ink)] md:text-4xl">
+            <h2 className="font-[var(--serif)] text-2xl font-semibold leading-tight text-[var(--ink)] md:text-3xl lg:text-4xl">
               {promo.title}
             </h2>
             <p className="whitespace-pre-wrap text-base leading-relaxed text-[var(--muted)] md:text-lg">
               {promo.description}
             </p>
-
-            <div className="grid grid-cols-1 gap-4 rounded-xl border border-[var(--line)] bg-white p-5 shadow-sm md:grid-cols-3">
-              <div className="flex flex-col gap-1.5">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--wine)]">
-                  <Calendar className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="uppercase tracking-wide">Дати</span>
-                </div>
-                <p className="text-sm text-[var(--ink)]">27.07 - 02.08</p>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--wine)]">
-                  <MapPin className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="uppercase tracking-wide">Місце</span>
-                </div>
-                <p className="text-sm text-[var(--ink)]">с.Заріччя, база «Золота генерація»</p>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <div className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--wine)]">
-                  <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  <span className="uppercase tracking-wide">Вік</span>
-                </div>
-                <p className="text-sm text-[var(--ink)]">9 - 15 років</p>
-              </div>
-            </div>
-
-            <a
-              href="https://www.instagram.com/p/DYmrIdmop8z/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="button button-wine w-fit"
-            >
-              <span>Детальніше</span>
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
           </div>
         </div>
       </div>

@@ -20,7 +20,6 @@ export type Announcement = {
 export type PromoConfig = {
   enabled: boolean;
   videoUrl: string;
-  posterUrl?: string;
   title: string;
   description: string;
 };
@@ -56,10 +55,9 @@ export const defaultConfig: Required<SiteConfig> = {
   promo: {
     enabled: true,
     videoUrl: "/media/promo-camp.mp4",
-    posterUrl: "",
     title: "Літній табір em_kids_camp",
     description:
-      "Запрошуємо дітей та підлітків 9-15 років на незабутній літній табір em_kids_camp.\n\nЧекає класний час разом з іграми, пригодами, новими друзями, творчими активностями, біблійними темами, молитвою та прославленням.\n\nУ програмі:\n• насичена програма;\n• ігри, квести та командні завдання;\n• творчі активності;\n• нові знайомства та друзі;\n• біблійні теми;\n• молитва та прославлення;\n• багато радості, сміху й незабутніх моментів.\n\nЧекаємо саме на тебе!",
+      "Запрошуємо дітей та підлітків 9-15 років на класний час разом — з іграми, пригодами, новими друзями, теплою атмосферою та біблійними темами.",
   },
   serviceLocations: defaultServiceLocations,
   team: defaultTeam as TeamMember[],

@@ -193,7 +193,7 @@ export function SiteConfigEditor() {
   const tabs: { key: SubTab; label: string; icon: typeof Video }[] = [
     { key: "hero", label: "Hero", icon: Video },
     { key: "announcement", label: "Анонс", icon: Megaphone },
-    { key: "promo", label: "Промо під hero", icon: Play },
+    { key: "promo", label: "Анонс", icon: Play },
     { key: "locations", label: "Локації", icon: MapPin },
     { key: "team", label: "Служителі", icon: Globe },
   ];
@@ -340,25 +340,14 @@ export function SiteConfigEditor() {
           </label>
           {promo.enabled && (
             <>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Відео URL</label>
-                  <input
-                    value={promo.videoUrl || ""}
-                    onChange={(e) => updatePromo({ videoUrl: e.target.value })}
-                    placeholder="/media/promo.mp4"
-                    className={attempted && !promo.videoUrl.trim() ? inputErrorClass : inputClass}
-                  />
-                </div>
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Poster (необов’язково)</label>
-                  <input
-                    value={promo.posterUrl || ""}
-                    onChange={(e) => updatePromo({ posterUrl: e.target.value })}
-                    placeholder="/media/promo-poster.jpg"
-                    className={inputClass}
-                  />
-                </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Файл відео</label>
+                <input
+                  value={promo.videoUrl || ""}
+                  onChange={(e) => updatePromo({ videoUrl: e.target.value })}
+                  placeholder="/media/promo-camp.mp4"
+                  className={attempted && !promo.videoUrl.trim() ? inputErrorClass : inputClass}
+                />
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-[var(--ink)]">Заголовок</label>
