@@ -32,8 +32,8 @@ export function PromoSection() {
 
   return (
     <section data-header-theme="light" className="promo-section overflow-hidden border-b border-[var(--line)] bg-[var(--paper)]">
-      <div className="grid h-[80vh] min-h-[28rem] grid-cols-[auto_1fr] lg:h-[90vh] lg:min-h-[36rem]">
-        <div className="relative flex h-full min-h-0 items-center justify-center bg-black">
+      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] lg:h-[90vh] lg:min-h-[36rem]">
+        <div className="relative flex h-[50vh] min-h-[20rem] items-center justify-center bg-black lg:h-full lg:min-h-0">
           <video
             ref={videoRef}
             className="h-full max-h-full w-auto max-w-full object-contain"
@@ -56,15 +56,15 @@ export function PromoSection() {
           </button>
         </div>
 
-        <div className="flex h-full min-h-0 flex-col justify-center overflow-y-auto bg-[var(--paper)] p-6 lg:p-10">
-          <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+        <div className="flex min-h-0 flex-col justify-center overflow-y-auto bg-[var(--paper)] p-5 lg:h-full lg:p-10">
+          <div className="mx-auto flex w-full max-w-lg flex-col gap-3">
             <p className="overline">Анонс</p>
             <h2 className="font-[var(--serif)] text-2xl font-semibold leading-tight text-[var(--ink)] md:text-3xl">
               {promo.title}
             </h2>
             <p className="text-sm leading-relaxed text-[var(--muted)] md:text-base">{promo.description}</p>
 
-            <div className="mt-2 flex flex-col gap-3 rounded-xl border border-[var(--line)] bg-white p-5 shadow-sm">
+            <div className="mt-1 flex flex-col gap-2.5 rounded-xl border border-[var(--line)] bg-white p-4 shadow-sm">
               <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
                 <Calendar className="h-4 w-4 shrink-0 text-[var(--wine)]" aria-hidden="true" />
                 <span>27.07 - 02.08</span>
