@@ -14,11 +14,23 @@ export function PromoSection() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
-    video.play().catch(() => {});
+
+    // Try to autoplay with sound; if blocked, fall back to muted autoplay.
+    video.muted = false;
+    video
+      .play()
+      .then(() => setMuted(false))
+      .catch(() => {
+        video.muted = true;
+        setMuted(true);
+        video.play().catch(() => {});
+      });
+
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
@@ -28,10 +40,15 @@ export function PromoSection() {
   const toggleSound = () => {
     const video = videoRef.current;
     if (!video) return;
+
     if (!playing) {
       video.muted = false;
       setMuted(false);
-      video.play().catch(() => {});
+      video.play().catch(() => {
+        video.muted = true;
+        setMuted(true);
+        video.play().catch(() => {});
+      });
     } else {
       const next = !muted;
       setMuted(next);
@@ -43,8 +60,8 @@ export function PromoSection() {
 
   return (
     <section data-header-theme="light" className="promo-section border-b border-[var(--line)] bg-[var(--paper)]">
-      <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="relative aspect-[9/16] w-full bg-[var(--ink)]">
+      <div className="grid h-auto min-h-[28rem] grid-cols-1 lg:h-[80vh] lg:grid-cols-2 lg:max-h-[900px]">
+        <div className="relative h-[70vh] w-full bg-[var(--ink)] lg:h-full lg:max-h-none">
           <video
             ref={videoRef}
             className="h-full w-full object-cover"
@@ -67,10 +84,10 @@ export function PromoSection() {
           </button>
         </div>
 
-        <div className="flex h-full items-center justify-center bg-[var(--paper)] p-8 md:p-12 lg:p-16">
+        <div className="flex h-auto min-h-0 flex-col justify-center overflow-y-auto bg-[var(--paper)] p-8 md:p-12 lg:h-full lg:p-16">
           <div className="flex w-full max-w-lg flex-col gap-5">
             <div className="h-1 w-20 bg-[var(--wine)]" />
-            <h2 className="font-[var(--serif)] text-3xl font-semibold leading-tight text-[var(--ink)] md:text-4xl lg:text-5xl">
+            <h2 className="font-[var(--serif)] text-3xl font-semibold leading-tight text-[var(--ink)] md:text-4xl">
               {promo.title}
             </h2>
             <p className="whitespace-pre-wrap text-base leading-relaxed text-[var(--muted)] md:text-lg">
