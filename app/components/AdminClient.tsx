@@ -1,17 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  AlertCircle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
   Download,
   FileText,
   LogOut,
+  MapPin,
+  Pencil,
   Plus,
   Save,
+  Search,
   Shield,
   Trash2,
   Users,
+  X,
 } from "lucide-react";
-import { MapPicker } from "./MapPicker";
+import { MapPicker, MapPickerValue } from "./MapPicker";
 
 type Group = {
   id: number;
@@ -45,6 +56,26 @@ type Application = {
 
 const API_PREFIX = "/admin/api";
 
+const ukrainianDays = [
+  "Понеділок",
+  "Вівторок",
+  "Середа",
+  "Четвер",
+  "П’ятниця",
+  "Субота",
+  "Неділя",
+];
+
+const dayOrder: Record<string, number> = {
+  Понеділок: 1,
+  Вівторок: 2,
+  Середа: 3,
+  Четвер: 4,
+  "П’ятниця": 5,
+  Субота: 6,
+  Неділя: 7,
+};
+
 async function api<T>(
   method: string,
   path: string,
@@ -70,11 +101,22 @@ export function AdminClient() {
   const [password, setPassword] = useState("");
 
   const [groups, setGroups] = useState<Group[]>([]);
-  const [apps, setApps] = useState<{ apps: Application[]; total: number }>({ apps: [], total: 0 });
+  const [apps, setApps] = useState<{ apps: Application[]; total: number }>({
+    apps: [],
+    total: 0,
+  });
   const [appOffset, setAppOffset] = useState(0);
   const [admins, setAdmins] = useState<number[]>([]);
   const [newAdmin, setNewAdmin] = useState("");
-  const [mapGroupId, setMapGroupId] = useState<number | null>(null);
+
+  const [query, setQuery] = useState("");
+  const [dayFilter, setDayFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"title" | "time" | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -87,6 +129,11 @@ export function AdminClient() {
     if (tab === "admins") loadAdmins();
   }, [auth, tab, appOffset]);
 
+  function show(msg: string) {
+    setMessage(msg);
+    setTimeout(() => setMessage(""), 4000);
+  }
+
   async function checkAuth() {
     try {
       await api<{ ok: true }>("GET", "/me");
@@ -94,11 +141,6 @@ export function AdminClient() {
     } catch {
       setAuth(false);
     }
-  }
-
-  function show(msg: string) {
-    setMessage(msg);
-    setTimeout(() => setMessage(""), 4000);
   }
 
   async function login(e: React.FormEvent) {
@@ -132,9 +174,12 @@ export function AdminClient() {
     }
   }
 
-  async function saveGroups() {
+  async function persist(nextGroups: Group[]) {
+    setGroups(nextGroups);
     try {
-      const data = await api<{ groups: Group[] }>("PUT", "/groups", { groups });
+      const data = await api<{ groups: Group[] }>("PUT", "/groups", {
+        groups: nextGroups,
+      });
       setGroups(data.groups);
       show("Групи збережено");
     } catch (err: any) {
@@ -142,25 +187,106 @@ export function AdminClient() {
     }
   }
 
-  function addGroup() {
-    setGroups((g) => [
-      ...g,
-      {
-        id: Date.now(),
-        title: "",
-        leaders: "",
-        description: "",
-        time: "",
-      },
-    ]);
+  function openAdd() {
+    setEditingGroup({
+      id: Date.now(),
+      title: "",
+      leaders: "",
+      description: "",
+      time: "",
+      day: "",
+      address: "",
+      coordinates: "",
+      showOnHome: true,
+    });
+    setAttempted(false);
+    setShowMapPicker(false);
   }
 
-  function updateGroup(id: number, patch: Partial<Group>) {
-    setGroups((g) => g.map((gr) => (gr.id === id ? { ...gr, ...patch } : gr)));
+  function openEdit(group: Group) {
+    setEditingGroup({ ...group });
+    setAttempted(false);
+    setShowMapPicker(false);
   }
 
-  function deleteGroup(id: number) {
-    setGroups((g) => g.filter((gr) => gr.id !== id));
+  function duplicateGroup(group: Group) {
+    setEditingGroup({
+      ...group,
+      id: Date.now(),
+      title: `${group.title} (копія)`,
+    });
+    setAttempted(false);
+    setShowMapPicker(false);
+  }
+
+  async function toggleShow(id: number) {
+    const next = groups.map((g) =>
+      g.id === id ? { ...g, showOnHome: !g.showOnHome } : g,
+    );
+    await persist(next);
+  }
+
+  function handleSort(key: "title" | "time") {
+    if (sortBy === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(key);
+      setSortDir("asc");
+    }
+  }
+
+  function timeValue(time: string): number {
+    const m = time.match(/(\d{1,2}):(\d{2})/);
+    if (!m) return 0;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+
+  const visibleGroups = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let list = groups.filter((g) => {
+      const matchesQuery =
+        !q ||
+        g.title.toLowerCase().includes(q) ||
+        g.leaders.toLowerCase().includes(q) ||
+        (g.address || "").toLowerCase().includes(q);
+      const matchesDay = dayFilter === "all" || g.day === dayFilter;
+      return matchesQuery && matchesDay;
+    });
+
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortBy === "title") {
+      list = [...list].sort(
+        (a, b) => a.title.localeCompare(b.title, "uk") * dir,
+      );
+    } else if (sortBy === "time") {
+      list = [...list].sort((a, b) => {
+        const dayDiff =
+          (dayOrder[a.day || ""] || 8) - (dayOrder[b.day || ""] || 8);
+        if (dayDiff !== 0) return dayDiff * dir;
+        const timeDiff = timeValue(a.time) - timeValue(b.time);
+        if (timeDiff !== 0) return timeDiff * dir;
+        return a.title.localeCompare(b.title, "uk") * dir;
+      });
+    }
+    return list;
+  }, [groups, query, dayFilter, sortBy, sortDir]);
+
+  function handleSaveGroup() {
+    setAttempted(true);
+    if (!editingGroup) return;
+    if (
+      !editingGroup.title.trim() ||
+      !editingGroup.leaders.trim() ||
+      !editingGroup.time.trim()
+    ) {
+      return;
+    }
+    const next = groups.some((g) => g.id === editingGroup.id)
+      ? groups.map((g) => (g.id === editingGroup.id ? editingGroup : g))
+      : [...groups, editingGroup];
+    persist(next);
+    setEditingGroup(null);
+    setAttempted(false);
   }
 
   async function loadApps() {
@@ -197,7 +323,9 @@ export function AdminClient() {
 
   async function exportCsv() {
     try {
-      const res = await fetch(`${API_PREFIX}/export`, { credentials: "include" });
+      const res = await fetch(`${API_PREFIX}/export`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -224,7 +352,9 @@ export function AdminClient() {
     const userId = parseInt(newAdmin, 10);
     if (!Number.isFinite(userId)) return show("Некоректний ID");
     try {
-      const data = await api<{ admins: number[] }>("POST", "/admins", { userId });
+      const data = await api<{ admins: number[] }>("POST", "/admins", {
+        userId,
+      });
       setAdmins(data.admins);
       setNewAdmin("");
       show("Адміна додано");
@@ -246,8 +376,10 @@ export function AdminClient() {
   const isError =
     message.includes("Помилка") || message.toLowerCase().includes("error");
 
-  const mapGroup =
-    mapGroupId !== null ? groups.find((g) => g.id === mapGroupId) : null;
+  const inputClass =
+    "w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]";
+  const inputErrorClass =
+    "w-full rounded-lg border border-red-400 bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-200";
 
   if (auth === null) {
     return (
@@ -286,7 +418,7 @@ export function AdminClient() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Пароль"
-              className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-3 text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
+              className={inputClass}
               required
             />
             <button
@@ -301,16 +433,50 @@ export function AdminClient() {
     );
   }
 
+  const navItems = [
+    { key: "groups" as const, label: "Групи", icon: Users },
+    { key: "apps" as const, label: "Заявки", icon: FileText },
+    { key: "admins" as const, label: "Адміни", icon: Shield },
+  ];
+
   return (
-    <main className="min-h-screen bg-[var(--paper)] p-4 pb-12 font-[var(--sans)] text-[var(--ink)] md:p-8">
-      <div className="mx-auto max-w-6xl space-y-5">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <Shield className="h-7 w-7 text-[var(--wine)]" aria-hidden="true" />
-            <h1 className="font-[var(--serif)] text-xl font-semibold uppercase tracking-[0.15em] text-[var(--wine)] md:text-2xl">
+    <div className="flex min-h-screen bg-[var(--paper)] font-[var(--sans)] text-[var(--ink)]">
+      <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-[var(--line)] bg-white shadow-sm md:flex">
+        <div className="flex h-16 items-center gap-3 border-b border-[var(--line)] px-6">
+          <Shield className="h-6 w-6 text-[var(--wine)]" aria-hidden="true" />
+          <span className="font-[var(--serif)] text-lg font-semibold uppercase tracking-widest text-[var(--wine)]">
+            Адмінка
+          </span>
+        </div>
+        <nav className="flex-1 space-y-1 p-4">
+          {navItems.map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                tab === key
+                  ? "bg-[var(--wine)] text-white"
+                  : "text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+              }`}
+            >
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </nav>
+      </aside>
+
+      <div className="flex flex-1 flex-col">
+        <header className="flex h-16 items-center justify-between border-b border-[var(--line)] bg-white px-4 shadow-sm md:px-8">
+          <div className="flex items-center gap-3 md:hidden">
+            <Shield className="h-6 w-6 text-[var(--wine)]" aria-hidden="true" />
+            <span className="font-[var(--serif)] text-lg font-semibold uppercase tracking-widest text-[var(--wine)]">
               Адміністрація
-            </h1>
+            </span>
           </div>
+          <h1 className="hidden font-[var(--serif)] text-xl font-semibold uppercase tracking-[0.15em] text-[var(--wine)] md:block">
+            Адміністрація
+          </h1>
           <button
             onClick={logout}
             className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-4 py-2 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
@@ -320,60 +486,22 @@ export function AdminClient() {
           </button>
         </header>
 
-        {message && (
-          <div
-            className={`rounded-lg border px-4 py-3 text-sm ${
-              isError
-                ? "border-red-200 bg-red-50 text-red-700"
-                : "border-[var(--wine)]/20 bg-[var(--rose)] text-[var(--wine-dark)]"
-            }`}
-          >
-            {message}
-          </div>
-        )}
+        <main className="flex-1 overflow-auto p-4 md:p-8">
+          {message && (
+            <div
+              className={`mb-5 rounded-lg border px-4 py-3 text-sm ${
+                isError
+                  ? "border-red-200 bg-red-50 text-red-700"
+                  : "border-[var(--wine)]/20 bg-[var(--rose)] text-[var(--wine-dark)]"
+              }`}
+            >
+              {message}
+            </div>
+          )}
 
-        <nav className="rounded-2xl border border-[var(--line)] bg-white p-2 shadow-sm">
-          <div className="flex flex-wrap gap-1">
-            <button
-              onClick={() => setTab("groups")}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                tab === "groups"
-                  ? "border-b-2 border-[var(--wine)] text-[var(--wine)]"
-                  : "text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-              }`}
-            >
-              <Users className="h-4 w-4" aria-hidden="true" />
-              Групи
-            </button>
-            <button
-              onClick={() => setTab("apps")}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                tab === "apps"
-                  ? "border-b-2 border-[var(--wine)] text-[var(--wine)]"
-                  : "text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-              }`}
-            >
-              <FileText className="h-4 w-4" aria-hidden="true" />
-              Заявки
-            </button>
-            <button
-              onClick={() => setTab("admins")}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-                tab === "admins"
-                  ? "border-b-2 border-[var(--wine)] text-[var(--wine)]"
-                  : "text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]"
-              }`}
-            >
-              <Shield className="h-4 w-4" aria-hidden="true" />
-              Адміни
-            </button>
-          </div>
-        </nav>
-
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
           {tab === "groups" && (
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
+              <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-[var(--wine)]" aria-hidden="true" />
                   <h2 className="font-[var(--serif)] text-xl font-semibold text-[var(--ink)]">
@@ -381,7 +509,7 @@ export function AdminClient() {
                   </h2>
                 </div>
                 <button
-                  onClick={addGroup}
+                  onClick={openAdd}
                   className="inline-flex items-center gap-2 rounded-xl bg-[var(--wine)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wine-dark)]"
                 >
                   <Plus className="h-4 w-4" aria-hidden="true" />
@@ -389,105 +517,167 @@ export function AdminClient() {
                 </button>
               </div>
 
-              <div className="grid gap-4">
-                {groups.map((g) => (
-                  <div
-                    key={g.id}
-                    className="rounded-xl border border-[var(--line)] bg-white p-4 shadow-sm"
-                  >
-                    <div className="mb-4 flex items-center justify-between">
-                      <span className="font-[var(--serif)] text-sm font-medium uppercase tracking-wider text-[var(--wine)]">
-                        Група №{g.id}
-                      </span>
-                      <button
-                        onClick={() => deleteGroup(g.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" aria-hidden="true" />
-                        Видалити
-                      </button>
-                    </div>
-
-                    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                      <input
-                        value={g.title}
-                        onChange={(e) => updateGroup(g.id, { title: e.target.value })}
-                        placeholder="Назва групи"
-                        className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
-                      />
-                      <input
-                        value={g.leaders}
-                        onChange={(e) => updateGroup(g.id, { leaders: e.target.value })}
-                        placeholder="Лідери"
-                        className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
-                      />
-                      <input
-                        value={g.time}
-                        onChange={(e) => updateGroup(g.id, { time: e.target.value })}
-                        placeholder="Час зустрічі"
-                        className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
-                      />
-                      <input
-                        value={g.day || ""}
-                        onChange={(e) => updateGroup(g.id, { day: e.target.value })}
-                        placeholder="День тижня"
-                        className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
-                      />
-                      <input
-                        value={g.address || ""}
-                        onChange={(e) => updateGroup(g.id, { address: e.target.value })}
-                        placeholder="Адреса"
-                        className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
-                      />
-                      <input
-                        value={g.coordinates || ""}
-                        onChange={(e) => updateGroup(g.id, { coordinates: e.target.value })}
-                        placeholder="Координати"
-                        className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setMapGroupId(g.id)}
-                        className="inline-flex w-full items-center gap-2 rounded-lg border border-[var(--line)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
-                      >
-                        🗺 Карта
-                      </button>
-                      <textarea
-                        value={g.description}
-                        onChange={(e) => updateGroup(g.id, { description: e.target.value })}
-                        placeholder="Опис групи"
-                        rows={3}
-                        className="w-full resize-y rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)] md:col-span-2 lg:col-span-3"
-                      />
-                      <label className="flex items-center gap-2 md:col-span-2 lg:col-span-3">
-                        <input
-                          type="checkbox"
-                          checked={!!g.showOnHome}
-                          onChange={(e) => updateGroup(g.id, { showOnHome: e.target.checked })}
-                          className="h-4 w-4 rounded border-[var(--line)] accent-[var(--wine)]"
-                        />
-                        <span className="text-sm text-[var(--ink)]">Показувати на головній</span>
-                      </label>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  onClick={saveGroups}
-                  className="inline-flex items-center gap-2 rounded-xl bg-[var(--wine)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wine-dark)]"
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" aria-hidden="true" />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Пошук за назвою, лідерами чи адресою"
+                    className={`${inputClass} pl-9`}
+                  />
+                </div>
+                <select
+                  value={dayFilter}
+                  onChange={(e) => setDayFilter(e.target.value)}
+                  className="w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] focus:border-[var(--wine)] focus:outline-none lg:w-auto"
                 >
-                  <Save className="h-4 w-4" aria-hidden="true" />
-                  Зберегти
-                </button>
+                  <option value="all">Усі дні</option>
+                  {ukrainianDays.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleSort("time")}
+                    className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                      sortBy === "time"
+                        ? "border-[var(--wine)] bg-[var(--wine)]/10 text-[var(--wine-dark)]"
+                        : "border-[var(--line)] bg-white text-[var(--muted)] hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    За днем/часом
+                    {sortBy === "time" ? (
+                      sortDir === "asc" ? (
+                        <ArrowUp className="h-3 w-3" aria-hidden="true" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" aria-hidden="true" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => handleSort("title")}
+                    className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                      sortBy === "title"
+                        ? "border-[var(--wine)] bg-[var(--wine)]/10 text-[var(--wine-dark)]"
+                        : "border-[var(--line)] bg-white text-[var(--muted)] hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    За назвою
+                    {sortBy === "title" ? (
+                      sortDir === "asc" ? (
+                        <ArrowUp className="h-3 w-3" aria-hidden="true" />
+                      ) : (
+                        <ArrowDown className="h-3 w-3" aria-hidden="true" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="h-3 w-3" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
+
+              <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-white shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-[var(--paper)] text-left">
+                      <tr>
+                        <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                          Назва
+                        </th>
+                        <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                          День / Час
+                        </th>
+                        <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                          Лідери
+                        </th>
+                        <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                          Адреса
+                        </th>
+                        <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                          Показувати
+                        </th>
+                        <th className="p-3"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[var(--line)]">
+                      {visibleGroups.map((g) => (
+                        <tr key={g.id} className="hover:bg-[var(--paper)]/60">
+                          <td className="p-3 font-medium text-[var(--ink)]">
+                            {g.title}
+                          </td>
+                          <td className="p-3 text-[var(--ink)]">
+                            {g.day && (
+                              <span className="block text-[var(--ink)]">{g.day}</span>
+                            )}
+                            <span className="text-[var(--muted)]">{g.time}</span>
+                          </td>
+                          <td className="p-3 text-[var(--ink)]">{g.leaders}</td>
+                          <td className="p-3 text-[var(--muted)]">
+                            {g.address || "—"}
+                          </td>
+                          <td className="p-3">
+                            <button
+                              onClick={() => toggleShow(g.id)}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                g.showOnHome ? "bg-[var(--wine)]" : "bg-[var(--line)]"
+                              }`}
+                              aria-pressed={!!g.showOnHome}
+                              aria-label="Показувати на сайті"
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  g.showOnHome ? "translate-x-6" : "translate-x-1"
+                                }`}
+                              />
+                            </button>
+                          </td>
+                          <td className="p-3">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                title="Редагувати"
+                                onClick={() => openEdit(g)}
+                                className="inline-flex items-center rounded-lg border border-[var(--line)] p-2 text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+                              >
+                                <Pencil className="h-4 w-4" aria-hidden="true" />
+                              </button>
+                              <button
+                                title="Дублювати"
+                                onClick={() => duplicateGroup(g)}
+                                className="inline-flex items-center rounded-lg border border-[var(--line)] p-2 text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+                              >
+                                <Copy className="h-4 w-4" aria-hidden="true" />
+                              </button>
+                              <button
+                                title="Видалити"
+                                onClick={() => setConfirmDeleteId(g.id)}
+                                className="inline-flex items-center rounded-lg border border-red-200 p-2 text-red-700 transition-colors hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {visibleGroups.length === 0 && (
+                  <div className="p-8 text-center text-sm text-[var(--muted)]">
+                    Груп не знайдено
+                  </div>
+                )}
+              </div>
+            </section>
           )}
 
           {tab === "apps" && (
-            <div className="space-y-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-[var(--wine)]" aria-hidden="true" />
                   <h2 className="font-[var(--serif)] text-xl font-semibold text-[var(--ink)]">
@@ -531,14 +721,21 @@ export function AdminClient() {
                         <tr key={a.id} className="hover:bg-[var(--paper)]/60">
                           <td className="p-3 text-[var(--ink)]">{a.name}</td>
                           <td className="p-3 text-[var(--ink)]">{a.phone}</td>
-                          <td className="p-3 text-[var(--ink)]">{a.groupNames.join(", ")}</td>
+                          <td className="p-3 text-[var(--ink)]">
+                            {a.groupNames.join(", ")}
+                          </td>
                           <td className="p-3 text-[var(--ink)]">
                             {new Date(a.createdAt).toLocaleString("uk-UA")}
                           </td>
                           <td className="p-3">
                             <select
                               value={a.status || "new"}
-                              onChange={(e) => updateApp(a.id, e.target.value as Application["status"])}
+                              onChange={(e) =>
+                                updateApp(
+                                  a.id,
+                                  e.target.value as Application["status"],
+                                )
+                              }
                               className="rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2 text-sm text-[var(--ink)] transition-colors focus:border-[var(--wine)] focus:outline-none"
                             >
                               <option value="new">Нова</option>
@@ -563,43 +760,46 @@ export function AdminClient() {
               </div>
 
               {apps.total > 50 && (
-                <div className="flex items-center gap-2">
+                <div className="mt-4 flex items-center gap-2">
                   <button
                     disabled={appOffset === 0}
                     onClick={() => setAppOffset((o) => Math.max(0, o - 50))}
-                    className="rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-sm text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-sm text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
+                    <ChevronLeft className="h-4 w-4" aria-hidden="true" />
                     Назад
                   </button>
                   <span className="text-sm text-[var(--muted)]">
-                    {appOffset + 1}–{Math.min(appOffset + 50, apps.total)} з {apps.total}
+                    {appOffset + 1}–{Math.min(appOffset + 50, apps.total)} з{" "}
+                    {apps.total}
                   </span>
                   <button
                     disabled={appOffset + 50 >= apps.total}
                     onClick={() => setAppOffset((o) => o + 50)}
-                    className="rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-sm text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center gap-1 rounded-lg border border-[var(--line)] bg-white px-3 py-1.5 text-sm text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Вперед
+                    <ChevronRight className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
               )}
-            </div>
+            </section>
           )}
 
           {tab === "admins" && (
-            <div className="space-y-5">
-              <div className="flex items-center gap-2">
+            <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
+              <div className="mb-5 flex items-center gap-2">
                 <Shield className="h-5 w-5 text-[var(--wine)]" aria-hidden="true" />
                 <h2 className="font-[var(--serif)] text-xl font-semibold text-[var(--ink)]">
                   Адміни
                 </h2>
               </div>
 
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {admins.map((id) => (
                   <li
                     key={id}
-                    className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-white p-3 shadow-sm"
+                    className="flex items-center justify-between rounded-xl border border-[var(--line)] bg-[var(--paper)] p-3 shadow-sm"
                   >
                     <code className="font-mono text-sm text-[var(--ink)]">{id}</code>
                     <button
@@ -629,21 +829,256 @@ export function AdminClient() {
                   Додати
                 </button>
               </div>
-            </div>
+            </section>
           )}
-        </section>
-
-        {mapGroup && (
-          <MapPicker
-            initialAddress={mapGroup.address}
-            initialCoordinates={mapGroup.coordinates}
-            onSave={({ address, coordinates }) =>
-              updateGroup(mapGroup.id, { address, coordinates })
-            }
-            onClose={() => setMapGroupId(null)}
-          />
-        )}
+        </main>
       </div>
-    </main>
+
+      {editingGroup && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-[var(--line)] bg-white p-6 shadow-xl">
+            <div className="mb-5 flex items-center justify-between">
+              <h3 className="font-[var(--serif)] text-lg font-semibold text-[var(--wine)]">
+                {editingGroup.title.trim() || "Нова група"}
+              </h3>
+              <button
+                onClick={() => setEditingGroup(null)}
+                className="rounded-lg p-1 text-[var(--muted)] transition-colors hover:bg-[var(--paper)] hover:text-[var(--ink)]"
+                aria-label="Закрити"
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  Назва <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={editingGroup.title}
+                  onChange={(e) =>
+                    setEditingGroup({ ...editingGroup, title: e.target.value })
+                  }
+                  placeholder="Назва групи"
+                  className={
+                    attempted && !editingGroup.title.trim()
+                      ? inputErrorClass
+                      : inputClass
+                  }
+                />
+                {attempted && !editingGroup.title.trim() && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                    Вкажіть назву групи
+                  </p>
+                )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  Лідери <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={editingGroup.leaders}
+                  onChange={(e) =>
+                    setEditingGroup({ ...editingGroup, leaders: e.target.value })
+                  }
+                  placeholder="Прізвища та імена лідерів"
+                  className={
+                    attempted && !editingGroup.leaders.trim()
+                      ? inputErrorClass
+                      : inputClass
+                  }
+                />
+                {attempted && !editingGroup.leaders.trim() && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                    Вкажіть лідерів
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  Час зустрічі <span className="text-red-500">*</span>
+                </label>
+                <input
+                  value={editingGroup.time}
+                  onChange={(e) =>
+                    setEditingGroup({ ...editingGroup, time: e.target.value })
+                  }
+                  placeholder="Наприклад: Вівторок, 18:00"
+                  className={
+                    attempted && !editingGroup.time.trim()
+                      ? inputErrorClass
+                      : inputClass
+                  }
+                />
+                {attempted && !editingGroup.time.trim() && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                    <AlertCircle className="h-3 w-3" aria-hidden="true" />
+                    Вкажіть час зустрічі
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  День тижня
+                </label>
+                <select
+                  value={editingGroup.day || ""}
+                  onChange={(e) =>
+                    setEditingGroup({ ...editingGroup, day: e.target.value })
+                  }
+                  className={inputClass}
+                >
+                  <option value="">Оберіть день</option>
+                  {ukrainianDays.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  Адреса
+                </label>
+                <input
+                  value={editingGroup.address || ""}
+                  onChange={(e) =>
+                    setEditingGroup({ ...editingGroup, address: e.target.value })
+                  }
+                  placeholder="Адреса зустрічі"
+                  className={inputClass}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  Координати
+                </label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={editingGroup.coordinates || ""}
+                    readOnly
+                    placeholder="Виберіть місце на карті"
+                    className="flex-1 cursor-not-allowed rounded-lg border border-[var(--line)] bg-[var(--paper)]/60 p-2.5 text-sm text-[var(--ink)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+                  >
+                    <MapPin className="h-4 w-4" aria-hidden="true" />
+                    🗺 Вибрати на карті
+                  </button>
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-[var(--ink)]">
+                  Опис
+                </label>
+                <textarea
+                  value={editingGroup.description}
+                  onChange={(e) =>
+                    setEditingGroup({
+                      ...editingGroup,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Короткий опис групи"
+                  rows={4}
+                  className="w-full resize-y rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2.5 text-sm text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--wine)] focus:outline-none focus:ring-2 focus:ring-[var(--rose)]"
+                />
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-2 md:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={!!editingGroup.showOnHome}
+                  onChange={(e) =>
+                    setEditingGroup({
+                      ...editingGroup,
+                      showOnHome: e.target.checked,
+                    })
+                  }
+                  className="h-4 w-4 rounded border-[var(--line)] accent-[var(--wine)]"
+                />
+                <span className="text-sm text-[var(--ink)]">Показувати на сайті</span>
+              </label>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setEditingGroup(null)}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+              >
+                Скасувати
+              </button>
+              <button
+                onClick={handleSaveGroup}
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--wine)] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wine-dark)]"
+              >
+                <Save className="h-4 w-4" aria-hidden="true" />
+                Зберегти
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMapPicker && editingGroup && (
+        <MapPicker
+          initialAddress={editingGroup.address}
+          initialCoordinates={editingGroup.coordinates}
+          onSave={({ address, coordinates }: MapPickerValue) =>
+            setEditingGroup({
+              ...editingGroup,
+              address,
+              coordinates,
+            })
+          }
+          onClose={() => setShowMapPicker(false)}
+        />
+      )}
+
+      {confirmDeleteId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-2xl border border-[var(--line)] bg-white p-6 shadow-xl">
+            <h3 className="mb-2 font-[var(--serif)] text-lg font-semibold text-[var(--wine)]">
+              Підтвердіть видалення
+            </h3>
+            <p className="text-sm text-[var(--muted)]">
+              Ви впевнені, що хочете видалити групу „
+              {groups.find((g) => g.id === confirmDeleteId)?.title || ""}“?
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setConfirmDeleteId(null)}
+                className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-4 py-2 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+              >
+                Скасувати
+              </button>
+              <button
+                onClick={() => {
+                  const next = groups.filter((g) => g.id !== confirmDeleteId);
+                  persist(next);
+                  setConfirmDeleteId(null);
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                Видалити
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

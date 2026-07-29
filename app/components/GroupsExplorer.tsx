@@ -55,10 +55,32 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
   useEffect(() => {
     if (!loaded || typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("register") === "1") {
+    const register = params.get("register") === "1";
+    const groupIdParam = params.get("group");
+    const url = new URL(window.location.href);
+    let changed = false;
+
+    if (groupIdParam) {
+      const groupId = parseInt(groupIdParam, 10);
+      if (Number.isFinite(groupId) && groupId > 0) {
+        setSelected(Math.max(0, groupId - 1));
+        setChosenGroups([groupId]);
+        startedAt.current = Date.now();
+        if (register) setFormOpen(true);
+      }
+    } else if (register) {
       openRegistration();
-      const url = new URL(window.location.href);
+    }
+
+    if (params.has("register")) {
       url.searchParams.delete("register");
+      changed = true;
+    }
+    if (params.has("group")) {
+      url.searchParams.delete("group");
+      changed = true;
+    }
+    if (changed) {
       window.history.replaceState({}, "", url.toString());
     }
   }, [loaded]);
