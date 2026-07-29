@@ -57,7 +57,7 @@ export const defaultConfig: Required<SiteConfig> = {
     videoUrl: "/media/promo-camp.mp4",
     title: "Літній табір em_kids_camp",
     description:
-      "Запрошуємо дітей та підлітків 9-15 років на класний час разом — з іграми, пригодами, новими друзями, теплою атмосферою та біблійними темами.",
+      "Запрошуємо дітей та підлітків 9-15 років на незабутній літній табір em_kids_camp.\n\nЧекає класний час разом з іграми, пригодами, новими друзями, творчими активностями, біблійними темами, молитвою та прославленням.\n\nЧекаємо саме на тебе!",
   },
   serviceLocations: defaultServiceLocations,
   team: defaultTeam as TeamMember[],

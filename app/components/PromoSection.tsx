@@ -32,8 +32,8 @@ export function PromoSection() {
 
   return (
     <section data-header-theme="light" className="promo-section overflow-hidden border-b border-[var(--line)] bg-[var(--paper)]">
-      <div className="grid h-auto min-h-[32rem] grid-cols-1 lg:min-h-[40rem] lg:grid-cols-[auto_1fr]">
-        <div className="relative flex h-[55vh] min-h-[18rem] items-center justify-center bg-black lg:h-full lg:min-h-0">
+      <div className="grid h-auto grid-cols-1 lg:grid-cols-[auto_1fr]">
+        <div className="relative flex h-[45vh] min-h-[16rem] items-center justify-center bg-black lg:h-[26rem] lg:min-h-0">
           <video
             ref={videoRef}
             className="h-full w-auto max-w-full object-contain"
@@ -55,7 +55,7 @@ export function PromoSection() {
           </button>
         </div>
 
-        <div className="flex h-auto min-h-0 flex-col justify-center bg-[var(--paper)] p-6 lg:h-full lg:p-10">
+        <div className="flex h-auto flex-col justify-center bg-[var(--paper)] p-6 lg:p-10">
           <div className="flex w-full max-w-2xl flex-col gap-4">
             <p className="overline">Анонс</p>
             <h2 className="font-[var(--serif)] text-2xl font-semibold leading-tight text-[var(--ink)] md:text-3xl lg:text-4xl">
