@@ -26,15 +26,27 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
   const dialog = useRef<HTMLDivElement>(null);
   const startedAt = useRef(0);
 
-  const fallbackGroups = useMemo<Group[]>(() => propGroups.map((group, index) => ({ ...group, id: index + 1, description: "", day: group.time.split(",")[0].trim(), showOnHome: true } as Group)), [propGroups]);
-  const groups = apiGroups ?? fallbackGroups;
+  const fallbackGroups = useMemo<Group[]>(() => propGroups.map((group, index) => ({
+    ...group,
+    id: index + 1,
+    description: "",
+    day: (group.time ?? "").split(",")[0].trim(),
+    showOnHome: true,
+  } as Group)).filter((g) => g != null), [propGroups]);
+  const groups = (apiGroups?.filter((g) => g != null) ?? []).length ? apiGroups!.filter((g) => g != null) : fallbackGroups;
 
   useEffect(() => {
     fetch("/api/groups")
       .then(async (res) => {
         if (!res.ok) return;
         const data = await res.json() as { groups: Group[]; season: unknown | null };
-        if (data.groups?.length) setApiGroups(data.groups);
+        const valid = data.groups
+          ?.filter((g) => g != null)
+          .map((g) => ({
+            ...g,
+            day: (g.day ?? (g.time ?? "").split(",")[0]).trim(),
+          }));
+        if (valid?.length) setApiGroups(valid);
       })
       .catch(() => {})
       .finally(() => setLoaded(true));
@@ -51,15 +63,19 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
     }
   }, [loaded]);
 
-  const groupDays = useMemo(() => groups.map((group) => (group.day ?? group.time.split(",")[0]).trim()).filter(Boolean), [groups]);
+  const groupDays = useMemo(() => groups
+    .filter((group) => group != null)
+    .map((group) => (group.day ?? (group.time ?? "").split(",")[0]).trim())
+    .filter(Boolean), [groups]);
   const days = useMemo(() => [
     ...Array.from(new Set(groupDays))
       .sort((first, second) => weekdayOrder.indexOf(first) - weekdayOrder.indexOf(second)),
     "Усі дні",
   ], [groupDays]);
   const filtered = useMemo(() => groups.filter((group) => {
-    const groupDay = (group.day ?? group.time.split(",")[0]).trim();
-    const haystack = `${group.title} ${group.leaders} ${group.address ?? ""}`.toLocaleLowerCase("uk");
+    if (!group) return false;
+    const groupDay = (group.day ?? (group.time ?? "").split(",")[0]).trim();
+    const haystack = `${group.title ?? ""} ${group.leaders ?? ""} ${group.address ?? ""}`.toLocaleLowerCase("uk");
     return (day === "Усі дні" || groupDay === day) && haystack.includes(query.trim().toLocaleLowerCase("uk"));
   }), [groups, query, day]);
   const active = filtered[selected] ?? filtered[0];
