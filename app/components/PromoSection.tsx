@@ -32,8 +32,8 @@ export function PromoSection() {
 
   return (
     <section data-header-theme="light" className="promo-section overflow-hidden border-b border-[var(--line)] bg-[var(--paper)]">
-      <div className="grid h-auto min-h-[40rem] grid-cols-1 grid-rows-1 lg:grid-cols-[auto_1fr] lg:min-h-[46rem]">
-        <div className="relative flex h-[55vh] min-h-[22rem] items-center justify-center bg-black lg:h-full lg:min-h-0">
+      <div className="grid h-[80vh] min-h-[28rem] grid-cols-1 lg:grid-cols-[auto_1fr] lg:h-[90vh] lg:min-h-[36rem]">
+        <div className="relative flex h-[50vh] min-h-[20rem] items-center justify-center bg-black lg:h-full lg:min-h-0">
           <video
             ref={videoRef}
             className="h-full max-h-full w-auto max-w-full object-contain"
