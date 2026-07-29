@@ -63,9 +63,7 @@ function formatApplication(app: GroupApplication, showDelete = false): { text: s
   const groups = app.groupNames.map((name, i) => `${i + 1}. ${escapeHtml(name)}`).join("\n");
   const date = new Date(app.createdAt).toLocaleString("uk-UA");
   const text = `<b>Заявка #${app.id}</b>\n\n<b>Ім’я:</b> ${escapeHtml(app.name)}\n<b>Телефон:</b> ${escapeHtml(app.phone)}\n<b>Групи:</b>\n${groups}\n<b>Дата:</b> ${date}`;
-  const keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> = [
-    [{ text: "📞 Подзвонити", url: `tel:${app.phone.replace(/[^\d+]/g, "")}` }],
-  ];
+  const keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> = [];
   if (showDelete) {
     keyboard.push([{ text: "🗑 Видалити", callback_data: `delete:${app.id}` }]);
   }

@@ -88,8 +88,7 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
   };
   if (adminByUser) {
     (notificationPayload.reply_markup as { inline_keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> }).inline_keyboard.push([
-      { text: "📞 Подзвонити", url: `tel:${phone.replace(/[^\d+]/g, "")}` },
-      { text: "🗑 Видалити", callback_data: `delete:${id}` },
+      { text: " Видалити", callback_data: `delete:${id}` },
     ]);
   }
   const response = await sendTelegramMessage(env, notificationPayload);
