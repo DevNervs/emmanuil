@@ -64,7 +64,7 @@ export function PromoSection() {
 
         <div className="flex h-full min-h-0 flex-col justify-center overflow-y-auto bg-[var(--paper)] p-6 lg:p-10">
           <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
-            <div className="h-1 w-20 bg-[var(--wine)]" />
+            <p className="overline">Анонс</p>
             <h2 className="font-[var(--serif)] text-2xl font-semibold leading-tight text-[var(--ink)] md:text-3xl">
               {promo.title}
             </h2>
