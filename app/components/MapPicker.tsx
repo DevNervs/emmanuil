@@ -54,13 +54,13 @@ export function MapPicker({
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const defaultCenter: [number, number] = [50.4501, 30.5234];
+  const defaultCenter: [number, number] = [48.2864, 25.9392];
 
   const setPositionFromCoords = async (lat: number, lon: number) => {
     setCoordinates(formatCoords(lat, lon));
     try {
       const res = await fetch(
-        `https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}&limit=1&lang=uk`,
+        `https://photon.komoot.io/reverse?lon=${lon}&lat=${lat}&limit=1`,
       );
       if (!res.ok) return;
       const data = await res.json();
@@ -128,7 +128,7 @@ export function MapPicker({
     setLoading(true);
     try {
       const res = await fetch(
-        `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lang=uk`,
+        `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5`,
       );
       if (!res.ok) throw new Error("geocoding failed");
       const data = await res.json();
