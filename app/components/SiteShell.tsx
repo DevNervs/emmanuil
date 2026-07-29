@@ -153,12 +153,19 @@ function readHeaderCompact() {
   return current;
 }
 
+function getInitialCompact() {
+  if (typeof document === "undefined") return false;
+  return document.documentElement.classList.contains("hdr-compact") || (window.scrollY || document.documentElement.scrollTop) >= 72;
+}
+
 export function SiteHeader({ active }: { active?: string }) {
-  const [compact, setCompact] = useState(false);
+  const [compact, setCompact] = useState(getInitialCompact);
   useHeaderTheme();
   useLayoutEffect(() => {
     let frame = 0;
-    applyHeaderCompact(readHeaderCompact());
+    const initial = readHeaderCompact();
+    setCompact(initial);
+    applyHeaderCompact(initial);
     const bootFrame = requestAnimationFrame(() => {
       requestAnimationFrame(() => document.documentElement.classList.remove("hdr-boot"));
     });

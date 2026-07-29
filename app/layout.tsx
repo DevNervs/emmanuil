@@ -105,7 +105,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;var sections=document.querySelectorAll("#main-content [data-header-theme]");var active="dark";var offset=88;for(var i=0;i<sections.length;i++){var r=sections[i].getBoundingClientRect();if(r.top<offset&&r.bottom>offset){active=sections[i].getAttribute("data-header-theme")||active;break;}}if(active==="dark"||active==="light")d.setAttribute("data-header-theme",active);}catch(e){}})();`,
+          }}
+        />
+      </body>
     </html>
   );
 }
