@@ -54,11 +54,12 @@ export const defaultConfig: Required<SiteConfig> = {
   },
   announcement: defaultAnnouncement,
   promo: {
-    enabled: false,
-    videoUrl: "",
+    enabled: true,
+    videoUrl: "https://www.instagram.com/p/DYmrIdmop8z/",
     posterUrl: "",
-    title: "",
-    description: "",
+    title: "Тестовий анонс: літній табір em_kids_camp",
+    description:
+      "Не знаєш як незабутньо провести час літом?❤️‍🔥\n\nЗапрошуємо дітей та підлітків на класний час разом — з іграми, пригодами, новими друзями, веселими активностями та теплою атмосферою 🙌🏼\n\nНа учасників чекає:\n🏕 насичена програма;\n🎯 ігри, квести та командні завдання;\n🎨 творчі активності;\n🤝 нові знайомства та друзі;\n📖 біблійні теми;\n🙏 молитва та прославлення;\n💛 багато радості, сміху й незабутніх моментів\n\nДати: 27.07 - 02.08\nМісце: с.Заріччя, база відпочинку «Золота генерація»\nВік: 9 - 15 років включно\n📝 Посилання на реєстрацію — у шапці профілю @em_kids_camp",
   },
   serviceLocations: defaultServiceLocations,
   team: defaultTeam as TeamMember[],
