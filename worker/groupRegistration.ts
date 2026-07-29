@@ -92,6 +92,9 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
     ]);
   }
   const response = await sendTelegramMessage(env, notificationPayload);
-  if (!response.ok) return json({ message: "Не вдалося передати заявку адміністратору. Спробуйте ще раз." }, 502);
+  if (!response.ok) {
+    const body = await response.text().catch(() => "unknown");
+    return json({ message: "Не вдалося передати заявку адміністратору.", telegramError: body }, 502);
+  }
   return json({ message: "Заявку надіслано. Адміністратор зв’яжеться з вами." });
 }
