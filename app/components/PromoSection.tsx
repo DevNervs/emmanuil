@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Calendar, MapPin, Users, Volume2, VolumeX } from "lucide-react";
 import { useSiteConfig } from "./SiteConfig";
 
 export function PromoSection() {
@@ -13,7 +13,6 @@ export function PromoSection() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    // Start muted so autoplay reliably works in every browser.
     video.muted = true;
     setMuted(true);
     video.play().catch(() => {});
@@ -25,13 +24,8 @@ export function PromoSection() {
     const next = !muted;
     setMuted(next);
     video.muted = next;
-    if (!video.paused && !next) {
-      // already playing; just unmute
-      return;
-    }
-    if (video.paused) {
-      video.play().catch(() => {});
-    }
+    if (!video.paused && !next) return;
+    if (video.paused) video.play().catch(() => {});
   };
 
   if (!promo?.enabled || !promo.videoUrl || !promo.title) return null;
@@ -68,9 +62,22 @@ export function PromoSection() {
             <h2 className="font-[var(--serif)] text-2xl font-semibold leading-tight text-[var(--ink)] md:text-3xl">
               {promo.title}
             </h2>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--muted)] md:text-base">
-              {promo.description}
-            </p>
+            <p className="text-sm leading-relaxed text-[var(--muted)] md:text-base">{promo.description}</p>
+
+            <div className="mt-2 flex flex-col gap-3 rounded-xl border border-[var(--line)] bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
+                <Calendar className="h-4 w-4 shrink-0 text-[var(--wine)]" aria-hidden="true" />
+                <span>27.07 - 02.08</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
+                <MapPin className="h-4 w-4 shrink-0 text-[var(--wine)]" aria-hidden="true" />
+                <span>с.Заріччя, база «Золота генерація»</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-[var(--ink)]">
+                <Users className="h-4 w-4 shrink-0 text-[var(--wine)]" aria-hidden="true" />
+                <span>9 - 15 років</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
