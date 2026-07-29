@@ -3,7 +3,6 @@ import { GroupsExplorer } from "./components/GroupsExplorer";
 import { HeroAnnouncement } from "./components/HeroAnnouncement";
 import { HeroLocations } from "./components/HeroLocations";
 import { HeroVideo } from "./components/HeroVideo";
-import { HomeGroups } from "./components/HomeGroups";
 import { groupSeason, groups } from "./content";
 import { pageMetadata } from "./seo";
 
@@ -109,8 +108,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        <HomeGroups propGroups={groups} />
 
         <section data-header-theme="light" className="first-visit-feature" aria-labelledby="home-expect-title">
           <div>
