@@ -38,7 +38,7 @@ export function PromoSection() {
 
   return (
     <section data-header-theme="light" className="promo-section overflow-hidden border-b border-[var(--line)] bg-[var(--paper)]">
-      <div className="grid h-[45vh] min-h-[22rem] grid-cols-[auto_1fr] lg:h-[55vh] lg:min-h-[26rem]">
+      <div className="grid h-[80vh] min-h-[28rem] grid-cols-[auto_1fr] lg:h-[90vh] lg:min-h-[36rem]">
         <div className="relative flex h-full min-h-0 items-center justify-center bg-black">
           <video
             ref={videoRef}
