@@ -55,7 +55,7 @@ export const defaultConfig: Required<SiteConfig> = {
   announcement: defaultAnnouncement,
   promo: {
     enabled: true,
-    videoUrl: "https://www.instagram.com/p/DYmrIdmop8z/",
+    videoUrl: "/media/promo-camp.mp4",
     posterUrl: "",
     title: "Тестовий анонс: літній табір em_kids_camp",
     description:
