@@ -10,7 +10,7 @@ export function HeroLocations() {
     <div className="hero-locations-bar">
       <div className="hero-locations-header">
         <span className="hero-locations-title">Найближчі служіння</span>
-        <a className="hero-locations-link" href="/contacts">
+        <a className="hero-locations-link" href="/contacts/">
           Карта та маршрути →
         </a>
       </div>

@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(site.canonicalUrl),
   applicationName: "Християнська церква Еммануїл Чернівці",
   title: {
-    default: "Церква Еммануїл у Чернівцях | Християнська євангельська церква",
+    default: "Церква Еммануїл у Чернівцях, Україна | Християнська євангельська церква",
     template: "%s | Церква Еммануїл Чернівці",
   },
   description:
-    "Християнська євангельська церква Еммануїл у Чернівцях. Недільні служіння о 10:00 та 17:00 на 4 локаціях, домашні групи, онлайн-трансляції, адреси та контакти.",
+    "Християнська євангельська церква Еммануїл у Чернівцях, Україна. Недільні служіння о 10:00 та 17:00 на 4 локаціях, домашні групи, онлайн-трансляції, адреси та контакти.",
   keywords: seoKeywords,
   category: "religion",
   creator: site.legalName,
@@ -90,7 +90,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   const structuredData = buildSiteGraph();
   const ogImage = shareImageUrl();
   return (
-    <html lang="uk" data-header-theme="dark">
+    <html lang="uk" data-header-theme="dark" suppressHydrationWarning>
       <head>
         <meta name="color-scheme" content="light only" />
         <meta name="darkreader-lock" />
@@ -107,11 +107,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body>
         {children}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=document.documentElement;var sections=document.querySelectorAll("#main-content [data-header-theme]");var active="dark";var offset=88;for(var i=0;i<sections.length;i++){var r=sections[i].getBoundingClientRect();if(r.top<offset&&r.bottom>offset){active=sections[i].getAttribute("data-header-theme")||active;break;}}if(active==="dark"||active==="light")d.setAttribute("data-header-theme",active);}catch(e){}})();`,
-          }}
-        />
       </body>
     </html>
   );

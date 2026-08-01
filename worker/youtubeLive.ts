@@ -1,11 +1,5 @@
-const channelLiveUrl = "https://www.youtube.com/@EmmanuilCV/live";
-const channelStreamsUrl = "https://www.youtube.com/@EmmanuilCV/streams";
-
-const requestHeaders = {
-  Accept: "text/html,application/xhtml+xml",
-  "Accept-Language": "uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7",
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
-};
+import { YOUTUBE_API_KEY } from "./youtubeConfig";
+import { DEFAULT_CHANNEL_ID } from "./youtubeChannels";
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
@@ -20,72 +14,88 @@ const cleanVideoId = (value?: string) => {
   return videoId && videoId.length === 11 ? videoId : undefined;
 };
 
-const videoIdFromUrl = (value?: string) => {
-  if (!value) return undefined;
-  try {
-    const url = new URL(value.replaceAll("\\u0026", "&"));
-    return cleanVideoId(url.searchParams.get("v") ?? url.pathname.match(/\/(?:embed|shorts|live)\/([^/?]+)/)?.[1]);
-  } catch {
-    return undefined;
-  }
+const SEARCH_INTERVAL_MS = 2 * 60 * 1000;
+const VIDEO_CHECK_INTERVAL_MS = 60 * 1000;
+const API_BASE = "https://www.googleapis.com/youtube/v3";
+
+type LiveCache = {
+  videoId?: string;
+  lastSearchAt: number;
+  lastVideoCheckAt: number;
 };
 
-/** Extract the active broadcast from either a watch page or a channel/streams page. */
-export function extractLiveVideoId(source: string, responseUrl?: string) {
-  const redirectedVideoId = videoIdFromUrl(responseUrl);
-  if (redirectedVideoId && /\/watch(?:\?|$)/.test(responseUrl ?? "")) return redirectedVideoId;
+const liveCache: LiveCache = { lastSearchAt: 0, lastVideoCheckAt: 0 };
 
-  // YouTube sometimes serializes its page data with escaped quotes.
-  const html = source.replaceAll('\\"', '"');
-  const isLiveNow = /"isLiveNow"\s*:\s*true/i.test(html);
-
-  if (isLiveNow) {
-    const directUrl = html.match(/<(?:link|meta)[^>]+(?:href|content)="(https:\/\/(?:www\.)?youtube\.com\/watch\?v=[^"&]+)[^"]*"/i)?.[1]
-      ?? html.match(/"canonicalUrl"\s*:\s*"(https:\/\/(?:www\.)?youtube\.com\/watch\?v=[^"]+)"/i)?.[1];
-    const directVideoId = videoIdFromUrl(directUrl);
-    if (directVideoId) return directVideoId;
-  }
-
-  // On channel pages the canonical URL remains the channel URL. Locate the
-  // video renderer nearest to YouTube's live badge instead of relying on it.
-  const liveMarkers = [
-    /"isLiveNow"\s*:\s*true/gi,
-    /"style"\s*:\s*"BADGE_STYLE_TYPE_LIVE_NOW"/gi,
-    /"style"\s*:\s*"LIVE"/gi,
-  ];
-
-  for (const markerPattern of liveMarkers) {
-    for (const marker of html.matchAll(markerPattern)) {
-      const beforeMarker = html.slice(Math.max(0, (marker.index ?? 0) - 30_000), marker.index);
-      const candidates = [...beforeMarker.matchAll(/"videoId"\s*:\s*"([a-zA-Z0-9_-]{11})"/g)];
-      const videoId = cleanVideoId(candidates.at(-1)?.[1]);
-      if (videoId) return videoId;
-    }
-  }
-
-  return undefined;
-}
-
-async function inspectYouTubePage(url: string) {
+async function findLiveVideoId(channelId: string, apiKey: string): Promise<string | undefined> {
+  const url = `${API_BASE}/search?part=snippet&channelId=${channelId}&eventType=live&type=video&maxResults=1&key=${apiKey}`;
   const response = await fetch(url, {
-    headers: requestHeaders,
-    redirect: "follow",
+    headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(8_000),
   });
-  if (!response.ok) throw new Error(`YouTube returned ${response.status}`);
-  return extractLiveVideoId(await response.text(), response.url);
+  if (!response.ok) return undefined;
+  const data = (await response.json()) as { items?: { id?: { videoId?: string } }[] };
+  return cleanVideoId(data.items?.[0]?.id?.videoId);
+}
+
+async function isVideoLive(videoId: string, apiKey: string): Promise<boolean> {
+  const url = `${API_BASE}/videos?part=snippet,liveStreamingDetails&id=${videoId}&key=${apiKey}`;
+  const response = await fetch(url, {
+    headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!response.ok) return false;
+  const data = (await response.json()) as {
+    items?: {
+      snippet?: { liveBroadcastContent?: string };
+      liveStreamingDetails?: { actualEndTime?: string };
+    }[];
+  };
+  const item = data.items?.[0];
+  if (!item) return false;
+  if (item.snippet?.liveBroadcastContent !== "live") return false;
+  if (item.liveStreamingDetails?.actualEndTime) return false;
+  return true;
 }
 
 export async function handleYouTubeLive(request: Request): Promise<Response> {
   if (request.method !== "GET") return json({ live: false }, 405);
 
-  const checks = await Promise.allSettled([
-    inspectYouTubePage(channelLiveUrl),
-    inspectYouTubePage(channelStreamsUrl),
-  ]);
-  const videoId = checks.find((result): result is PromiseFulfilledResult<string> => result.status === "fulfilled" && Boolean(result.value))?.value;
+  const apiKey = YOUTUBE_API_KEY;
+  const channelId = DEFAULT_CHANNEL_ID;
 
-  if (videoId) return json({ live: true, videoId });
-  if (checks.some((result) => result.status === "fulfilled")) return json({ live: false });
-  return json({ live: false, available: false }, 502);
+  if (!apiKey || !channelId) {
+    return json({ live: false, available: false }, 503);
+  }
+
+  const now = Date.now();
+
+  // Если есть videoId, периодически проверяем, не закончился ли ефир.
+  if (liveCache.videoId) {
+    if (now - liveCache.lastVideoCheckAt < VIDEO_CHECK_INTERVAL_MS) {
+      return json({ live: true, videoId: liveCache.videoId });
+    }
+
+    const stillLive = await isVideoLive(liveCache.videoId, apiKey);
+    liveCache.lastVideoCheckAt = now;
+
+    if (stillLive) {
+      return json({ live: true, videoId: liveCache.videoId });
+    }
+
+    liveCache.videoId = undefined;
+  }
+
+  // Периодически ищем новый live на канале.
+  if (now - liveCache.lastSearchAt >= SEARCH_INTERVAL_MS || !liveCache.lastSearchAt) {
+    const videoId = await findLiveVideoId(channelId, apiKey);
+    liveCache.lastSearchAt = now;
+
+    if (videoId) {
+      liveCache.videoId = videoId;
+      liveCache.lastVideoCheckAt = now;
+      return json({ live: true, videoId });
+    }
+  }
+
+  return json({ live: false });
 }

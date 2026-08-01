@@ -7,14 +7,31 @@ export const seoKeywords = [
   "євангельська церква Чернівці",
   "церква Еммануїл",
   "Еммануїл Чернівці",
+  "Еммануїл Україна",
+  "церква Україна",
+  "церква в Україні",
   "недільне служіння Чернівці",
+  "недільне служіння Україна",
   "домашні групи Чернівці",
+  "домашні групи Україна",
   "церква Садгора",
   "церква Сторожинець",
-  "церковь Черновцы",
+  "церква Чернівецька область",
+  "церква Черновцы",
+  "христианская церковь Черновцы",
+  "евангельская церковь Черновцы",
   "Эммануил Черновцы",
+  "Эммануил Украина",
+  "Эммануил",
+  "Мануил Черновцы",
+  "Мануил Украина",
+  "Мануил",
   "Emmanuil Chernivtsi",
+  "Emmanuil Ukraine",
+  "Emmanuil",
+  "Emmanuel Chernivtsi",
   "church Chernivtsi",
+  "church Ukraine",
 ];
 
 export const siteRoutes = [
@@ -33,7 +50,7 @@ export const siteRoutes = [
 ];
 
 /** Canonical social share image (1200×630 JPEG in public/). A new physical filename busts messenger caches. */
-export const OG_SHARE_IMAGE_PATH = "/share-card-20260729.jpg";
+export const OG_SHARE_IMAGE_PATH = "/emmanuil-social-preview-20260729-v2.jpg";
 
 export function shareImageUrl(): string {
   return absoluteUrl(OG_SHARE_IMAGE_PATH);
@@ -124,6 +141,7 @@ export function pageMetadata({
   return {
     title,
     description,
+    keywords: seoKeywords,
     alternates: {
       canonical: canonicalPath,
       languages: { "uk-UA": canonicalPath, uk: canonicalPath },
@@ -188,6 +206,48 @@ export function openingHoursFor(location: ServiceLocation) {
   };
 }
 
+function serviceEventFor(location: ServiceLocation) {
+  const opens = serviceOpens(location.time);
+  const [h, m] = opens.split(":").map(Number);
+  const startDate = new Date();
+  startDate.setUTCHours(h - 3, m, 0, 0); // Approximate EET (UTC+3) for next Sunday
+  const day = startDate.getUTCDay();
+  const daysUntilSunday = (7 - day) % 7 || 7;
+  startDate.setUTCDate(startDate.getUTCDate() + daysUntilSunday);
+  const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+  const rrule = "RRULE:FREQ=WEEKLY;BYDAY=SU";
+
+  return {
+    "@type": "Event",
+    name: `Недільне служіння Еммануїл — ${location.label}`,
+    description: `Недільне богослужіння християнської церкви Еммануїл у ${location.addressLocality}, локація ${location.label}.`,
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString(),
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    isAccessibleForFree: true,
+    inLanguage: "uk",
+    location: {
+      "@type": "Place",
+      name: `Церква Еммануїл — ${location.label}`,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: location.streetAddress,
+        addressLocality: location.addressLocality,
+        addressRegion: location.addressRegion,
+        addressCountry: "UA",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: Number(location.coordinates.split(",")[0]),
+        longitude: Number(location.coordinates.split(",")[1]),
+      },
+    },
+    image: shareImageUrl(),
+    recurrence: rrule,
+  };
+}
+
 export function buildSiteGraph() {
   const organizationId = absoluteUrl("/#organization");
   const websiteId = absoluteUrl("/#website");
@@ -202,9 +262,21 @@ export function buildSiteGraph() {
         alternateName: [
           "Церква Еммануїл Чернівці",
           "Еммануїл Чернівці",
+          "Еммануїл Україна",
+          "Церква Еммануїл Україна",
+          "Церква в Україні",
+          "Християнська церква Україна",
           "Эммануил Черновцы",
+          "Эммануил Украина",
+          "Эммануил",
+          "Мануил Черновцы",
+          "Мануил Украина",
+          "Мануил",
           "Emmanuil Chernivtsi",
+          "Emmanuil Ukraine",
+          "Emmanuil",
           "Emmanuel Church Chernivtsi",
+          "Emmanuel Church Ukraine",
         ],
         url: absoluteUrl("/"),
         logo: {
@@ -258,8 +330,12 @@ export function buildSiteGraph() {
         knowsAbout: [
           "християнське служіння",
           "євангельська церква",
+          "церква Україна",
+          "церква Чернівці",
           "домашні групи",
           "недільні богослужіння",
+          "Еммануїл Чернівці",
+          "Emmanuil Ukraine",
         ],
       },
       {
@@ -267,9 +343,18 @@ export function buildSiteGraph() {
         "@id": websiteId,
         url: absoluteUrl("/"),
         name: "Церква Еммануїл Чернівці",
-        alternateName: ["Emmanuil Chernivtsi", "Эммануил Черновцы"],
+        alternateName: [
+          "Emmanuil Chernivtsi",
+          "Emmanuil Ukraine",
+          "Emmanuil",
+          "Эммануил Черновцы",
+          "Эммануил Украина",
+          "Эммануил",
+          "Мануил Черновцы",
+          "Мануил Украина",
+        ],
         description:
-          "Офіційний сайт християнської євангельської церкви Еммануїл у Чернівцях: адреси служінь, домашні групи, онлайн-трансляції та контакти.",
+          "Офіційний сайт християнської євангельської церкви Еммануїл у Чернівцях, Україна. Адреси недільних служінь, домашні групи, онлайн-трансляції, контакти та служіння.",
         inLanguage: ["uk-UA", "uk"],
         publisher: { "@id": organizationId },
         about: { "@id": organizationId },
@@ -308,6 +393,7 @@ export function buildSiteGraph() {
             "@type": "City",
             name: location.addressLocality,
           },
+          event: serviceEventFor(location),
         };
       }),
     ],

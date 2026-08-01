@@ -44,13 +44,13 @@ export function InteractiveMap({ id, eyebrow, title, description, locations, dar
                 <strong>{item.label}</strong>
                 <small>{item.address}</small>
               </button>
-              <a href={directionsUrl(item)} target="_blank" rel="noreferrer" aria-label={`Прокласти маршрут: ${item.label}`}>Прокласти маршрут <span aria-hidden="true">↗</span></a>
+              <a href={directionsUrl(item)} target="_blank" rel="noopener noreferrer" aria-label={`Прокласти маршрут: ${item.label}`}>Прокласти маршрут <span aria-hidden="true">↗</span></a>
             </div>
           ))}
         </div>
       </div>
       <div className="interactive-map-stage">
-        <div className="interactive-map-toolbar"><div><span>Обрана адреса</span><strong>{location.label}</strong></div><a href={directionsUrl(location)} target="_blank" rel="noreferrer">Прокласти маршрут <span aria-hidden="true">↗</span></a></div>
+        <div className="interactive-map-toolbar"><div><span>Обрана адреса</span><strong>{location.label}</strong></div><a href={directionsUrl(location)} target="_blank" rel="noopener noreferrer">Прокласти маршрут <span aria-hidden="true">↗</span></a></div>
         <iframe key={markerKey} src={embedUrl(mapQuery, location.coordinates)} title={`${location.label} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
       </div>
     </section>

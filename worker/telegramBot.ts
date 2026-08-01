@@ -1,18 +1,36 @@
 import { groupNames } from "./data";
 import {
   addAdmin,
+  addAdminRequest,
+  addLog,
+  consumeAdminInvite,
   countApplications,
   deleteApplication,
   filterApplicationsByGroup,
   getAdmins,
+  getAdminProfiles,
+  getAdminInvite,
+  getAdminRequests,
   getApplication,
   getCurrentGroups,
   getCurrentSeason,
+  getOwner,
   listApplications,
   removeAdmin,
+  removeAdminRequest,
+  saveAdminProfile,
   searchApplications,
+  setOwner,
 } from "./storage";
-import { answerCallbackQuery, escapeHtml, isAdmin, json, sendTelegramMessage, verifyWebhookSecret } from "./telegram";
+import {
+  answerCallbackQuery,
+  escapeHtml,
+  getEffectiveAdminIds,
+  isAdmin,
+  json,
+  sendTelegramMessage,
+  verifyWebhookSecret,
+} from "./telegram";
 import type { Env } from "./env";
 import type { Group, GroupApplication, TelegramCallbackQuery, TelegramMessage, TelegramUpdate } from "./types";
 
@@ -37,7 +55,7 @@ const menuActions: Record<string, (env: Env, message: TelegramMessage) => Promis
   "👥 Адміни": handleAdmins,
   "📅 Сезон": handleSeason,
   "🏠 Групи": handleGroups,
-  "❓ Допомога": (env, message) => handleStart(env, message, ""),
+  "❓ Допомога": (env, message) => handleStart(env, message, "", true),
 };
 
 async function resolveCurrentGroups(env: Env): Promise<Group[]> {
@@ -133,10 +151,62 @@ async function sendNoAccess(env: Env, chatId: number): Promise<void> {
   await sendAdminMessage(env, chatId, { text: "У вас немає доступу до цієї команди." });
 }
 
-async function handleStart(env: Env, message: TelegramMessage, args: string): Promise<void> {
+async function handleStart(env: Env, message: TelegramMessage, args: string, isUserAdmin = false): Promise<void> {
   const chatId = message.chat.id;
+  const userId = message.from.id;
+  const adminInviteToken = args.startsWith("admin_") ? args.slice(6) : "";
+  if (adminInviteToken && env.GROUP_APPLICATIONS) {
+    if (message.chat.type !== "private") {
+      await sendAdminMessage(env, chatId, { text: "Відкрийте це запрошення в особистому чаті з ботом." });
+      return;
+    }
+    const invite = await getAdminInvite(env.GROUP_APPLICATIONS, adminInviteToken);
+    if (!invite) {
+      await sendAdminMessage(env, chatId, {
+        text: "Це запрошення недійсне або вже використане. Попросіть створити нове в адмінці сайту.",
+      });
+      return;
+    }
+    const actualUsername = message.from.username?.toLowerCase();
+    if (invite.username && invite.username !== actualUsername) {
+      await sendAdminMessage(env, chatId, {
+        text: `Це запрошення створене для @${invite.username}. Увійдіть у потрібний Telegram-акаунт або попросіть нове запрошення.`,
+      });
+      return;
+    }
+    if (invite.role === "owner" && await getOwner(env.GROUP_APPLICATIONS)) {
+      await consumeAdminInvite(env.GROUP_APPLICATIONS, adminInviteToken);
+      await sendAdminMessage(env, chatId, { text: "Власника вже призначено. Це запрошення більше не діє." });
+      return;
+    }
+    const profile = {
+      userId,
+      firstName: message.from.first_name,
+      username: message.from.username,
+      addedAt: Date.now(),
+    };
+    await addAdmin(env.GROUP_APPLICATIONS, userId);
+    await saveAdminProfile(env.GROUP_APPLICATIONS, profile);
+    if (invite.role === "owner") await setOwner(env.GROUP_APPLICATIONS, profile);
+    await consumeAdminInvite(env.GROUP_APPLICATIONS, adminInviteToken);
+    await removeAdminRequest(env.GROUP_APPLICATIONS, userId);
+    await addLog(
+      env.GROUP_APPLICATIONS,
+      "admin_invite_accepted",
+      message.from.username ? `@${message.from.username}` : `ID: ${userId}`,
+    );
+    const text = invite.role === "owner"
+      ? `Готово, ${escapeHtml(message.from.first_name)}! Ви підключені як головний власник.\n\nВаш статус не можна видалити через звичайну адмінку.`
+      : `Готово, ${escapeHtml(message.from.first_name)}! Ви підключені як адміністратор.\n\nТепер вам доступні заявки, статистика та керування групами.`;
+    await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
+    return;
+  }
   const appArg = args.startsWith("app_") ? args.slice(4) : "";
   if (appArg && env.GROUP_APPLICATIONS) {
+    if (!isUserAdmin) {
+      await sendAdminMessage(env, chatId, { text: "У вас немає доступу до цієї заявки." });
+      return;
+    }
     const app = await getApplication(env.GROUP_APPLICATIONS, appArg, true);
     if (app) {
       const { text, keyboard } = formatApplication(app, true);
@@ -144,6 +214,48 @@ async function handleStart(env: Env, message: TelegramMessage, args: string): Pr
       return;
     }
   }
+
+  if (!isUserAdmin && env.GROUP_APPLICATIONS) {
+    await addAdminRequest(env.GROUP_APPLICATIONS, {
+      userId,
+      firstName: message.from.first_name,
+      username: message.from.username,
+      requestedAt: Date.now(),
+    });
+
+    const adminText = `Новий запит на доступ до бота.\n\n<b>ID:</b> <code>${userId}</code>\n<b>Ім’я:</b> ${escapeHtml(message.from.first_name)}${message.from.username ? `\n<b>Юзернейм:</b> @${message.from.username}` : ""}`;
+    const adminKeyboard = {
+      inline_keyboard: [
+        [
+          { text: "✅ Додати", callback_data: `approve_admin:${userId}` },
+          { text: "❌ Відхилити", callback_data: `reject_admin:${userId}` },
+        ],
+      ],
+    };
+
+    if (env.TELEGRAM_ADMIN_CHAT_ID) {
+      const chatId = Number(env.TELEGRAM_ADMIN_CHAT_ID);
+      if (Number.isFinite(chatId)) {
+        await sendAdminMessage(env, chatId, { text: adminText, parse_mode: "HTML", reply_markup: adminKeyboard });
+      }
+    }
+
+    const admins = await getAdmins(env.GROUP_APPLICATIONS);
+    for (const adminId of admins) {
+      if (adminId === Number(env.TELEGRAM_ADMIN_CHAT_ID)) continue;
+      await sendAdminMessage(env, adminId, { text: adminText, parse_mode: "HTML", reply_markup: adminKeyboard });
+    }
+
+    const text = `Привіт, ${escapeHtml(message.from.first_name)}!\n\nВаш запит на доступ надіслано адміністратору. Ваш ID: <code>${userId}</code>\n\nЯк тільки вас підтвердять, у вас з’явиться доступ до всіх команд.`;
+    await sendAdminMessage(env, chatId, { text, parse_mode: "HTML" });
+    return;
+  }
+
+  if (!isUserAdmin) {
+    await sendAdminMessage(env, chatId, { text: "У вас немає доступу до бота." });
+    return;
+  }
+
   const text = `Привіт, ${escapeHtml(message.from.first_name)}!\n\nЯ бот для управління заявками на домашні групи.\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/groups — список груп\n/season — поточний сезон\n/admins — адміни\n/delete &lt;id&gt; — видалити`;
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
 }
@@ -255,8 +367,21 @@ async function handleAdmins(env: Env, message: TelegramMessage): Promise<void> {
     await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
     return;
   }
-  const admins = await getAdmins(env.GROUP_APPLICATIONS);
-  const text = `<b>Адміністратори</b>\n\n${admins.length ? admins.map((id) => `• ${id}`).join("\n") : "Адміністраторів не додано."}`;
+  const [admins, profiles, owner] = await Promise.all([
+    getEffectiveAdminIds(env),
+    getAdminProfiles(env.GROUP_APPLICATIONS),
+    getOwner(env.GROUP_APPLICATIONS),
+  ]);
+  const profilesById = new Map(profiles.map((profile) => [profile.userId, profile]));
+  const rows = admins.map((id) => {
+    const profile = profilesById.get(id);
+    const username = profile?.username ? `@${escapeHtml(profile.username)}` : "";
+    const name = profile?.firstName ? escapeHtml(profile.firstName) : "";
+    const label = [username, name].filter(Boolean).join(" — ");
+    const role = owner?.userId === id ? " (власник)" : "";
+    return `• ${label || `<code>${id}</code>`}${role}`;
+  });
+  const text = `<b>Адміністратори</b>\n\n${rows.length ? rows.join("\n") : "Адміністраторів не додано."}`;
   await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML" });
 }
 
@@ -442,24 +567,35 @@ async function handleStatsCallback(env: Env, query: TelegramCallbackQuery): Prom
 
 async function handleMessage(env: Env, message: TelegramMessage): Promise<void> {
   const userId = message.from.id;
-  if (!(await isAdmin(userId, env))) {
-    await sendNoAccess(env, message.chat.id);
+  const chatId = message.chat.id;
+  const text = message.text ?? "";
+  const { command, args } = parseCommand(text);
+  const isUserAdmin = await isAdmin(userId, env);
+
+  // Публічні команди — доступні без прав адміна.
+  if (command === "id" || text === "🆔 Мій ID") {
+    await sendAdminMessage(env, chatId, {
+      text: `Ваш ID: <code>${userId}</code>\n\nПередайте цей ID адміністратору, щоб він відкрив вам доступ до бота.`,
+      parse_mode: "HTML",
+    });
     return;
   }
-  const text = message.text ?? "";
+  if (command === "start" || command === "help" || text === "❓ Допомога") {
+    await handleStart(env, message, command === "start" ? args : "", isUserAdmin);
+    return;
+  }
+
+  if (!isUserAdmin) {
+    await sendNoAccess(env, chatId);
+    return;
+  }
+
   const menuAction = menuActions[text];
   if (menuAction) {
     await menuAction(env, message);
     return;
   }
-  const { command, args } = parseCommand(text);
   switch (command) {
-    case "start":
-      await handleStart(env, message, args);
-      break;
-    case "help":
-      await handleStart(env, message, "");
-      break;
     case "last":
       await handleLast(env, message);
       break;
@@ -530,9 +666,57 @@ async function handleCallback(env: Env, query: TelegramCallbackQuery): Promise<v
     case "cancel_delete":
       await handleCancelDeleteCallback(env, query, value);
       break;
+    case "approve_admin":
+      await handleApproveAdminCallback(env, query, value);
+      break;
+    case "reject_admin":
+      await handleRejectAdminCallback(env, query, value);
+      break;
     default:
       await answerCallbackQuery(env, query.id, "Невідома дія");
   }
+}
+
+async function handleApproveAdminCallback(env: Env, query: TelegramCallbackQuery, id: string): Promise<void> {
+  const userId = Number(id);
+  const chatId = query.message?.chat.id ?? query.from.id;
+  if (!env.GROUP_APPLICATIONS) {
+    await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
+    return;
+  }
+  if (!Number.isInteger(userId)) {
+    await answerCallbackQuery(env, query.id, "Некоректний ID");
+    return;
+  }
+  const request = (await getAdminRequests(env.GROUP_APPLICATIONS)).find((item) => item.userId === userId);
+  await addAdmin(env.GROUP_APPLICATIONS, userId);
+  await saveAdminProfile(env.GROUP_APPLICATIONS, {
+    userId,
+    firstName: request?.firstName,
+    username: request?.username,
+    addedAt: Date.now(),
+  });
+  await removeAdminRequest(env.GROUP_APPLICATIONS, userId);
+  await answerCallbackQuery(env, query.id, "Користувача додано");
+  await sendAdminMessage(env, userId, { text: "Вас додано до адміністраторів. Натисніть /start, щоб відкрити меню." });
+  await sendAdminMessage(env, chatId, { text: `Користувача <code>${userId}</code> додано.`, parse_mode: "HTML" });
+}
+
+async function handleRejectAdminCallback(env: Env, query: TelegramCallbackQuery, id: string): Promise<void> {
+  const userId = Number(id);
+  const chatId = query.message?.chat.id ?? query.from.id;
+  if (!env.GROUP_APPLICATIONS) {
+    await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
+    return;
+  }
+  if (!Number.isInteger(userId)) {
+    await answerCallbackQuery(env, query.id, "Некоректний ID");
+    return;
+  }
+  await removeAdminRequest(env.GROUP_APPLICATIONS, userId);
+  await answerCallbackQuery(env, query.id, "Запит відхилено");
+  await sendAdminMessage(env, userId, { text: "Ваш запит на доступ відхилено." });
+  await sendAdminMessage(env, chatId, { text: `Запит <code>${userId}</code> відхилено.`, parse_mode: "HTML" });
 }
 
 export async function handleTelegramUpdate(update: TelegramUpdate, env: Env): Promise<void> {

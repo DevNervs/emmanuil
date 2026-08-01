@@ -27,7 +27,7 @@ export default function DonatePage() {
             </>
           }
         >
-          <a className="button button-wine" href={donation.paymentUrl} target="_blank" rel="noreferrer">
+          <a className="button button-wine" href={donation.paymentUrl} target="_blank" rel="noopener noreferrer">
             Пожертвувати через ПриватБанк ↗
           </a>
         </PageIntro>
@@ -66,7 +66,7 @@ export default function DonatePage() {
             ))}
           </div>
           <p className="donation-note">
-            Сума пожертви НЕ підлягає поверненню. Якщо маєте запитання щодо переказу, <a href="/contacts">зв’яжіться з нами</a>.
+            Сума пожертви НЕ підлягає поверненню. Якщо маєте запитання щодо переказу, <a href="/contacts/">зв’яжіться з нами</a>.
           </p>
         </section>
       </main>

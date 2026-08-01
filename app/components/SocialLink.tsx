@@ -23,7 +23,7 @@ export function SocialLink({ network, href, label, className = "" }: { network: 
   const accessibleLabel = label ?? names[network];
   const Icon = icons[network];
   return (
-    <a className={`social-icon-link ${className}`.trim()} href={href} target="_blank" rel="noreferrer" aria-label={accessibleLabel} title={accessibleLabel}>
+    <a className={`social-icon-link ${className}`.trim()} href={href} target="_blank" rel="noopener noreferrer" aria-label={accessibleLabel} title={accessibleLabel}>
       <Icon className="social-brand-icon" aria-hidden="true" />
     </a>
   );

@@ -8,9 +8,9 @@ import { breadcrumbFor, pageMetadata } from "../seo";
 
 export const metadata = pageMetadata({
   path: "/contacts",
-  title: "Адреси церковних служінь у Чернівцях",
+  title: "Адреси церковних служінь у Чернівцях, Україна",
   description:
-    "Адреси та карта церкви Еммануїл: Криворучка, Кобилянська, Садгора, Сторожинець. Телефони, маршрути Google Maps і контактна форма.",
+    "Адреси, карта та телефони церкви Еммануїл у Чернівцях, Україна: Криворучка, Кобилянська, Садгора, Сторожинець. Недільні служіння, маршрути Google Maps і контактна форма.",
   ogTitle: "Локації церкви Еммануїл у Чернівцях",
 });
 
@@ -29,7 +29,7 @@ export default function ContactsPage() {
         >
           <div className="hero-actions">
             <a className="button button-wine" href="#contacts-map">Відкрити карту</a>
-            <a className="button button-secondary" href="/visit">Вперше у нас</a>
+            <a className="button button-secondary" href="/visit/">Вперше у нас</a>
           </div>
         </PageIntro>
 
@@ -53,7 +53,7 @@ export default function ContactsPage() {
             <p>Якщо ви знаєте людей, які знаходяться в наркотичній, алкогольній чи ін. залежностях, звертайтеся:</p>
             <address>
               <strong>с. Великий Кучурів, Чернівецька обл.</strong>
-              <a href="https://maps.app.goo.gl/C65CdZUqP8ChXojk8" target="_blank" rel="noreferrer">Відкрити на карті ↗</a>
+              <a href="https://maps.app.goo.gl/C65CdZUqP8ChXojk8" target="_blank" rel="noopener noreferrer">Відкрити на карті ↗</a>
               <a href="tel:+380989423713">(098) 942 37 13</a>
               <a href="tel:+380508476116">(050) 847 61 16</a>
               <a href="tel:+380372904032">(0372) 90 40 32</a>

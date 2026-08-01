@@ -1,12 +1,11 @@
-import { AdminClient } from "../components/AdminClient";
-import { pageMetadata } from "../seo";
+import { AdminCMS } from "../components/AdminCMS";
 
-export const metadata = pageMetadata({
-  path: "/admin",
-  title: "Адміністрація | Церква Еммануїл",
-  description: "Адміністративна панель церкви Еммануїл.",
-});
+export const metadata = {
+  title: "Керування сайтом | Церква Еммануїл",
+  description: "Панель керування сайтом церкви Еммануїл.",
+  robots: "noindex, nofollow",
+};
 
 export default function AdminPage() {
-  return <AdminClient />;
+  return <AdminCMS />;
 }

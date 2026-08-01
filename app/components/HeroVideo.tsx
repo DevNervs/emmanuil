@@ -44,7 +44,7 @@ export function HeroVideo() {
       }
 
       void import("hls.js/light")
-        .then(({ default: Hls }) => {
+        .then(({ default: Hls, Events }) => {
           if (disposed) return;
           if (!Hls.isSupported()) {
             enableFallback();
@@ -63,7 +63,7 @@ export function HeroVideo() {
           hlsInstance = hls;
           hls.loadSource(hlsSrc);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          hls.on(Events.MANIFEST_PARSED, () => {
             const dpr = window.devicePixelRatio || 1;
             const maxWidth = video.clientWidth * dpr;
             let cap = 0;
@@ -77,7 +77,7 @@ export function HeroVideo() {
             hls.autoLevelCapping = cap;
             play();
           });
-          hls.on(Hls.Events.ERROR, (_event, data) => {
+          hls.on(Events.ERROR, (_event, data) => {
             if (!data.fatal) return;
             hls.destroy();
             hlsInstance = null;

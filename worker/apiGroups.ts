@@ -2,7 +2,7 @@ import { groupNames } from "./data";
 import { getCurrentGroups, getCurrentSeason } from "./storage";
 import { json } from "./telegram";
 import type { Env } from "./env";
-import type { Group, Season } from "./types";
+import type { Group } from "./types";
 
 export async function handleGroupsApi(request: Request, env: Env): Promise<Response> {
   if (request.method !== "GET") return json({ message: "Метод не підтримується." }, 405);
@@ -16,7 +16,6 @@ export async function handleGroupsApi(request: Request, env: Env): Promise<Respo
       day: "",
       address: "",
       coordinates: "",
-      showOnHome: true,
     })) as Group[];
     return json({ groups, season: null });
   }
@@ -25,12 +24,15 @@ export async function handleGroupsApi(request: Request, env: Env): Promise<Respo
     getCurrentSeason(env.GROUP_APPLICATIONS),
   ]);
   if (!groups.length) {
-    const fallback = groupNames.map((name, index) => ({
+    const fallback = groupNames.map((title, index) => ({
       id: index,
-      name,
-      responsible: "",
+      title,
+      leaders: "",
       description: "",
-      location: "",
+      time: "",
+      day: "",
+      address: "",
+      coordinates: "",
     })) as Group[];
     return json({ groups: fallback, season });
   }

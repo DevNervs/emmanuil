@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Clock, Trash2 } from "lucide-react";
 
 type Log = {
@@ -15,6 +15,18 @@ const actionNames: Record<string, string> = {
   site_config_updated: "Оновлено конфіг сайту",
   admin_added: "Додано адміна",
   admin_removed: "Видалено адміна",
+  owner_invite_created: "Створено запрошення власника",
+  admin_invite_created: "Створено запрошення адміна",
+  promo_video_uploaded: "Завантажено промо-відео",
+  promo_video_deleted: "Видалено промо-відео",
+  season_created: "Створено сезон",
+  season_archived: "Архівовано сезон",
+  season_deleted: "Видалено сезон",
+  application_deleted: "Видалено заявку",
+  application_status_updated: "Оновлено статус заявки",
+  logs_cleared: "Очищено логи",
+  trash_restored: "Відновлено з кошика",
+  trash_deleted: "Видалено з кошика",
 };
 
 export function LogsPanel() {
@@ -22,22 +34,23 @@ export function LogsPanel() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const res = await fetch("/admin/api/logs", { credentials: "include" });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = (await res.json()) as { logs: Log[] };
       setLogs(data.logs);
-    } catch (err: any) {
-      setMessage(`Помилка: ${err.message}`);
+    } catch (err: unknown) {
+      setMessage(`Помилка: ${err instanceof Error ? err.message : "Невідома помилка"}`);
     } finally {
       setLoading(false);
     }
-  }
+  }, [setLogs, setLoading, setMessage]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
-  }, []);
+  }, [load]);
 
   async function clear() {
     if (!confirm("Очистити всю історію?")) return;
@@ -49,8 +62,8 @@ export function LogsPanel() {
       if (!res.ok) throw new Error(`${res.status}`);
       setLogs([]);
       setMessage("Історію очищено");
-    } catch (err: any) {
-      setMessage(`Помилка: ${err.message}`);
+    } catch (err: unknown) {
+      setMessage(`Помилка: ${err instanceof Error ? err.message : "Невідома помилка"}`);
     }
   }
 

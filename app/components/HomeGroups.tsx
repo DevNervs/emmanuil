@@ -12,7 +12,6 @@ type HomeGroup = {
   day?: string;
   address?: string;
   coordinates?: string;
-  showOnHome?: boolean;
 };
 
 const weekdayOrder = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
@@ -26,7 +25,6 @@ function normalize(groups: LegacyGroup[]): HomeGroup[] {
     day: (g.time ?? "").split(",")[0].trim(),
     address: g.address,
     coordinates: g.coordinates,
-    showOnHome: true,
   }));
 }
 
@@ -53,9 +51,7 @@ export function HomeGroups({ propGroups }: { propGroups: LegacyGroup[] }) {
 
   const groups = useMemo(() => {
     const source = apiGroups ?? normalize(propGroups);
-    let selected = source.filter((g) => g.showOnHome);
-    if (!selected.length) selected = source;
-    return [...selected].sort(
+    return [...source].sort(
       (a, b) =>
         weekdayOrder.indexOf(a.day || "") - weekdayOrder.indexOf(b.day || "") ||
         a.title.localeCompare(b.title, "uk"),
@@ -82,7 +78,7 @@ export function HomeGroups({ propGroups }: { propGroups: LegacyGroup[] }) {
           <p className="overline">Домашні групи</p>
           <h2 id="home-groups-title">Актуальні групи цього сезону</h2>
         </div>
-        <a className="button button-ghost" href="/groups">Всі групи</a>
+        <a className="button button-ghost" href="/groups/">Всі групи</a>
       </div>
       <p className="home-now-lead">
         Оберіть домашню групу за днем, часом та локацією. Лідер зв’яжеться з вами.

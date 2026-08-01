@@ -6,6 +6,7 @@ import { handleGroupsApi } from "./apiGroups";
 import { handleSiteApi } from "./apiSite";
 import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import { handleYouTubeLive } from "./youtubeLive";
+import { handlePromoVideo } from "./promoVideo";
 import type { Env } from "./env";
 
 interface ExecutionContext {
@@ -62,6 +63,11 @@ const routes: { match: (pathname: string) => boolean; handler: RouteHandler }[] 
   {
     match: (pathname) => pathname.startsWith("/admin/api/"),
     handler: (request, env) => handleAdminApi(request, env),
+  },
+  {
+    match: (pathname) => /^\/media\/admin-promo-video\/[a-f0-9-]+$/.test(pathname),
+    handler: (request, env, _ctx, url) =>
+      handlePromoVideo(request, env, url.pathname.split("/").at(-1) || ""),
   },
   {
     match: (pathname) => pathname === "/_vinext/image",

@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { Page } from "../components/SiteShell";
 import { pageMetadata } from "../seo";
 
-export const metadata = pageMetadata({
-  path: "/departments",
-  title: "Департаменти церкви",
-  description: "Департаменти та служіння церкви Еммануїл у Чернівцях.",
-});
+export const metadata: Metadata = {
+  ...pageMetadata({
+    path: "/departments",
+    title: "Департаменти церкви",
+    description: "Департаменти та служіння церкви Еммануїл у Чернівцях.",
+  }),
+  robots: "noindex, nofollow",
+};
 
 export default function DepartmentsPage() {
   return (
