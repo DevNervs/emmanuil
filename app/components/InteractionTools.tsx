@@ -37,7 +37,7 @@ export function ContactForm({ email }: { email: string }) {
     <div><label htmlFor="contact-name">ПІБ</label><input id="contact-name" name="name" autoComplete="name" required /></div>
     <div><label htmlFor="contact-email">E-mail</label><input id="contact-email" name="email" type="email" autoComplete="email" required /></div>
     <div><label htmlFor="contact-message">Повідомлення</label><textarea id="contact-message" name="message" rows={6} required /></div>
-    <label className="form-consent"><input type="checkbox" name="privacy-consent" required /><span>Погоджуюсь з <a href="/privacy" target="_blank" rel="noreferrer">політикою конфіденційності</a> та обробкою даних для відповіді на звернення.</span></label>
+    <label className="form-consent"><input type="checkbox" name="privacy-consent" required /><span>Погоджуюсь з <a href="/privacy/" target="_blank" rel="noopener noreferrer">політикою конфіденційності</a> та обробкою даних для відповіді на звернення.</span></label>
     <button className="button button-wine" type="submit" disabled={status === "sending"}>{status === "sending" ? "Надсилаємо…" : "Надіслати"}</button>
     <p className={`form-status ${status}`} role="status" aria-live="polite">{status === "sent" ? "Дякуємо! Повідомлення надіслано." : status === "error" ? "Не вдалося надіслати. Спробуйте ще раз або напишіть нам на e-mail." : "Відповімо на вказану електронну адресу."}</p>
   </form>;

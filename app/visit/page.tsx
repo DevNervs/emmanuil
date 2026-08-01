@@ -5,7 +5,7 @@ import { breadcrumbFor, buildFaqPageSchema, pageMetadata } from "../seo";
 
 export const metadata = pageMetadata({
   path: "/visit",
-  title: "Вперше у церкві Еммануїл — що очікувати",
+  title: "Вперше у церкві Еммануїл, Чернівці, Україна — що очікувати",
   description:
     "Перший візит до церкви Еммануїл у Чернівцях: скільки триває служба, дитяче служіння, паркування, дресс-код, доступність і практичний FAQ.",
   ogTitle: "Вперше у церкві Еммануїл",
@@ -33,7 +33,7 @@ export default function VisitPage() {
         >
           <div className="hero-actions">
             <a className="button button-wine" href="#visit-faq">Відповіді на запитання</a>
-            <a className="button button-secondary" href="/contacts">Карта та локації</a>
+            <a className="button button-secondary" href="/contacts/">Карта та локації</a>
           </div>
         </PageIntro>
 
@@ -98,7 +98,7 @@ export default function VisitPage() {
           <div>
             <p>Адреси, час служінь, маршрути Google Maps і контактна форма зібрані на окремій сторінці. Якщо залишилися запитання — зателефонуйте або напишіть нам.</p>
             <div className="visit-help-links">
-              <a className="button button-wine" href="/contacts">Локації та контакти</a>
+              <a className="button button-wine" href="/contacts/">Локації та контакти</a>
               <a href={`tel:${site.phoneE164[0]}`}>{site.phones[0]}</a>
               <a href={`mailto:${site.email}`}>{site.email}</a>
             </div>

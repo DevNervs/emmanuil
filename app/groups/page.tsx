@@ -6,7 +6,7 @@ import { breadcrumbFor, pageMetadata } from "../seo";
 
 export const metadata = pageMetadata({
   path: "/groups",
-  title: "Домашні групи в Чернівцях",
+  title: "Домашні групи в Чернівцях, Україна",
   description:
     "15 домашніх груп церкви Еммануїл у Чернівцях, Садгорі та Сторожинці: розклад, ведучі, адреси та онлайн-реєстрація.",
   ogTitle: "Домашні групи церкви Еммануїл",
@@ -32,7 +32,7 @@ export default function GroupsPage() {
               </p>
             </>
           }
-          image="/media/homegroup-how.webp?v=q2"
+          image="/media/homegroups/homegroup-gallery-01.webp?v=q2"
           imageAlt="Домашні групи церкви Еммануїл"
         />
         <GroupsExplorer groups={groups} />

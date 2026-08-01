@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { ArrowRight, Check, Send, X } from "lucide-react";
 import type { Group as LegacyGroup } from "../content";
 
-type ApiGroup = { id: number; title: string; leaders: string; description: string; time: string; day?: string; address?: string; coordinates?: string; showOnHome?: boolean; };
+type ApiGroup = { id: number; title: string; leaders: string; description: string; time: string; day?: string; address?: string; coordinates?: string; };
 type Group = ApiGroup;
 type SubmitState = "idle" | "sending" | "sent" | "error";
 const weekdayOrder = ["Понеділок", "Вівторок", "Середа", "Четвер", "П’ятниця", "Субота", "Неділя"];
@@ -31,7 +31,6 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
     id: index + 1,
     description: "",
     day: (group.time ?? "").split(",")[0].trim(),
-    showOnHome: true,
   } as Group)).filter((g) => g != null), [propGroups]);
   const groups = (apiGroups?.filter((g) => g != null) ?? []).length ? apiGroups!.filter((g) => g != null) : fallbackGroups;
 
@@ -52,6 +51,7 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
       .finally(() => setLoaded(true));
   }, []);
 
+  /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!loaded || typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -84,6 +84,7 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
       window.history.replaceState({}, "", url.toString());
     }
   }, [loaded]);
+  /* eslint-enable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 
   const groupDays = useMemo(() => groups
     .filter((group) => group != null)
@@ -165,7 +166,7 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
       <i aria-hidden="true"><ArrowRight strokeWidth={1.8} /></i>
     </button>
     <div className="group-tools">
-      <label><span>Пошук</span><input type="search" value={query} onChange={(event) => changeFilters(event.target.value)} placeholder="Назва, ведучий або адреса" /></label>
+      <label htmlFor="group-search"><span>Пошук</span><input id="group-search" type="search" value={query} onChange={(event) => changeFilters(event.target.value)} placeholder="Назва, ведучий або адреса" /></label>
       <div className="day-filters" aria-label="Фільтр за днем">{days.map((item) => <button type="button" className={item === day ? "is-active" : ""} aria-pressed={item === day} onClick={() => { setDay(item); setSelected(0); }} key={item}>{item}</button>)}</div>
     </div>
     <div className="groups-explorer-layout">
@@ -173,7 +174,7 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
         {filtered.length ? filtered.map((group, index) => <button type="button" className={`group-result ${active === group ? "is-active" : ""}`} onClick={() => setSelected(index)} key={group.id}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{group.title}</strong><small>{group.leaders}</small><b>{group.time}</b><address>{group.address || "Адресу уточнюйте у ведучого"}</address></div></button>) : <p className="empty-result">За цими параметрами груп не знайдено.</p>}
       </div>
       <div className="group-map-card">
-        {active?.coordinates ? <><div className="group-map-info"><div><span>Обрана група</span><strong>{active.title}</strong><small>{active.address || "Адресу уточнюйте у ведучого"}</small></div><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.coordinates)}`} target="_blank" rel="noreferrer">Прокласти маршрут ↗</a></div><iframe key={active.coordinates} src={`https://www.google.com/maps?q=${encodeURIComponent(active.coordinates)}&z=17&output=embed`} title={`${active.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></> : <div className="map-unavailable"><strong>{active?.title}</strong><p>Адресу цієї групи потрібно уточнити у ведучого.</p></div>}
+        {active?.coordinates ? <><div className="group-map-info"><div><span>Обрана група</span><strong>{active.title}</strong><small>{active.address || "Адресу уточнюйте у ведучого"}</small></div><a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(active.coordinates)}`} target="_blank" rel="noopener noreferrer">Прокласти маршрут ↗</a></div><iframe key={active.coordinates} src={`https://www.google.com/maps?q=${encodeURIComponent(active.coordinates)}&z=17&output=embed`} title={`${active.title} на карті`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen /></> : <div className="map-unavailable"><strong>{active?.title}</strong><p>Адресу цієї групи потрібно уточнити у ведучого.</p></div>}
       </div>
     </div>
     </>}
@@ -200,7 +201,7 @@ export function GroupsExplorer({ groups: propGroups, launcherOnly = false }: { g
               <label className="group-form-field"><span>Прізвище та ім’я *</span><input value={name} onChange={(event) => setName(event.target.value)} name="name" autoComplete="name" minLength={2} maxLength={100} placeholder="Наприклад, Анна Коваль" required /></label>
               <label className="group-form-field"><span>Номер телефону *</span><input value={phone} onChange={(event) => setPhone(event.target.value)} name="phone" type="tel" autoComplete="tel" minLength={9} maxLength={20} placeholder="066 950 99 77" required /><small>Вкажіть номер, за яким адміністратор зможе з вами зв’язатися.</small></label>
             </div>
-            <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі, та приймаю <a href="/privacy" target="_blank" rel="noreferrer">політику конфіденційності</a>.</span></label>
+            <label className="group-form-consent"><input type="checkbox" required /><span>Погоджуюсь, щоб адміністратор церкви зв’язався зі мною щодо участі у групі, та приймаю <a href="/privacy/" target="_blank" rel="noopener noreferrer">політику конфіденційності</a>.</span></label>
             <label className="group-form-honeypot" aria-hidden="true">Ваш сайт<input name="website" tabIndex={-1} autoComplete="off" /></label>
             {submitMessage ? <p className={`group-submit-message ${submitState}`}>{submitMessage}</p> : null}
             <button className="group-submit-button" type="submit" disabled={submitState === "sending" || !chosenGroups.length}><span>{submitState === "sending" ? "Надсилаємо…" : "Надіслати заявку"}</span><Send aria-hidden="true" /></button>

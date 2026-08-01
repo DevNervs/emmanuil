@@ -2,16 +2,23 @@ import { JsonLd } from "../components/JsonLd";
 import { Page, PageIntro } from "../components/SiteShell";
 import { LiveStream } from "../components/LiveStream";
 import { breadcrumbFor, pageMetadata } from "../seo";
+import { handleYouTubeLive } from "../../worker/youtubeLive";
 
 export const metadata = pageMetadata({
   path: "/online",
-  title: "Онлайн-служіння церкви Еммануїл",
+  title: "Онлайн-служіння церкви Еммануїл, Україна",
   description:
-    "Дивіться недільні служіння церкви Еммануїл у Чернівцях онлайн о 10:00 та 17:00. Live-трансляція з YouTube.",
+    "Дивіться недільні служіння церкви Еммануїл у Чернівцях, Україна онлайн о 10:00 та 17:00. Live-трансляція з YouTube.",
   ogTitle: "Онлайн-служіння Еммануїл",
 });
 
-export default function OnlinePage() {
+export default async function OnlinePage() {
+  const liveResponse = await handleYouTubeLive(new Request("https://example.com/api/youtube-live", { method: "GET" }));
+  const liveResult = await liveResponse.json() as { live?: boolean; videoId?: string };
+  const initialState = liveResult.live
+    ? { status: "live" as const, videoId: liveResult.videoId }
+    : { status: "offline" as const };
+
   return (
     <Page active="/online">
       <main>
@@ -28,7 +35,7 @@ export default function OnlinePage() {
           }
         />
         <section data-header-theme="light" className="video-section">
-          <LiveStream />
+          <LiveStream initialState={initialState} />
         </section>
       </main>
     </Page>

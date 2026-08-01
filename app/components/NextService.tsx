@@ -32,8 +32,8 @@ export function NextService() {
           </p>
         </div>
         <div className="home-now-actions">
-          <a className="button button-wine" href="/visit">Що очікувати на візиті</a>
-          <a className="inline-link" href="/contacts">Карта та маршрути</a>
+          <a className="button button-wine" href="/visit/">Що очікувати на візиті</a>
+          <a className="inline-link" href="/contacts/">Карта та маршрути</a>
         </div>
       </div>
       <div className="home-now-locations">

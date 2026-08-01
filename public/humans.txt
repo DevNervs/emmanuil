@@ -5,8 +5,8 @@ Contact: emmanuil.cv@gmail.com
 Phones: +380669509977, +380969509977
 
 /* SITE */
-Last update: 2026-07-23
+Last update: 2026-08-01
 Language: Ukrainian
 Standards: HTML5, Schema.org JSON-LD
-Canonical: https://emmanuil.pages.dev
-Sitemap: https://emmanuil.pages.dev/sitemap.xml
+Canonical: https://app.boris-reminder.workers.dev
+Sitemap: https://app.boris-reminder.workers.dev/sitemap.xml

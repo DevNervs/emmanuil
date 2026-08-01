@@ -44,28 +44,31 @@ export function HeroVideo() {
       }
 
       void import("hls.js/light")
-        .then(({ default: Hls }) => {
+        .then(({ default: Hls, Events }) => {
           if (disposed) return;
           if (!Hls.isSupported()) {
             enableFallback();
             return;
           }
+          const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
           const hls = new Hls({
-            backBufferLength: 45,
-            maxBufferLength: 45,
-            maxMaxBufferLength: 45,
-            maxBufferSize: 100_000_000,
+            backBufferLength: isCoarsePointer ? 30 : 45,
+            maxBufferLength: isCoarsePointer ? 30 : 45,
+            maxMaxBufferLength: isCoarsePointer ? 30 : 45,
+            maxBufferSize: isCoarsePointer ? 40_000_000 : 100_000_000,
             startFragPrefetch: true,
-            capLevelToPlayerSize: false,
+            capLevelToPlayerSize: true,
             startLevel: 0,
-            abrEwmaDefaultEstimate: 1_500_000,
+            abrEwmaDefaultEstimate: isCoarsePointer ? 900_000 : 1_500_000,
           });
           hlsInstance = hls;
           hls.loadSource(hlsSrc);
           hls.attachMedia(video);
-          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          hls.on(Events.MANIFEST_PARSED, () => {
             const dpr = window.devicePixelRatio || 1;
-            const maxWidth = video.clientWidth * dpr;
+            // Cap mobile decode cost (~720p) without changing the visible framing.
+            const hardCap = isCoarsePointer ? 1280 : Number.POSITIVE_INFINITY;
+            const maxWidth = Math.min(video.clientWidth * dpr, hardCap);
             let cap = 0;
             for (let i = hls.levels.length - 1; i >= 0; i--) {
               const level = hls.levels[i];
@@ -77,7 +80,7 @@ export function HeroVideo() {
             hls.autoLevelCapping = cap;
             play();
           });
-          hls.on(Hls.Events.ERROR, (_event, data) => {
+          hls.on(Events.ERROR, (_event, data) => {
             if (!data.fatal) return;
             hls.destroy();
             hlsInstance = null;

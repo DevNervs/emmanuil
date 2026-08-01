@@ -7,7 +7,6 @@ export interface Group {
   day?: string;
   address?: string;
   coordinates?: string;
-  showOnHome?: boolean;
 }
 
 export interface Season {

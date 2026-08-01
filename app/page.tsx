@@ -1,17 +1,19 @@
 import { Page } from "./components/SiteShell";
 import { GroupsExplorer } from "./components/GroupsExplorer";
-import { HeroAnnouncement } from "./components/HeroAnnouncement";
+import { HomeGroupCount } from "./components/HomeGroupCount";
 import { HeroLocations } from "./components/HeroLocations";
 import { HeroVideo } from "./components/HeroVideo";
+import { LiveOnlineButton } from "./components/LiveOnlineButton";
 import { PromoSection } from "./components/PromoSection";
 import { groupSeason, groups } from "./content";
 import { pageMetadata } from "./seo";
+import { handleYouTubeLive } from "../worker/youtubeLive";
 
 export const metadata = pageMetadata({
   path: "/",
-  title: { absolute: "Церква Еммануїл у Чернівцях | Християнська євангельська церква" },
+  title: { absolute: "Церква Еммануїл у Чернівцях, Україна | Християнська євангельська церква" },
   description:
-    "Християнська євангельська церква Еммануїл у Чернівцях: недільні служіння о 10:00 та 17:00 на 4 локаціях, домашні групи, онлайн-трансляції та контакти.",
+    "Християнська євангельська церква Еммануїл у Чернівцях, Україна. Недільні служіння о 10:00 та 17:00 на 4 локаціях, домашні групи, онлайн-трансляції та контакти.",
   ogTitle: "Еммануїл — християнська церква у Чернівцях",
   ogDescription:
     "Недільні служіння о 10:00 та 17:00 на 4 локаціях у Чернівцях і області, домашні групи, онлайн-трансляції та контакти.",
@@ -35,7 +37,13 @@ const carouselPhotos = [
   "/media/homegroups/homegroup-gallery-15.webp",
 ];
 
-export default function Home() {
+export default async function Home() {
+  const liveResponse = await handleYouTubeLive(new Request("https://example.com/api/youtube-live", { method: "GET" }));
+  const liveResult = await liveResponse.json() as { live?: boolean; videoId?: string };
+  const initialState = liveResult.live
+    ? { status: "live" as const, videoId: liveResult.videoId }
+    : { status: "offline" as const };
+
   return (
     <Page active="/">
       <main>
@@ -50,8 +58,8 @@ export default function Home() {
               <h1 className="sr-only">Християнська церква Еммануїл у Чернівцях</h1>
               <p className="hero-slogan">Існуємо, щоб ви дізналися про Бога більше</p>
               <div className="hero-actions">
-                <a className="button button-wine" href="/visit">Вперше у нас</a>
-                <a className="button button-ghost" href="/online">Дивитися онлайн</a>
+                <a className="button button-wine" href="/visit/">Вперше у нас</a>
+                <LiveOnlineButton initialState={initialState} />
               </div>
               <p className="hero-tagline">Поклоніння · учнівство · духовний зріст</p>
             </div>
@@ -61,20 +69,37 @@ export default function Home() {
           </div>
         </section>
 
-        <HeroAnnouncement />
-
         <PromoSection />
+
+        <section data-header-theme="light" className="first-visit-feature" aria-labelledby="home-intro-title">
+          <div>
+            <p className="overline">Про церкву</p>
+            <h2 id="home-intro-title">Християнська церква Еммануїл у Чернівцях, Україна</h2>
+          </div>
+          <div>
+            <p>
+              Еммануїл — це євангельська церква в Україні та Європі, яка збирається в Чернівцях,
+              Садгорі та Сторожинці, а також у Брюсселі, Амстердамі та Генті. Ми проводимо недільні
+              служіння, дитяче служіння, домашні групи, молодіжні та сімейні зустрічі, а також
+              онлайн-трансляції для тих, хто не може бути присутній.
+            </p>
+            <div className="first-visit-actions">
+              <a className="button button-wine" href="/about/">Дізнатися більше</a>
+              <a className="inline-link" href="/contacts/">Знайти адресу</a>
+            </div>
+          </div>
+        </section>
 
         {/* Home Groups Section */}
         <section data-header-theme="light" className="home-season" aria-labelledby="home-season-title">
           <div className="home-season-copy">
             <p className="overline">{groupSeason.label}</p>
             <h2 id="home-season-title">{groupSeason.title}</h2>
-            <p className="home-season-period">{groupSeason.period} · {groups.length} груп</p>
+            <p className="home-season-period">{groupSeason.period} · <HomeGroupCount fallback={groups.length} /></p>
             <p>{groupSeason.summary}</p>
             <div className="first-visit-actions">
               <GroupsExplorer groups={groups} launcherOnly />
-              <a className="inline-link" href="/groups">Розклад груп</a>
+              <a className="inline-link" href="/groups/">Розклад груп</a>
             </div>
           </div>
 
@@ -100,8 +125,8 @@ export default function Home() {
                       src={src}
                       width="1200"
                       height="900"
-                      alt="Домашня група Еммануїл"
-                      loading="eager"
+                      alt={`Фото з домашньої групи Еммануїл — ${(idx % carouselPhotos.length) + 1}`}
+                      loading="lazy"
                       fetchPriority="low"
                       decoding="async"
                     />
@@ -121,7 +146,7 @@ export default function Home() {
             <p>Служіння триває близько двох годин: поклоніння, проповідь і спілкування. Є дитяче служіння, відповіді про паркування, дресс-код і доступність — у практичному FAQ.</p>
             <div className="first-visit-actions">
               <a className="button button-wine" href="/visit#visit-faq">Практичний FAQ</a>
-              <a className="inline-link" href="/contacts">Знайти на карті</a>
+              <a className="inline-link" href="/contacts/">Знайти на карті</a>
             </div>
           </div>
         </section>
@@ -133,7 +158,7 @@ export default function Home() {
           </div>
           <div>
             <p>Дякуємо кожному, хто підтримує нас молитовно чи фінансово у розповсюдженні Божого слова.</p>
-            <a className="button button-light" href="/donate">Реквізити</a>
+            <a className="button button-light" href="/donate/">Реквізити</a>
           </div>
         </section>
       </main>
