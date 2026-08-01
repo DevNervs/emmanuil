@@ -7,6 +7,7 @@ import { handleSiteApi } from "./apiSite";
 import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import { handleYouTubeLive } from "./youtubeLive";
 import { handlePromoVideo } from "./promoVideo";
+import { redirectToHttps, withSecurityHeaders } from "./securityHeaders";
 import type { Env } from "./env";
 
 interface ExecutionContext {
@@ -77,6 +78,9 @@ const routes: { match: (pathname: string) => boolean; handler: RouteHandler }[] 
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const httpsRedirect = redirectToHttps(request);
+    if (httpsRedirect) return httpsRedirect;
+
     const url = new URL(request.url);
     const normalizedPath = url.pathname.length > 1 ? url.pathname.replace(/\/$/, "") : url.pathname;
     const legacyTarget = LEGACY_REDIRECTS[normalizedPath];
@@ -89,11 +93,15 @@ const worker = {
 
     for (const route of routes) {
       if (route.match(url.pathname)) {
-        return route.handler(request, env, ctx, url);
+        const response = await route.handler(request, env, ctx, url);
+        const contentType = response.headers.get("Content-Type") || "";
+        return withSecurityHeaders(response, { isHtml: contentType.includes("text/html") });
       }
     }
 
-    return handler.fetch(request, env, ctx);
+    const page = await handler.fetch(request, env, ctx);
+    const contentType = page.headers.get("Content-Type") || "";
+    return withSecurityHeaders(page, { isHtml: contentType.includes("text/html") });
   },
 };
 

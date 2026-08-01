@@ -1,10 +1,19 @@
 /**
  * Domain switch (one place):
- * 1) Set NEXT_PUBLIC_SITE_URL=https://emmanuil.cv.ua in env, OR
- * 2) Change DEFAULT_SITE_ORIGIN below to https://emmanuil.cv.ua
+ * 1) Set NEXT_PUBLIC_SITE_URL / SITE_ORIGIN in env, OR
+ * 2) Change DEFAULT_SITE_ORIGIN below.
  * Then rebuild + redeploy. Canonical, sitemap, OG, JSON-LD all follow this.
+ *
+ * Current: temporary workers.dev host (custom domain DNS not active yet).
+ * When new.emmanuil.cv.ua resolves: set env to https://new.emmanuil.cv.ua and redeploy.
+ * Final apex cutover later: https://emmanuil.cv.ua
  */
-export const DEFAULT_SITE_ORIGIN = "https://emmanuil.pages.dev";
+export const DEFAULT_SITE_ORIGIN = "https://app.boris-reminder.workers.dev";
+
+function resolveSiteOrigin(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_ORIGIN || DEFAULT_SITE_ORIGIN;
+  return fromEnv.replace(/\/$/, "");
+}
 
 export const site = {
   name: "Еммануїл",
@@ -17,9 +26,14 @@ export const site = {
   email: "emmanuil.cv@gmail.com",
   services: "Щонеділі о 10:00 та 17:00",
   /** Production origin used by canonical / sitemap / OG / schema. */
-  canonicalUrl: (process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_ORIGIN).replace(/\/$/, ""),
+  canonicalUrl: resolveSiteOrigin(),
   /** Old / alternate hosts (for Search Console migration notes). Not used as canonical. */
-  legacyOrigins: ["https://emmanuil.cv.ua", "http://emmanuil.cv.ua"],
+  legacyOrigins: [
+    "https://emmanuil.pages.dev",
+    "https://new.emmanuil.cv.ua",
+    "https://emmanuil.cv.ua",
+    "http://emmanuil.cv.ua",
+  ],
   geo: {
     latitude: 48.2863973,
     longitude: 25.9391673,

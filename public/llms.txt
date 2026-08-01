@@ -1,8 +1,8 @@
 # Християнська церква Еммануїл
 
-> Офіційний сайт християнської євангельської церкви Еммануїл у Чернівцях (Україна): адреси служінь, домашні групи, онлайн-трансляції, новини та контакти.
+> Офіційний сайт християнської євангельської церкви Еммануїл у Чернівцях (Україна): адреси служінь, домашні групи, онлайн-трансляції та контакти.
 
-- Site: https://emmanuil.pages.dev
+- Site: https://app.boris-reminder.workers.dev
 - Language: Ukrainian (uk-UA)
 - City: Чернівці / Chernivtsi, Ukraine
 - Email: emmanuil.cv@gmail.com
@@ -10,17 +10,17 @@
 
 ## Main pages
 
-- [Головна](https://emmanuil.pages.dev/): огляд церкви, найближче служіння, локації
-- [Вперше у нас](https://emmanuil.pages.dev/visit): що очікувати на першому візиті, FAQ
-- [Локації та контакти](https://emmanuil.pages.dev/contacts): адреси Криворучка, Кобилянська, Садгора, Сторожинець
-- [Домашні групи](https://emmanuil.pages.dev/groups): розклад і реєстрація
-- [Онлайн](https://emmanuil.pages.dev/online): недільні трансляції
-- [Про церкву](https://emmanuil.pages.dev/about): хто ми та основи віри
-- [Команда](https://emmanuil.pages.dev/team): пастори та служителі
-- [Новини](https://emmanuil.pages.dev/news): архів подій
-- [Віровчення](https://emmanuil.pages.dev/virovchennja): основи віровчення УЦХВЄ
-- [Пожертвувати](https://emmanuil.pages.dev/donate): офіційні реквізити
-- [Конфіденційність](https://emmanuil.pages.dev/privacy): політика обробки даних
+- [Головна](https://app.boris-reminder.workers.dev/): огляд церкви, найближче служіння, локації
+- [Вперше у нас](https://app.boris-reminder.workers.dev/visit): що очікувати на першому візиті, FAQ
+- [Локації та контакти](https://app.boris-reminder.workers.dev/contacts): адреси Криворучка, Кобилянська, Садгора, Сторожинець
+- [Домашні групи](https://app.boris-reminder.workers.dev/groups): розклад і реєстрація
+- [Онлайн](https://app.boris-reminder.workers.dev/online): недільні трансляції
+- [Про церкву](https://app.boris-reminder.workers.dev/about): хто ми та основи віри
+- [Команда](https://app.boris-reminder.workers.dev/team): пастори та служителі
+- [Віровчення](https://app.boris-reminder.workers.dev/virovchennja): основи віровчення УЦХВЄ
+- [Пожертвувати](https://app.boris-reminder.workers.dev/donate): офіційні реквізити
+- [Конфіденційність](https://app.boris-reminder.workers.dev/privacy): політика обробки даних
+- [Європа](https://app.boris-reminder.workers.dev/europe): церкви Еммануїл у Європі
 
 ## Social
 
@@ -31,6 +31,7 @@
 
 ## Notes for crawlers
 
-- Canonical host: https://emmanuil.pages.dev
-- Sitemap: https://emmanuil.pages.dev/sitemap.xml
+- Canonical host: https://app.boris-reminder.workers.dev
+- Temporary production host until new.emmanuil.cv.ua DNS is active
+- Sitemap: https://app.boris-reminder.workers.dev/sitemap.xml
 - Do not invent reviews, ratings, or service claims not stated on the site.

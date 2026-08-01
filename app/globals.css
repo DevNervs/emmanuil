@@ -497,7 +497,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
   .mobile-menu nav a[aria-current="page"] { color:var(--wine); font-weight:750; }
   .mobile-menu nav a:last-child { margin-top:.65rem; min-height:3.55rem; border:0; border-radius:10rem; background:var(--wine); color:var(--white); font-size:1.08rem; font-weight:750; justify-content:center; }
   .site-header:has(.mobile-menu[open]) { z-index:60; }
-  .site-header:has(.mobile-menu[open]) .mobile-menu summary { background:#fff; }
+  .site-header:has(.mobile-menu[open]) .mobile-menu summary { background:transparent; }
   .photo-hero { min-height:min(78svh, 42rem); }
   .photo-hero-copy { max-width:36rem; padding:clamp(1.5rem,4vw,2.2rem) clamp(1.15rem,5vw,3rem) clamp(1.8rem,5vw,2.8rem); }
   .home-now-locations { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -1609,30 +1609,30 @@ html[data-header-theme="light"] { --header-fg:#000; --header-active-icon:#fff; }
 
 /* Mobile polish: transparent hamburger, readable Cyrillic type, robust grids. */
 @media (max-width:1000px) {
-  /* Frosted-glass hamburger that matches the header instead of an opaque pill. */
+  /* Hamburger blends into the header — no lighter frosted circle. */
   .mobile-menu summary {
-    background: rgba(255,255,255,.12);
-    -webkit-backdrop-filter: blur(12px) saturate(1.6);
-    backdrop-filter: blur(12px) saturate(1.6);
-    border-color: rgba(255,255,255,.25);
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-color: transparent;
     color: var(--header-fg);
     box-shadow: none;
   }
   html[data-header-theme="light"] .mobile-menu summary {
-    background: rgba(18,26,36,.1);
-    border-color: rgba(18,26,36,.18);
+    background: transparent;
+    border-color: transparent;
     color: var(--header-fg);
   }
   .mobile-menu summary:hover,
   .mobile-menu[open] summary,
   .site-header:has(.mobile-menu[open]) .mobile-menu summary {
-    background: rgba(255,255,255,.22);
+    background: transparent;
     color: var(--header-fg);
   }
   html[data-header-theme="light"] .mobile-menu summary:hover,
   html[data-header-theme="light"] .mobile-menu[open] summary,
   html[data-header-theme="light"] .site-header:has(.mobile-menu[open]) .mobile-menu summary {
-    background: rgba(18,26,36,.2);
+    background: transparent;
     color: var(--header-fg);
   }
 

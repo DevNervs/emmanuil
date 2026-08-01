@@ -5,7 +5,7 @@ import { handleAdminApi } from "../worker/adminApi.ts";
 import { handleGroupRegistration } from "../worker/groupRegistration.ts";
 import { cookie, signAdminSession } from "../worker/telegram.ts";
 import { handleTelegramUpdate } from "../worker/telegramBot.ts";
-import { extractLiveVideoId, handleYouTubeLive } from "../worker/youtubeLive.ts";
+import { handleYouTubeLive, resetYouTubeLiveCache } from "../worker/youtubeLive.ts";
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -48,10 +48,10 @@ test("renders every public route in Ukrainian", async () => {
     const html = await response.text();
     assert.match(html, /<html[^>]*lang="uk"/);
     assert.match(html, /Еммануїл/);
-    assert.ok(html.includes(`<link rel="canonical" href="https://emmanuil.pages.dev${pathname === "/" ? "" : `${pathname}/`}"/>`), `canonical ${pathname}`);
-    assert.match(html, /property="og:image" content="https:\/\/emmanuil\.pages\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/, `og:image ${pathname}`);
-    assert.match(html, /name="twitter:image" content="https:\/\/emmanuil\.pages\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/, `twitter:image ${pathname}`);
-    assert.match(html, /rel="image_src" href="https:\/\/emmanuil\.pages\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/, `image_src ${pathname}`);
+    assert.ok(html.includes(`<link rel="canonical" href="https://app.boris-reminder.workers.dev${pathname === "/" ? "" : `${pathname}/`}"/>`), `canonical ${pathname}`);
+    assert.match(html, /property="og:image" content="https:\/\/app\.boris-reminder\.workers\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/, `og:image ${pathname}`);
+    assert.match(html, /name="twitter:image" content="https:\/\/app\.boris-reminder\.workers\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/, `twitter:image ${pathname}`);
+    assert.match(html, /rel="image_src" href="https:\/\/app\.boris-reminder\.workers\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/, `image_src ${pathname}`);
     assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/);
   }
 });
@@ -77,10 +77,10 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(home, /emmanuil-logo-brand\.png/);
   assert.match(home, /favicon-emmanuil-dark-32\.png/);
   assert.match(home, /application\/ld\+json/);
-  assert.match(home, /emmanuil\.pages\.dev\/emmanuil-social-preview-20260729-v2\.jpg/);
+  assert.match(home, /app\.boris-reminder\.workers\.dev\/emmanuil-social-preview-20260729-v2\.jpg/);
   assert.match(home, /property="og:image"/);
   assert.match(home, /og:image:type" content="image\/jpeg"/);
-  assert.match(home, /Церква Еммануїл у Чернівцях \| Християнська євангельська церква/);
+  assert.match(home, /Церква Еммануїл у Чернівцях, Україна \| Християнська євангельська церква/);
   assert.match(home, /Эммануил Черновцы/);
   assert.match(home, /Emmanuil Chernivtsi/);
   assert.match(home, /LocalBusiness/);
@@ -121,7 +121,7 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.doesNotMatch(visit, /visit-location-grid/);
 
   const groups = await (await render("/groups")).text();
-  assert.match(groups, /\/media\/homegroup-how\.webp/);
+  assert.match(groups, /\/media\/homegroups\/homegroup-gallery-01\.webp/);
   assert.match(groups, /Назва, ведучий або адреса/);
   assert.match(groups, /48\.2863973,25\.9391673/);
 
@@ -144,10 +144,10 @@ test("ships brand, SEO and primary interactions", async () => {
 
   const about = await (await render("/about")).text();
   assert.match(about, /\/media\/baptism-editorial-color\.webp/);
-  assert.ok(about.includes('property="og:url" content="https://emmanuil.pages.dev/about/"'), "about og:url");
+  assert.ok(about.includes('property="og:url" content="https://app.boris-reminder.workers.dev/about/"'), "about og:url");
   assert.match(about, /BreadcrumbList/);
   const online = await (await render("/online")).text();
-  assert.ok(online.includes('property="og:url" content="https://emmanuil.pages.dev/online/"'), "online og:url");
+  assert.ok(online.includes('property="og:url" content="https://app.boris-reminder.workers.dev/online/"'), "online og:url");
   assert.match(online, /Онлайн-служіння/);
   assert.match(online, /twitter:title" content="Онлайн-служіння Еммануїл"/);
   const teamPage = await (await render("/team")).text();
@@ -167,8 +167,8 @@ test("uses one social preview image on the protected admin route too", async () 
     new URL("../public/emmanuil-social-preview-20260729-v2.jpg", import.meta.url),
   );
   assert.ok(preview.length > 0);
-  assert.match(admin, /property="og:image" content="https:\/\/emmanuil\.pages\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/);
-  assert.match(admin, /name="twitter:image" content="https:\/\/emmanuil\.pages\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/);
+  assert.match(admin, /property="og:image" content="https:\/\/app\.boris-reminder\.workers\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/);
+  assert.match(admin, /name="twitter:image" content="https:\/\/app\.boris-reminder\.workers\.dev\/emmanuil-social-preview-20260729-v2\.jpg"/);
 });
 
 test("ships every responsive home-group carousel image", async () => {
@@ -210,7 +210,7 @@ test("keeps the mobile group application scrollable and group-first", async () =
   assert.match(styles, /--photo-filter:/);
   assert.match(styles, /\.video-hero \{[^}]*min-height:min\(85svh/);
   assert.match(styles, /\.groups-carousel/);
-  assert.match(styles, /\.live-indicator i \{[^}]*animation:live-pulse/);
+  assert.match(styles, /\.live-dot \{[^}]*animation:live-pulse-red/);
   assert.doesNotMatch(styles, /\.video-placeholder-mark/);
   assert.match(styles, /\.video-hero \.hero-slogan \{[^}]*animation:rise/);
   assert.match(styles, /\.video-hero-media video \{[^}]*brightness\(\.7/);
@@ -246,7 +246,7 @@ test("keeps group editing and the promo section intentionally simple", async () 
   assert.match(promoSource, /promo-ambient-video/);
   assert.match(promoSource, /object-contain/);
   assert.match(promoSource, /aria-hidden="true"/);
-  assert.match(promoSource, /Math\.abs\(ambientVideo\.currentTime - video\.currentTime\) > 0\.35/);
+  assert.match(promoSource, /Math\.abs\(ambient\.currentTime - video\.currentTime\) > 0\.2/);
   assert.equal((promoSource.match(/<video/g) || []).length, 2);
   assert.doesNotMatch(promoSource, /buttonText|buttonHref|<a /);
   assert.doesNotMatch(configSource, /Текст кнопки|Посилання для кнопки|buttonText|buttonHref/);
@@ -296,8 +296,9 @@ test("uses centralized typed content and stable sitemap dates", async () => {
   assert.match(publicSitemap, /\/visit\/<\/loc>/);
   assert.match(publicSitemap, /\/privacy\/<\/loc>/);
   assert.match(publicSitemap, /\/virovchennja\/<\/loc>/);
-  assert.match(publicSitemap, /<lastmod>2026-07-28<\/lastmod>/);
-  assert.equal((publicSitemap.match(/<url>/g) || []).length, 12);
+  assert.match(publicSitemap, /<lastmod>2026-08-01<\/lastmod>/);
+  assert.doesNotMatch(publicSitemap, /\/departments\/<\/loc>/);
+  assert.equal((publicSitemap.match(/<url>/g) || []).length, 11);
   assert.match(seo, /pageMetadata/);
   assert.match(seo, /buildBreadcrumbList/);
   assert.match(seo, /"Church"/);
@@ -321,10 +322,35 @@ test("preserves authority from indexed legacy URLs with permanent redirects", as
   const { default: worker } = await import(workerUrl.href);
   const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
   for (const [oldPath, newPath] of [["/about-us/team", "/team"], ["/about-us/mi-virimo", "/about#beliefs"], ["/about-us/virovchennja-chve", "/virovchennja"], ["/live", "/online"]]) {
-    const response = await worker.fetch(new Request(`https://emmanuil.pages.dev${oldPath}`), env, { waitUntil() {}, passThroughOnException() {} });
+    const response = await worker.fetch(new Request(`https://app.boris-reminder.workers.dev${oldPath}`), env, { waitUntil() {}, passThroughOnException() {} });
     assert.equal(response.status, 301, oldPath);
-    assert.equal(response.headers.get("location"), `https://emmanuil.pages.dev${newPath}`);
+    assert.equal(response.headers.get("location"), `https://app.boris-reminder.workers.dev${newPath}`);
   }
+});
+
+test("adds security headers and upgrades insecure production requests", async () => {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("security-test", `${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
+  const env = { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } };
+  const html = await worker.fetch(
+    new Request("https://app.boris-reminder.workers.dev/", { headers: { accept: "text/html" } }),
+    env,
+    { waitUntil() {}, passThroughOnException() {} },
+  );
+  assert.equal(html.headers.get("X-Content-Type-Options"), "nosniff");
+  assert.equal(html.headers.get("Referrer-Policy"), "strict-origin-when-cross-origin");
+  assert.equal(html.headers.get("X-Frame-Options"), "SAMEORIGIN");
+  assert.match(html.headers.get("Strict-Transport-Security") || "", /max-age=63072000/);
+  assert.match(html.headers.get("Cache-Control") || "", /s-maxage=3600/);
+
+  const upgrade = await worker.fetch(
+    new Request("http://app.boris-reminder.workers.dev/visit", { headers: { accept: "text/html" } }),
+    env,
+    { waitUntil() {}, passThroughOnException() {} },
+  );
+  assert.equal(upgrade.status, 301);
+  assert.equal(upgrade.headers.get("location"), "https://app.boris-reminder.workers.dev/visit");
 });
 
 test("renders the manuscript without decorative verse stars or a baked white backdrop", async () => {
@@ -583,24 +609,42 @@ test("assigns the first Telegram owner once and prevents owner deletion", async 
   }
 });
 
-test("handles live and offline YouTube states without network access", async () => {
-  mock.method(globalThis, "fetch", async () => new Response('<link rel="canonical" href="https://www.youtube.com/watch?v=liveVid1234"><script>{"isLiveNow":true}</script>'));
+test("handles live and offline YouTube states via Data API", async () => {
+  resetYouTubeLiveCache();
+  mock.method(globalThis, "fetch", async (input) => {
+    const url = String(input);
+    if (url.includes("/search?")) {
+      return new Response(JSON.stringify({ items: [{ id: { videoId: "liveVid1234" } }] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (url.includes("/videos?")) {
+      return new Response(JSON.stringify({
+        items: [{ snippet: { liveBroadcastContent: "live" }, liveStreamingDetails: {} }],
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("not found", { status: 404 });
+  });
   const liveResponse = await handleYouTubeLive(new Request("http://localhost/api/youtube-live"));
   assert.deepEqual(await liveResponse.json(), { live: true, videoId: "liveVid1234" });
   mock.restoreAll();
 
-  mock.method(globalThis, "fetch", async () => new Response('<link rel="canonical" href="https://www.youtube.com/watch?v=recorded123"><script>{"isLiveNow":false}</script>'));
+  resetYouTubeLiveCache();
+  mock.method(globalThis, "fetch", async () => new Response(JSON.stringify({ items: [] }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  }));
   const offlineResponse = await handleYouTubeLive(new Request("http://localhost/api/youtube-live"));
   assert.deepEqual(await offlineResponse.json(), { live: false });
   mock.restoreAll();
 });
 
-test("finds a live broadcast when YouTube keeps the channel canonical URL", () => {
-  const channelHtml = '<link rel="canonical" href="https://www.youtube.com/channel/UCxFwu9_CAk23NIVW3Y7emsQ"><script>{"videoRenderer":{"videoId":"BRxxF_SS6Rc","badges":[{"metadataBadgeRenderer":{"style":"BADGE_STYLE_TYPE_LIVE_NOW"}}]}}</script>';
-  assert.equal(extractLiveVideoId(channelHtml, "https://www.youtube.com/@EmmanuilCV/streams"), "BRxxF_SS6Rc");
-});
-
-test("does not report a YouTube outage as an offline broadcast", async () => {
+test("does not report a YouTube outage as a confirmed offline broadcast", async () => {
+  resetYouTubeLiveCache();
   mock.method(globalThis, "fetch", async () => new Response("rate limited", { status: 429 }));
   const response = await handleYouTubeLive(new Request("http://localhost/api/youtube-live"));
   assert.equal(response.status, 502);

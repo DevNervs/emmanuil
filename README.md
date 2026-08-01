@@ -54,7 +54,13 @@ npm run build:pages
 npm run deploy
 ```
 
-`NEXT_PUBLIC_SITE_URL` is build-time — set it to `https://emmanuil.pages.dev` before `npm run build` for production.
+`NEXT_PUBLIC_SITE_URL` is build-time. Current production host:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://app.boris-reminder.workers.dev npm run build
+```
+
+When `new.emmanuil.cv.ua` DNS is active, switch the URL (and the GitHub Actions env) to that origin, rebuild, and redeploy.
 
 ### GitHub Actions
 
@@ -64,7 +70,7 @@ Required GitHub secret:
 
 - `CLOUDFLARE_API_TOKEN` — create a token with `Cloudflare Pages:Edit`, `Account:Read`, and `Zone:Read` permissions.
 
-`NEXT_PUBLIC_SITE_URL` is set to `https://emmanuil.pages.dev` in the workflow, so it is baked into the build on CI.
+`NEXT_PUBLIC_SITE_URL` is set in the workflow (currently the temporary workers.dev host) so it is baked into the build on CI.
 
 ## Learn More
 

@@ -7,6 +7,7 @@ import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
 import type { Env } from "./env";
 import { handleYouTubeLive } from "./youtubeLive";
 import { handlePromoVideo } from "./promoVideo";
+import { redirectToHttps, withSecurityHeaders } from "./securityHeaders";
 
 const legacyRedirects: Record<string, string> = {
   "/about-us": "/about/",
@@ -18,7 +19,11 @@ const legacyRedirects: Record<string, string> = {
 
 const worker = {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const httpsRedirect = redirectToHttps(request);
+    if (httpsRedirect) return httpsRedirect;
+
     const url = new URL(request.url);
+
     const pathname = url.pathname.length > 1 ? url.pathname.replace(/\/$/, "") : url.pathname;
 
     const legacyTarget = legacyRedirects[pathname];
@@ -50,10 +55,15 @@ const worker = {
     ]);
     if (!publicRoutes.has(pathname)) {
       const notFound = await env.ASSETS.fetch(new Request(new URL("/404/", request.url)));
-      return new Response(notFound.body, { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
+      return withSecurityHeaders(
+        new Response(notFound.body, { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } }),
+        { isHtml: true },
+      );
     }
 
-    return env.ASSETS.fetch(request);
+    const page = await env.ASSETS.fetch(request);
+    const contentType = page.headers.get("Content-Type") || "";
+    return withSecurityHeaders(page, { isHtml: contentType.includes("text/html") });
   },
 };
 

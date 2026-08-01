@@ -72,7 +72,8 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
   }
 
   const groupList = selectedGroupNames.map((groupName, order) => `${order + 1}. ${escapeHtml(groupName)}`).join("\n");
-  const message = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Телефон:</b> ${escapeHtml(phone)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з emmanuil.pages.dev</i>`;
+  const host = new URL(request.url).host;
+  const message = `<b>Нова заявка на домашню групу</b>\n\n<b>Ім’я:</b> ${escapeHtml(name)}\n<b>Телефон:</b> ${escapeHtml(phone)}\n\n<b>Обрані групи:</b>\n${groupList}\n\n<i>Надіслано з ${escapeHtml(host)}</i>`;
   const adminUserId = Number(env.TELEGRAM_ADMIN_CHAT_ID);
   const adminByUser = await isAdmin(adminUserId, env);
   const notificationPayload: Record<string, unknown> = {
@@ -94,7 +95,8 @@ export async function handleGroupRegistration(request: Request, env: Env): Promi
   const response = await sendTelegramMessage(env, notificationPayload);
   if (!response.ok) {
     const body = await response.text().catch(() => "unknown");
-    return json({ message: "Не вдалося передати заявку адміністратору.", telegramError: body }, 502);
+    console.error("Telegram group registration notify failed", body.slice(0, 500));
+    return json({ message: "Не вдалося передати заявку адміністратору." }, 502);
   }
   return json({ message: "Заявку надіслано. Адміністратор зв’яжеться з вами." });
 }

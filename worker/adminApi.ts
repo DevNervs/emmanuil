@@ -87,19 +87,30 @@ async function recordLoginAttempt(request: Request, env: Env, success: boolean):
   await env.GROUP_APPLICATIONS.put(key, JSON.stringify({ attempts, resetAt }), { expirationTtl: windowSeconds });
 }
 
+const ALLOWED_ADMIN_ORIGINS = new Set([
+  "https://app.boris-reminder.workers.dev",
+  "https://emmanuil.pages.dev",
+  "https://new.emmanuil.cv.ua",
+  "https://emmanuil.cv.ua",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  "http://localhost:8787",
+  "http://127.0.0.1:8787",
+]);
+
 function corsHeaders(origin: string | null): Record<string, string> {
-  if (!origin) {
-    return {
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-File-Name",
-    };
-  }
-  return {
-    "Access-Control-Allow-Origin": origin,
+  const base = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-File-Name",
-    "Access-Control-Allow-Credentials": "true",
     Vary: "Origin",
+  };
+  if (!origin || !ALLOWED_ADMIN_ORIGINS.has(origin)) {
+    return base;
+  }
+  return {
+    ...base,
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Credentials": "true",
   };
 }
 

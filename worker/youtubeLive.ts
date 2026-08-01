@@ -26,35 +26,53 @@ type LiveCache = {
 
 const liveCache: LiveCache = { lastSearchAt: 0, lastVideoCheckAt: 0 };
 
-async function findLiveVideoId(channelId: string, apiKey: string): Promise<string | undefined> {
-  const url = `${API_BASE}/search?part=snippet&channelId=${channelId}&eventType=live&type=video&maxResults=1&key=${apiKey}`;
-  const response = await fetch(url, {
-    headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(8_000),
-  });
-  if (!response.ok) return undefined;
-  const data = (await response.json()) as { items?: { id?: { videoId?: string } }[] };
-  return cleanVideoId(data.items?.[0]?.id?.videoId);
+/** Test helper — clears the in-memory live cache between cases. */
+export function resetYouTubeLiveCache() {
+  liveCache.videoId = undefined;
+  liveCache.lastSearchAt = 0;
+  liveCache.lastVideoCheckAt = 0;
 }
 
-async function isVideoLive(videoId: string, apiKey: string): Promise<boolean> {
+type SearchResult = { videoId?: string; upstreamError?: boolean };
+
+async function findLiveVideoId(channelId: string, apiKey: string): Promise<SearchResult> {
+  const url = `${API_BASE}/search?part=snippet&channelId=${channelId}&eventType=live&type=video&maxResults=1&key=${apiKey}`;
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!response.ok) return { upstreamError: true };
+    const data = (await response.json()) as { items?: { id?: { videoId?: string } }[] };
+    return { videoId: cleanVideoId(data.items?.[0]?.id?.videoId) };
+  } catch {
+    return { upstreamError: true };
+  }
+}
+
+/** true = live, false = confirmed offline, null = upstream failure */
+async function isVideoLive(videoId: string, apiKey: string): Promise<boolean | null> {
   const url = `${API_BASE}/videos?part=snippet,liveStreamingDetails&id=${videoId}&key=${apiKey}`;
-  const response = await fetch(url, {
-    headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(8_000),
-  });
-  if (!response.ok) return false;
-  const data = (await response.json()) as {
-    items?: {
-      snippet?: { liveBroadcastContent?: string };
-      liveStreamingDetails?: { actualEndTime?: string };
-    }[];
-  };
-  const item = data.items?.[0];
-  if (!item) return false;
-  if (item.snippet?.liveBroadcastContent !== "live") return false;
-  if (item.liveStreamingDetails?.actualEndTime) return false;
-  return true;
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as {
+      items?: {
+        snippet?: { liveBroadcastContent?: string };
+        liveStreamingDetails?: { actualEndTime?: string };
+      }[];
+    };
+    const item = data.items?.[0];
+    if (!item) return false;
+    if (item.snippet?.liveBroadcastContent !== "live") return false;
+    if (item.liveStreamingDetails?.actualEndTime) return false;
+    return true;
+  } catch {
+    return null;
+  }
 }
 
 export async function handleYouTubeLive(request: Request): Promise<Response> {
@@ -78,8 +96,13 @@ export async function handleYouTubeLive(request: Request): Promise<Response> {
     const stillLive = await isVideoLive(liveCache.videoId, apiKey);
     liveCache.lastVideoCheckAt = now;
 
-    if (stillLive) {
+    if (stillLive === true) {
       return json({ live: true, videoId: liveCache.videoId });
+    }
+
+    if (stillLive === null) {
+      // Outage while verifying — do not claim a confirmed offline broadcast.
+      return json({ live: false, available: false }, 502);
     }
 
     liveCache.videoId = undefined;
@@ -87,13 +110,17 @@ export async function handleYouTubeLive(request: Request): Promise<Response> {
 
   // Периодически ищем новый live на канале.
   if (now - liveCache.lastSearchAt >= SEARCH_INTERVAL_MS || !liveCache.lastSearchAt) {
-    const videoId = await findLiveVideoId(channelId, apiKey);
+    const result = await findLiveVideoId(channelId, apiKey);
     liveCache.lastSearchAt = now;
 
-    if (videoId) {
-      liveCache.videoId = videoId;
+    if (result.upstreamError) {
+      return json({ live: false, available: false }, 502);
+    }
+
+    if (result.videoId) {
+      liveCache.videoId = result.videoId;
       liveCache.lastVideoCheckAt = now;
-      return json({ live: true, videoId });
+      return json({ live: true, videoId: result.videoId });
     }
   }
 

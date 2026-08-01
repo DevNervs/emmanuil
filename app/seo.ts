@@ -35,18 +35,18 @@ export const seoKeywords = [
 ];
 
 export const siteRoutes = [
-  { path: "", priority: 1, changeFrequency: "weekly" as const, lastModified: "2026-07-23" },
-  { path: "/visit", priority: 0.95, changeFrequency: "monthly" as const, lastModified: "2026-07-23" },
-  { path: "/contacts", priority: 0.95, changeFrequency: "monthly" as const, lastModified: "2026-07-23" },
-  { path: "/groups", priority: 0.9, changeFrequency: "weekly" as const, lastModified: "2026-07-23" },
-  { path: "/online", priority: 0.85, changeFrequency: "weekly" as const, lastModified: "2026-07-23" },
-  { path: "/about", priority: 0.8, changeFrequency: "monthly" as const, lastModified: "2026-07-23" },
-  { path: "/virovchennja", priority: 0.75, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
-  { path: "/team", priority: 0.7, changeFrequency: "monthly" as const, lastModified: "2026-07-23" },
-  { path: "/europe", priority: 0.5, changeFrequency: "monthly" as const, lastModified: "2026-07-28" },
-  { path: "/departments", priority: 0.5, changeFrequency: "monthly" as const, lastModified: "2026-07-28" },
-  { path: "/donate", priority: 0.65, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
-  { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const, lastModified: "2026-07-23" },
+  { path: "", priority: 1, changeFrequency: "weekly" as const, lastModified: "2026-08-01" },
+  { path: "/visit", priority: 0.95, changeFrequency: "monthly" as const, lastModified: "2026-08-01" },
+  { path: "/contacts", priority: 0.95, changeFrequency: "monthly" as const, lastModified: "2026-08-01" },
+  { path: "/groups", priority: 0.9, changeFrequency: "weekly" as const, lastModified: "2026-08-01" },
+  { path: "/online", priority: 0.85, changeFrequency: "weekly" as const, lastModified: "2026-08-01" },
+  { path: "/about", priority: 0.8, changeFrequency: "monthly" as const, lastModified: "2026-08-01" },
+  { path: "/virovchennja", priority: 0.75, changeFrequency: "yearly" as const, lastModified: "2026-08-01" },
+  { path: "/team", priority: 0.7, changeFrequency: "monthly" as const, lastModified: "2026-08-01" },
+  { path: "/europe", priority: 0.5, changeFrequency: "monthly" as const, lastModified: "2026-08-01" },
+  // /departments is a noindex placeholder — keep out of sitemap until content ships.
+  { path: "/donate", priority: 0.65, changeFrequency: "yearly" as const, lastModified: "2026-08-01" },
+  { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const, lastModified: "2026-08-01" },
 ];
 
 /** Canonical social share image (1200×630 JPEG in public/). A new physical filename busts messenger caches. */
