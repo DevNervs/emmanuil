@@ -1,20 +1,56 @@
+# Автодеплой сайту Emmanuil на Cloudflare Pages
 name: Deploy to Cloudflare Pages
+
 on:
   push:
     branches: [main]
+    paths:
+      - "app/**"
+      - "db/**"
+      - "drizzle/**"
+      - "lib/**"
+      - "public/**"
+      - "worker/**"
+      - "scripts/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - "drizzle.config.ts"
+      - "eslint.config.mjs"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: emmanuil-pages-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   deploy:
+    name: Build, test and deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22.13.0
-      - run: npm ci
-        env:
-          NEXT_PUBLIC_SITE_URL: https://emmanuil.pages.dev
-      - run: npm run deploy
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and run tests
+        run: npm test
+
+      - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: 367ca81763872c78fbc5a8d69ac8eb1d
-          NEXT_PUBLIC_SITE_URL: https://emmanuil.pages.dev
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.EMMANUIL_SITE_URL }}
+        run: npm run deploy
