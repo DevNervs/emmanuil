@@ -2,22 +2,8 @@
 name: Deploy to Cloudflare Pages
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "app/**"
-      - "db/**"
-      - "drizzle/**"
-      - "lib/**"
-      - "public/**"
-      - "worker/**"
-      - "scripts/**"
-      - "package.json"
-      - "package-lock.json"
-      - "tsconfig.json"
-      - "drizzle.config.ts"
-      - "eslint.config.mjs"
-      - ".github/workflows/deploy.yml"
+  # Cloudflare Pages Git integration is the primary CI/CD path. Keep this
+  # Direct Upload workflow only as an explicit emergency fallback.
   workflow_dispatch:
 
 concurrency:
