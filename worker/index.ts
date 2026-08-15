@@ -2,6 +2,7 @@ import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } fr
 import handler from "vinext/server/app-router-entry";
 import { handleAdminApi } from "./adminApi";
 import { handleGroupRegistration } from "./groupRegistration";
+import { handleQuestionSubmission, handleServingRegistration, handleServingsApi } from "./applications";
 import { handleGroupsApi } from "./apiGroups";
 import { handleSiteApi } from "./apiSite";
 import { handleTelegramWebhook, setupTelegramWebhook } from "./telegramBot";
@@ -38,6 +39,18 @@ const routes: { match: (pathname: string) => boolean; handler: RouteHandler }[] 
   {
     match: (pathname) => pathname === "/api/group-registration",
     handler: (request, env) => handleGroupRegistration(request, env),
+  },
+  {
+    match: (pathname) => pathname === "/api/serving-registration",
+    handler: (request, env) => handleServingRegistration(request, env),
+  },
+  {
+    match: (pathname) => pathname === "/api/question",
+    handler: (request, env) => handleQuestionSubmission(request, env),
+  },
+  {
+    match: (pathname) => pathname === "/api/servings",
+    handler: (request, env) => handleServingsApi(request, env),
   },
   {
     match: (pathname) => pathname === "/api/youtube-live",

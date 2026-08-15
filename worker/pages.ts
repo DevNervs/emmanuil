@@ -1,5 +1,6 @@
 import { handleAdminApi } from "./adminApi";
 import { handleGroupRegistration } from "./groupRegistration";
+import { handleQuestionSubmission, handleServingRegistration, handleServingsApi } from "./applications";
 import { handleGroupsApi } from "./apiGroups";
 import { handleSiteApi } from "./apiSite";
 import { json } from "./telegram";
@@ -28,6 +29,9 @@ const worker = {
     }
 
     if (pathname === "/api/group-registration") return handleGroupRegistration(request, env);
+    if (pathname === "/api/serving-registration") return handleServingRegistration(request, env);
+    if (pathname === "/api/question") return handleQuestionSubmission(request, env);
+    if (pathname === "/api/servings") return handleServingsApi(request, env);
     if (pathname === "/api/youtube-live") return handleYouTubeLive(request);
     if (pathname === "/api/telegram") return handleTelegramWebhook(request, env);
     if (pathname === "/api/setup-telegram") return setupTelegramWebhook(request, env);

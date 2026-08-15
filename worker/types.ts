@@ -17,15 +17,27 @@ export interface Season {
   archivedAt?: number;
 }
 
+export type ApplicationType = "group" | "serving" | "question";
+
 export interface GroupApplication {
   id: string;
+  type?: ApplicationType;
   name: string;
   phone: string;
+  email?: string;
   groups: number[];
   groupNames: string[];
+  serving?: string;
+  message?: string;
   createdAt: number;
   seasonId: string;
   status?: "new" | "in_progress" | "done";
+}
+
+export interface Serving {
+  id: number;
+  title: string;
+  description: string;
 }
 
 export interface TelegramUpdate {

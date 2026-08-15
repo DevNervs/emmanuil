@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test, { mock } from "node:test";
 import { handleGroupRegistration } from "../worker/groupRegistration.ts";
+import { handleQuestionSubmission, handleServingRegistration } from "../worker/applications.ts";
 import { extractLiveVideoId, handleYouTubeLive } from "../worker/youtubeLive.ts";
 
 async function render(pathname = "/") {
@@ -123,6 +124,10 @@ test("ships brand, SEO and primary interactions", async () => {
   assert.match(europe, /Розділ в розробці/);
   const departments = await (await render("/departments")).text();
   assert.match(departments, /Департаменти/);
+  assert.match(departments, /Служіння церкви/);
+  assert.match(departments, /Музичне служіння \(прославлення\)/);
+  assert.match(departments, /Записатися/);
+  assert.match(departments, /serving-grid/);
 });
 
 test("ships every responsive home-group carousel image", async () => {
@@ -329,6 +334,80 @@ test("sends a valid group application through a mocked Telegram request", async 
     assert.match(payload.text, /Тест Мобільний/);
     assert.match(payload.text, /№8\. Садгора\. Шлях до Батька/);
     assert.match(payload.text, /№9\. Садгора\. Молодіжна група/);
+  } finally {
+    mock.restoreAll();
+  }
+});
+
+test("rejects a serving application without a valid serving", async () => {
+  const request = new Request("http://localhost/api/serving-registration", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "Тест Служіння", phone: "+380669509977", serving: 999, startedAt: Date.now() - 5_000 }),
+  });
+  const response = await handleServingRegistration(request, {});
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { message: "Оберіть служіння зі списку." });
+});
+
+test("sends a valid serving application through a mocked Telegram request", async () => {
+  let telegramRequest;
+  mock.method(globalThis, "fetch", async (url, init) => {
+    telegramRequest = { url: String(url), init };
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  });
+  try {
+    const request = new Request("http://localhost/api/serving-registration", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Анна Коваль", phone: "+380669509977", serving: 4, message: "Граю на гітарі", startedAt: Date.now() - 5_000 }),
+    });
+    const response = await handleServingRegistration(request, { TELEGRAM_BOT_TOKEN: "test-token", TELEGRAM_ADMIN_CHAT_ID: "test-chat" });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { message: "Заявку надіслано. Адміністратор зв’яжеться з вами." });
+    const payload = JSON.parse(telegramRequest.init.body);
+    assert.equal(payload.chat_id, "test-chat");
+    assert.match(payload.text, /Нова заявка на служіння/);
+    assert.match(payload.text, /Анна Коваль/);
+    assert.match(payload.text, /Музичне служіння \(прославлення\)/);
+    assert.match(payload.text, /Граю на гітарі/);
+  } finally {
+    mock.restoreAll();
+  }
+});
+
+test("rejects a question without message text", async () => {
+  const request = new Request("http://localhost/api/question", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "Тест Питання", email: "test@example.com", message: "", startedAt: Date.now() - 5_000 }),
+  });
+  const response = await handleQuestionSubmission(request, {});
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), { message: "Напишіть, будь ласка, ваше питання." });
+});
+
+test("sends a valid question through a mocked Telegram request", async () => {
+  let telegramRequest;
+  mock.method(globalThis, "fetch", async (url, init) => {
+    telegramRequest = { url: String(url), init };
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  });
+  try {
+    const request = new Request("http://localhost/api/question", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Олена Мельник", email: "olena@example.com", message: "О котрій починається недільне служіння?", startedAt: Date.now() - 5_000 }),
+    });
+    const response = await handleQuestionSubmission(request, { TELEGRAM_BOT_TOKEN: "test-token", TELEGRAM_ADMIN_CHAT_ID: "test-chat" });
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { message: "Заявку надіслано. Адміністратор зв’яжеться з вами." });
+    const payload = JSON.parse(telegramRequest.init.body);
+    assert.equal(payload.chat_id, "test-chat");
+    assert.match(payload.text, /Нове питання з сайту/);
+    assert.match(payload.text, /Олена Мельник/);
+    assert.match(payload.text, /olena@example\.com/);
+    assert.match(payload.text, /О котрій починається недільне служіння\?/);
   } finally {
     mock.restoreAll();
   }

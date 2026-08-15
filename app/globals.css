@@ -797,6 +797,19 @@ body { background:var(--paper); font-size:16px; }
 .group-form-success > p:not(.overline) { max-width:30rem; color:var(--muted); line-height:1.7; }
 .group-form-success .button { margin-top:1.5rem; }
 
+.serving-section { padding:clamp(3.5rem,7vw,6.5rem) clamp(1.15rem,5vw,5rem); }
+.serving-head { display:grid; gap:1rem; max-width:46rem; margin-bottom:2.6rem; }
+.serving-head h2 { font-size:clamp(2.4rem,4.5vw,4rem); }
+.serving-head > p:not(.overline) { margin:0; color:var(--muted); line-height:1.75; }
+.serving-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(17rem,1fr)); gap:1rem; }
+.serving-card { display:flex; flex-direction:column; gap:.75rem; border:1px solid var(--line); border-radius:1rem; background:#fff; padding:1.5rem; box-shadow:0 18px 40px rgba(12,18,26,.05); transition:border-color .2s ease,box-shadow .2s ease; }
+.serving-card:hover { border-color:rgba(26,58,92,.4); box-shadow:0 22px 48px rgba(12,18,26,.08); }
+.serving-card h3 { font-family:var(--serif); font-size:1.25rem; font-weight:400; line-height:1.25; }
+.serving-card p { flex:1; margin:0; color:var(--muted); font-size:.88rem; line-height:1.65; }
+.serving-card .button { width:max-content; }
+.group-form-note { width:100%; border:1px solid var(--line); border-radius:.6rem; background:#fff; padding:.8rem 1rem; color:var(--ink); font:inherit; resize:vertical; transition:border-color .2s ease,box-shadow .2s ease; }
+.group-form-note:focus { border-color:var(--wine); outline:0; box-shadow:0 0 0 3px rgba(26,58,92,.11); }
+
 .interactive-map { padding-top:6rem; padding-bottom:6rem; background:var(--paper); }
 .interactive-map-panel h2 { font-size:clamp(3rem,4.8vw,5rem); }
 .map-location-list button { border-radius:.2rem; }

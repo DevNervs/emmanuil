@@ -12,6 +12,7 @@ import {
   Copy,
   Download,
   FileText,
+  HandHeart,
   LogOut,
   MapPin,
   Pencil,
@@ -47,18 +48,42 @@ type Season = {
   archivedAt?: number;
 };
 
+type ApplicationType = "group" | "serving" | "question";
+
 type Application = {
   id: string;
+  type?: ApplicationType;
   name: string;
   phone: string;
+  email?: string;
   groups: number[];
   groupNames: string[];
+  serving?: string;
+  message?: string;
   createdAt: number;
   seasonId: string;
   status?: "new" | "in_progress" | "done";
 };
 
+type Serving = {
+  id: number;
+  title: string;
+  description: string;
+};
+
+type AppTypeFilter = "all" | ApplicationType;
+
 const API_PREFIX = "/admin/api";
+
+const APP_TYPE_META: Record<ApplicationType, { label: string; className: string }> = {
+  group: { label: "Домашня група", className: "bg-[var(--rose)] text-[var(--wine-dark)]" },
+  serving: { label: "Служіння", className: "bg-emerald-50 text-emerald-700" },
+  question: { label: "Питання", className: "bg-sky-50 text-sky-700" },
+};
+
+function appType(app: Application): ApplicationType {
+  return app.type === "serving" || app.type === "question" ? app.type : "group";
+}
 
 const ukrainianDays = [
   "Понеділок",
@@ -100,16 +125,22 @@ async function api<T>(
 
 export function AdminClient() {
   const [auth, setAuth] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"groups" | "apps" | "admins" | "site" | "logs">("groups");
+  const [tab, setTab] = useState<"groups" | "servings" | "apps" | "admins" | "site" | "logs">("groups");
   const [toasts, setToasts] = useState<{ id: number; text: string; error: boolean }[]>([]);
   const [password, setPassword] = useState("");
 
   const [groups, setGroups] = useState<Group[]>([]);
+  const [servings, setServings] = useState<Serving[]>([]);
   const [apps, setApps] = useState<{ apps: Application[]; total: number }>({
     apps: [],
     total: 0,
   });
   const [appOffset, setAppOffset] = useState(0);
+  const [appTypeFilter, setAppTypeFilter] = useState<AppTypeFilter>("all");
+  const [appStats, setAppStats] = useState<{ total: number; byType: Record<ApplicationType, number> }>({
+    total: 0,
+    byType: { group: 0, serving: 0, question: 0 },
+  });
   const [admins, setAdmins] = useState<number[]>([]);
   const [newAdmin, setNewAdmin] = useState("");
 
@@ -129,9 +160,13 @@ export function AdminClient() {
   useEffect(() => {
     if (!auth) return;
     if (tab === "groups") loadGroups();
-    if (tab === "apps") loadApps();
+    if (tab === "servings") loadServings();
+    if (tab === "apps") {
+      loadApps();
+      loadAppStats();
+    }
     if (tab === "admins") loadAdmins();
-  }, [auth, tab, appOffset]);
+  }, [auth, tab, appOffset, appTypeFilter]);
 
   function show(msg: string) {
     const id = Date.now();
@@ -297,14 +332,73 @@ export function AdminClient() {
 
   async function loadApps() {
     try {
+      const typeParam = appTypeFilter === "all" ? "" : `&type=${appTypeFilter}`;
       const data = await api<{ apps: Application[]; total: number }>(
         "GET",
-        `/applications?offset=${appOffset}&limit=50`,
+        `/applications?offset=${appOffset}&limit=50${typeParam}`,
       );
       setApps(data);
     } catch (err: any) {
       show(`Помилка завантаження заявок: ${err.message}`);
     }
+  }
+
+  async function loadAppStats() {
+    try {
+      const data = await api<{ total: number; byType: Record<ApplicationType, number> }>(
+        "GET",
+        "/stats",
+      );
+      setAppStats(data);
+    } catch {
+      // stats are decorative; ignore failures
+    }
+  }
+
+  async function loadServings() {
+    try {
+      const data = await api<{ servings: Serving[] }>("GET", "/servings");
+      setServings(data.servings);
+    } catch (err: any) {
+      show(`Помилка завантаження служінь: ${err.message}`);
+    }
+  }
+
+  async function persistServings(nextServings: Serving[]) {
+    setServings(nextServings);
+    try {
+      const data = await api<{ servings: Serving[] }>("PUT", "/servings", {
+        servings: nextServings,
+      });
+      setServings(data.servings);
+      show("Служіння збережено");
+    } catch (err: any) {
+      show(`Помилка збереження: ${err.message}`);
+    }
+  }
+
+  function addServing() {
+    const nextId = servings.reduce((max, s) => Math.max(max, s.id), 0) + 1;
+    setServings((prev) => [...prev, { id: nextId, title: "", description: "" }]);
+  }
+
+  function updateServing(id: number, patch: Partial<Serving>) {
+    setServings((prev) => prev.map((s) => (s.id === id ? { ...s, ...patch } : s)));
+  }
+
+  function saveServing(serving: Serving) {
+    if (!serving.title.trim()) {
+      show("Помилка: вкажіть назву служіння");
+      return;
+    }
+    persistServings(
+      servings.map((s) => (s.id === serving.id ? { ...serving, title: serving.title.trim(), description: serving.description.trim() } : s)),
+    );
+  }
+
+  function deleteServing(id: number) {
+    if (!confirm("Видалити служіння?")) return;
+    persistServings(servings.filter((s) => s.id !== id));
   }
 
   async function updateApp(id: string, status: Application["status"]) {
@@ -320,7 +414,7 @@ export function AdminClient() {
     if (!confirm("Видалити заявку?")) return;
     try {
       await api<{ ok: true }>("DELETE", `/applications/${id}`);
-      await loadApps();
+      await Promise.all([loadApps(), loadAppStats()]);
       show("Заявку видалено");
     } catch (err: any) {
       show(`Помилка: ${err.message}`);
@@ -329,7 +423,8 @@ export function AdminClient() {
 
   async function exportCsv() {
     try {
-      const res = await fetch(`${API_PREFIX}/export`, {
+      const typeParam = appTypeFilter === "all" ? "" : `?type=${appTypeFilter}`;
+      const res = await fetch(`${API_PREFIX}/export${typeParam}`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
@@ -458,10 +553,18 @@ export function AdminClient() {
 
   const navItems = [
     { key: "groups" as const, label: "Групи", icon: Users },
+    { key: "servings" as const, label: "Служіння", icon: HandHeart },
     { key: "apps" as const, label: "Заявки", icon: FileText },
     { key: "admins" as const, label: "Адміни", icon: Shield },
     { key: "site" as const, label: "Сайт", icon: Settings },
     { key: "logs" as const, label: "Логи", icon: Clock },
+  ];
+
+  const appTypeTabs: { key: AppTypeFilter; label: string; count: number }[] = [
+    { key: "all", label: "Усі", count: appStats.total },
+    { key: "group", label: "Домашні групи", count: appStats.byType.group },
+    { key: "serving", label: "Служіння", count: appStats.byType.serving },
+    { key: "question", label: "Питання", count: appStats.byType.question },
   ];
 
   return (
@@ -688,6 +791,75 @@ export function AdminClient() {
             </section>
           )}
 
+          {tab === "servings" && (
+            <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
+              <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-2">
+                  <HandHeart className="h-5 w-5 text-[var(--wine)]" aria-hidden="true" />
+                  <h2 className="font-[var(--serif)] text-xl font-semibold text-[var(--ink)]">
+                    Служіння
+                  </h2>
+                </div>
+                <button
+                  onClick={addServing}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[var(--wine)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--wine-dark)]"
+                >
+                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  Додати служіння
+                </button>
+              </div>
+
+              <p className="mb-4 text-sm text-[var(--muted)]">
+                Список напрямків, які бачать відвідувачі на сторінці «Служіння» та можуть
+                обрати в анкеті. Зміни зберігаються після натискання «Зберегти» у рядку.
+              </p>
+
+              <div className="grid gap-3">
+                {servings.map((s) => (
+                  <div
+                    key={s.id}
+                    className="grid grid-cols-1 gap-3 rounded-xl border border-[var(--line)] bg-[var(--paper)] p-4 shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto]"
+                  >
+                    <input
+                      value={s.title}
+                      onChange={(e) => updateServing(s.id, { title: e.target.value })}
+                      placeholder="Назва служіння"
+                      className={inputClass}
+                    />
+                    <input
+                      value={s.description}
+                      onChange={(e) => updateServing(s.id, { description: e.target.value })}
+                      placeholder="Короткий опис"
+                      className={inputClass}
+                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => saveServing(s)}
+                        title="Зберегти"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] bg-white px-3 py-2 text-sm font-medium text-[var(--ink)] transition-colors hover:border-[var(--wine)] hover:text-[var(--wine)]"
+                      >
+                        <Save className="h-4 w-4" aria-hidden="true" />
+                        Зберегти
+                      </button>
+                      <button
+                        onClick={() => deleteServing(s.id)}
+                        title="Видалити"
+                        className="inline-flex items-center rounded-lg border border-red-200 bg-white p-2 text-red-700 transition-colors hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {servings.length === 0 && (
+                  <div className="rounded-xl border border-dashed border-[var(--line)] p-8 text-center text-sm text-[var(--muted)]">
+                    Служінь не додано. На сайті використовується стандартний список.
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
           {tab === "apps" && (
             <section className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm md:p-6">
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -706,19 +878,52 @@ export function AdminClient() {
                 </button>
               </div>
 
+              <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Категорії заявок">
+                {appTypeTabs.map((t) => (
+                  <button
+                    key={t.key}
+                    role="tab"
+                    aria-selected={appTypeFilter === t.key}
+                    onClick={() => {
+                      setAppTypeFilter(t.key);
+                      setAppOffset(0);
+                    }}
+                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-colors ${
+                      appTypeFilter === t.key
+                        ? "border-[var(--wine)] bg-[var(--wine)] text-white"
+                        : "border-[var(--line)] bg-white text-[var(--muted)] hover:border-[var(--wine)] hover:text-[var(--wine)]"
+                    }`}
+                  >
+                    {t.label}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        appTypeFilter === t.key
+                          ? "bg-white/20 text-white"
+                          : "bg-[var(--paper)] text-[var(--muted)]"
+                      }`}
+                    >
+                      {t.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
               <div className="overflow-hidden rounded-xl border border-[var(--line)] bg-white shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--paper)] text-left">
                       <tr>
                         <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
+                          Тип
+                        </th>
+                        <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
                           Імʼя
                         </th>
                         <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
-                          Телефон
+                          Контакт
                         </th>
                         <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
-                          Групи
+                          Деталі
                         </th>
                         <th className="p-3 font-[var(--serif)] text-xs font-medium uppercase tracking-wider text-[var(--muted)]">
                           Дата
@@ -730,46 +935,83 @@ export function AdminClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--line)]">
-                      {apps.apps.map((a) => (
-                        <tr key={a.id} className="hover:bg-[var(--paper)]/60">
-                          <td className="p-3 text-[var(--ink)]">{a.name}</td>
-                          <td className="p-3 text-[var(--ink)]">{a.phone}</td>
-                          <td className="p-3 text-[var(--ink)]">
-                            {a.groupNames.join(", ")}
-                          </td>
-                          <td className="p-3 text-[var(--ink)]">
-                            {new Date(a.createdAt).toLocaleString("uk-UA")}
-                          </td>
-                          <td className="p-3">
-                            <select
-                              value={a.status || "new"}
-                              onChange={(e) =>
-                                updateApp(
-                                  a.id,
-                                  e.target.value as Application["status"],
-                                )
-                              }
-                              className="rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2 text-sm text-[var(--ink)] transition-colors focus:border-[var(--wine)] focus:outline-none"
-                            >
-                              <option value="new">Нова</option>
-                              <option value="in_progress">В роботі</option>
-                              <option value="done">Оброблена</option>
-                            </select>
-                          </td>
-                          <td className="p-3">
-                            <button
-                              onClick={() => deleteApp(a.id)}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" aria-hidden="true" />
-                              Видалити
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                      {apps.apps.map((a) => {
+                        const type = appType(a);
+                        return (
+                          <tr key={a.id} className="hover:bg-[var(--paper)]/60">
+                            <td className="p-3">
+                              <span
+                                className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold ${APP_TYPE_META[type].className}`}
+                              >
+                                {APP_TYPE_META[type].label}
+                              </span>
+                            </td>
+                            <td className="p-3 text-[var(--ink)]">{a.name}</td>
+                            <td className="p-3 text-[var(--ink)]">
+                              {a.phone && <span className="block">{a.phone}</span>}
+                              {a.email && (
+                                <span className="block text-[var(--muted)]">{a.email}</span>
+                              )}
+                              {!a.phone && !a.email && "—"}
+                            </td>
+                            <td className="max-w-md p-3 text-[var(--ink)]">
+                              {type === "group" && a.groupNames.join(", ")}
+                              {type === "serving" && (
+                                <>
+                                  <span className="font-medium">{a.serving}</span>
+                                  {a.message && (
+                                    <span className="block text-[var(--muted)]">{a.message}</span>
+                                  )}
+                                </>
+                              )}
+                              {type === "question" && (
+                                <span
+                                  className="line-clamp-3 whitespace-pre-wrap"
+                                  title={a.message}
+                                >
+                                  {a.message}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 text-[var(--ink)]">
+                              {new Date(a.createdAt).toLocaleString("uk-UA")}
+                            </td>
+                            <td className="p-3">
+                              <select
+                                value={a.status || "new"}
+                                onChange={(e) =>
+                                  updateApp(
+                                    a.id,
+                                    e.target.value as Application["status"],
+                                  )
+                                }
+                                className="rounded-lg border border-[var(--line)] bg-[var(--paper)] p-2 text-sm text-[var(--ink)] transition-colors focus:border-[var(--wine)] focus:outline-none"
+                              >
+                                <option value="new">Нова</option>
+                                <option value="in_progress">В роботі</option>
+                                <option value="done">Оброблена</option>
+                              </select>
+                            </td>
+                            <td className="p-3">
+                              <button
+                                onClick={() => deleteApp(a.id)}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-sm text-white transition-colors hover:bg-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                Видалити
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
+                {apps.apps.length === 0 && (
+                  <div className="p-8 text-center text-sm text-[var(--muted)]">
+                    Заявок у цій категорії немає
+                  </div>
+                )}
               </div>
 
               {apps.total > 50 && (

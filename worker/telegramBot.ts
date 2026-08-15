@@ -1,6 +1,7 @@
 import { groupNames } from "./data";
 import {
   addAdmin,
+  applicationType,
   countApplications,
   deleteApplication,
   filterApplicationsByGroup,
@@ -14,16 +15,43 @@ import {
 } from "./storage";
 import { answerCallbackQuery, escapeHtml, isAdmin, json, sendTelegramMessage, verifyWebhookSecret } from "./telegram";
 import type { Env } from "./env";
-import type { Group, GroupApplication, TelegramCallbackQuery, TelegramMessage, TelegramUpdate } from "./types";
+import type { ApplicationType, Group, GroupApplication, TelegramCallbackQuery, TelegramMessage, TelegramUpdate } from "./types";
 
 const PAGE_SIZE = 5;
+
+type TypeFilter = ApplicationType | "all";
+
+const TYPE_LABELS: Record<ApplicationType, string> = {
+  group: "Домашня група",
+  serving: "Служіння",
+  question: "Питання",
+};
+
+const TYPE_EMOJI: Record<ApplicationType, string> = {
+  group: "🏠",
+  serving: "🙏",
+  question: "💬",
+};
+
+function parseTypeArg(args: string): TypeFilter {
+  const normalized = args.trim().toLowerCase();
+  if (["group", "groups", "група", "групи", "домашня", "home"].includes(normalized)) return "group";
+  if (["serving", "служіння", "служба"].includes(normalized)) return "serving";
+  if (["question", "questions", "питання", "запитання"].includes(normalized)) return "question";
+  return "all";
+}
+
+function typeFilterOption(type: TypeFilter): ApplicationType | undefined {
+  return type === "all" ? undefined : type;
+}
 
 const mainKeyboard = {
   keyboard: [
     [{ text: "🆕 Остання" }, { text: "📋 Список" }],
-    [{ text: "📊 Статистика" }, { text: "👥 Адміни" }],
-    [{ text: "📅 Сезон" }, { text: "🏠 Групи" }],
-    [{ text: "❓ Допомога" }],
+    [{ text: "🏠 Домашні групи" }, { text: "🙏 Служіння" }],
+    [{ text: "💬 Питання" }, { text: "📊 Статистика" }],
+    [{ text: "👥 Адміни" }, { text: "📅 Сезон" }],
+    [{ text: "🗂 Каталог груп" }, { text: "❓ Допомога" }],
   ],
   resize_keyboard: true,
   one_time_keyboard: false,
@@ -31,12 +59,15 @@ const mainKeyboard = {
 };
 
 const menuActions: Record<string, (env: Env, message: TelegramMessage) => Promise<void>> = {
-  "🆕 Остання": handleLast,
+  "🆕 Остання": (env, message) => handleLast(env, message, ""),
   "📋 Список": (env, message) => handleList(env, message, ""),
+  "🏠 Домашні групи": (env, message) => handleList(env, message, "group"),
+  "🙏 Служіння": (env, message) => handleList(env, message, "serving"),
+  "💬 Питання": (env, message) => handleList(env, message, "question"),
   "📊 Статистика": handleStats,
   "👥 Адміни": handleAdmins,
   "📅 Сезон": handleSeason,
-  "🏠 Групи": handleGroups,
+  "🗂 Каталог груп": handleGroups,
   "❓ Допомога": (env, message) => handleStart(env, message, ""),
 };
 
@@ -60,24 +91,48 @@ function toGroupName(group: Group): string {
 }
 
 function formatApplication(app: GroupApplication, showDelete = false): { text: string; keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> } {
-  const groups = app.groupNames.map((name, i) => `${i + 1}. ${escapeHtml(name)}`).join("\n");
+  const type = applicationType(app);
   const date = new Date(app.createdAt).toLocaleString("uk-UA");
-  const text = `<b>Заявка #${app.id}</b>\n\n<b>Ім’я:</b> ${escapeHtml(app.name)}\n<b>Телефон:</b> ${escapeHtml(app.phone)}\n<b>Групи:</b>\n${groups}\n<b>Дата:</b> ${date}`;
+  const lines: string[] = [
+    `<b>Заявка #${app.id}</b> · ${TYPE_EMOJI[type]} ${TYPE_LABELS[type]}`,
+    "",
+    `<b>Ім’я:</b> ${escapeHtml(app.name)}`,
+  ];
+  if (app.phone) lines.push(`<b>Телефон:</b> ${escapeHtml(app.phone)}`);
+  if (app.email) lines.push(`<b>E-mail:</b> ${escapeHtml(app.email)}`);
+  if (type === "serving") {
+    lines.push(`<b>Служіння:</b> ${escapeHtml(app.serving ?? "—")}`);
+    if (app.message) lines.push(`<b>Коментар:</b> ${escapeHtml(app.message)}`);
+  } else if (type === "question") {
+    lines.push(`<b>Питання:</b>\n${escapeHtml(app.message ?? "")}`);
+  } else {
+    lines.push(`<b>Групи:</b>\n${app.groupNames.map((name, i) => `${i + 1}. ${escapeHtml(name)}`).join("\n")}`);
+  }
+  lines.push(`<b>Дата:</b> ${date}`);
+  const text = lines.join("\n");
   const keyboard: Array<Array<{ text: string; callback_data?: string; url?: string }>> = [];
   if (showDelete) {
     keyboard.push([{ text: "🗑 Видалити", callback_data: `delete:${app.id}` }]);
   }
   keyboard.push([
-    { text: "↩️ Назад", callback_data: "list:0" },
+    { text: "↩️ Назад", callback_data: "list:all:0" },
     { text: "🏠 Меню", callback_data: "menu" },
   ]);
   return { text, keyboard };
 }
 
 function formatAppLine(app: GroupApplication, index: number): string {
+  const type = applicationType(app);
   const name = escapeHtml(app.name);
-  const shortGroups = app.groupNames.map((g) => g.split(" — ")[0]).join(", ");
-  return `${index}. <b>${name}</b> — ${escapeHtml(shortGroups)}`;
+  let detail: string;
+  if (type === "serving") {
+    detail = app.serving ?? "—";
+  } else if (type === "question") {
+    detail = (app.message ?? "").replace(/\s+/g, " ").slice(0, 48);
+  } else {
+    detail = app.groupNames.map((g) => g.split(" — ")[0]).join(", ");
+  }
+  return `${index}. ${TYPE_EMOJI[type]} <b>${name}</b> — ${escapeHtml(detail)}`;
 }
 
 function buildAppButtons(apps: GroupApplication[], offset: number): Array<Array<{ text: string; callback_data: string }>> {
@@ -98,15 +153,30 @@ function buildAppButtons(apps: GroupApplication[], offset: number): Array<Array<
   return keyboard;
 }
 
-function buildListKeyboard(apps: GroupApplication[], offset: number, total: number): Array<Array<{ text: string; callback_data: string }>> {
+function buildListKeyboard(apps: GroupApplication[], offset: number, total: number, type: TypeFilter = "all"): Array<Array<{ text: string; callback_data: string }>> {
   const keyboard = buildAppButtons(apps, offset);
   const nav: Array<{ text: string; callback_data: string }> = [];
-  if (offset > 0) nav.push({ text: "⬅️ Попередні", callback_data: `list:${Math.max(0, offset - PAGE_SIZE)}` });
-  if (offset + apps.length < total) nav.push({ text: "Наступні ➡️", callback_data: `list:${offset + PAGE_SIZE}` });
+  if (offset > 0) nav.push({ text: "⬅️ Попередні", callback_data: `list:${type}:${Math.max(0, offset - PAGE_SIZE)}` });
+  if (offset + apps.length < total) nav.push({ text: "Наступні ➡️", callback_data: `list:${type}:${offset + PAGE_SIZE}` });
   if (nav.length) keyboard.push(nav);
   keyboard.push([{ text: "📊 Статистика", callback_data: "stats" }, { text: "🏠 Меню", callback_data: "menu" }]);
   return keyboard;
 }
+
+const helpText = `<b>Команди:</b>
+/last [тип] — остання заявка
+/list [тип] — список заявок
+/search &lt;прізвище&gt; — пошук
+/group &lt;номер&gt; — фільтр за групою
+/serving — заявки на служіння
+/questions — питання з сайту
+/stats — статистика
+/groups — список груп
+/season — поточний сезон
+/admins — адміни
+/delete &lt;id&gt; — видалити
+
+<b>Типи заявок:</b> групи, служіння, питання.`;
 
 function buildSimpleAppKeyboard(apps: GroupApplication[], offset = 0): Array<Array<{ text: string; callback_data: string }>> {
   const keyboard = buildAppButtons(apps, offset);
@@ -144,18 +214,19 @@ async function handleStart(env: Env, message: TelegramMessage, args: string): Pr
       return;
     }
   }
-  const text = `Привіт, ${escapeHtml(message.from.first_name)}!\n\nЯ бот для управління заявками на домашні групи.\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/groups — список груп\n/season — поточний сезон\n/admins — адміни\n/delete &lt;id&gt; — видалити`;
+  const text = `Привіт, ${escapeHtml(message.from.first_name)}!\n\nЯ бот для управління заявками: домашні групи, служіння та питання з сайту.\n\n${helpText}`;
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
 }
 
-async function handleLast(env: Env, message: TelegramMessage): Promise<void> {
+async function handleLast(env: Env, message: TelegramMessage, args: string): Promise<void> {
   if (!env.GROUP_APPLICATIONS) {
     await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
     return;
   }
-  const { apps } = await listApplications(env.GROUP_APPLICATIONS, { limit: 1 });
+  const type = parseTypeArg(args);
+  const { apps } = await listApplications(env.GROUP_APPLICATIONS, { limit: 1, type: typeFilterOption(type) });
   if (!apps.length) {
-    await sendAdminMessage(env, message.chat.id, { text: "Заявок поки немає." });
+    await sendAdminMessage(env, message.chat.id, { text: type === "all" ? "Заявок поки немає." : "Заявок цього типу поки немає." });
     return;
   }
   const { text, keyboard } = formatApplication(apps[0], true);
@@ -167,15 +238,17 @@ async function handleList(env: Env, message: TelegramMessage, args: string): Pro
     await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
     return;
   }
-  const offset = Math.max(0, Number(args) || 0);
-  const { apps, total } = await listApplications(env.GROUP_APPLICATIONS, { offset, limit: PAGE_SIZE });
+  const type = parseTypeArg(args);
+  const offset = type === "all" && /^\d+$/.test(args.trim()) ? Math.max(0, Number(args)) : 0;
+  const { apps, total } = await listApplications(env.GROUP_APPLICATIONS, { offset, limit: PAGE_SIZE, type: typeFilterOption(type) });
   if (!apps.length) {
     await sendAdminMessage(env, message.chat.id, { text: offset === 0 ? "Заявок поки немає." : "Більше заявок немає." });
     return;
   }
   const lines = apps.map((app, i) => formatAppLine(app, offset + i + 1)).join("\n");
-  const text = `<b>Заявки (${offset + 1}–${Math.min(offset + apps.length, total)} з ${total})</b>\n\n${lines}`;
-  const keyboard = buildListKeyboard(apps, offset, total);
+  const title = type === "all" ? "Заявки" : `${TYPE_EMOJI[type]} ${TYPE_LABELS[type]} — заявки`;
+  const text = `<b>${title} (${offset + 1}–${Math.min(offset + apps.length, total)} з ${total})</b>\n\n${lines}`;
+  const keyboard = buildListKeyboard(apps, offset, total, type);
   await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
 }
 
@@ -260,23 +333,48 @@ async function handleAdmins(env: Env, message: TelegramMessage): Promise<void> {
   await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML" });
 }
 
+async function buildStatsText(kv: KVNamespace): Promise<string> {
+  const total = await countApplications(kv);
+  const all = await listApplications(kv, { limit: Math.max(total, 1) });
+  const byType: Record<ApplicationType, number> = { group: 0, serving: 0, question: 0 };
+  const groupCounts: Record<string, number> = {};
+  const servingCounts: Record<string, number> = {};
+  for (const app of all.apps) {
+    const type = applicationType(app);
+    byType[type] += 1;
+    if (type === "group") {
+      for (const groupName of app.groupNames) {
+        groupCounts[groupName] = (groupCounts[groupName] ?? 0) + 1;
+      }
+    } else if (type === "serving" && app.serving) {
+      servingCounts[app.serving] = (servingCounts[app.serving] ?? 0) + 1;
+    }
+  }
+  const sections: string[] = [
+    `<b>Статистика</b>`,
+    "",
+    `Всього заявок: ${total}`,
+    `${TYPE_EMOJI.group} Домашні групи: ${byType.group}`,
+    `${TYPE_EMOJI.serving} Служіння: ${byType.serving}`,
+    `${TYPE_EMOJI.question} Питання: ${byType.question}`,
+  ];
+  if (Object.keys(groupCounts).length) {
+    sections.push("", "<b>За групами:</b>");
+    sections.push(...Object.entries(groupCounts).map(([name, count]) => `• ${escapeHtml(name.split(" — ")[0])}: ${count}`));
+  }
+  if (Object.keys(servingCounts).length) {
+    sections.push("", "<b>За служіннями:</b>");
+    sections.push(...Object.entries(servingCounts).map(([name, count]) => `• ${escapeHtml(name)}: ${count}`));
+  }
+  return sections.join("\n");
+}
+
 async function handleStats(env: Env, message: TelegramMessage): Promise<void> {
   if (!env.GROUP_APPLICATIONS) {
     await sendAdminMessage(env, message.chat.id, { text: "Сховище заявок ще не налаштоване." });
     return;
   }
-  const total = await countApplications(env.GROUP_APPLICATIONS);
-  const groupCounts: Record<string, number> = {};
-  const all = await listApplications(env.GROUP_APPLICATIONS, { limit: total });
-  for (const app of all.apps) {
-    for (const groupName of app.groupNames) {
-      groupCounts[groupName] = (groupCounts[groupName] ?? 0) + 1;
-    }
-  }
-  const groupLines = Object.entries(groupCounts)
-    .map(([name, count]) => `• ${escapeHtml(name.split(" — ")[0])}: ${count}`)
-    .join("\n");
-  const text = `<b>Статистика</b>\n\nВсього заявок: ${total}\n\n<b>За групами:</b>\n${groupLines}`;
+  const text = await buildStatsText(env.GROUP_APPLICATIONS);
   await sendAdminMessage(env, message.chat.id, { text, parse_mode: "HTML" });
 }
 
@@ -348,13 +446,21 @@ async function handleAppCallback(env: Env, query: TelegramCallbackQuery, id: str
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
 }
 
-async function handleListCallback(env: Env, query: TelegramCallbackQuery, offsetStr: string): Promise<void> {
+function parseListValue(value: string): { type: TypeFilter; offset: number } {
+  const [first, second] = value.split(":");
+  if (second !== undefined) {
+    return { type: parseTypeArg(first), offset: Math.max(0, Number(second) || 0) };
+  }
+  return { type: "all", offset: Math.max(0, Number(first) || 0) };
+}
+
+async function handleListCallback(env: Env, query: TelegramCallbackQuery, value: string): Promise<void> {
   if (!env.GROUP_APPLICATIONS) {
     await answerCallbackQuery(env, query.id, "Сховище не налаштоване");
     return;
   }
-  const offset = Math.max(0, Number(offsetStr) || 0);
-  const { apps, total } = await listApplications(env.GROUP_APPLICATIONS, { offset, limit: PAGE_SIZE });
+  const { type, offset } = parseListValue(value);
+  const { apps, total } = await listApplications(env.GROUP_APPLICATIONS, { offset, limit: PAGE_SIZE, type: typeFilterOption(type) });
   await answerCallbackQuery(env, query.id);
   if (!apps.length) {
     const chatId = query.message?.chat.id ?? query.from.id;
@@ -362,8 +468,9 @@ async function handleListCallback(env: Env, query: TelegramCallbackQuery, offset
     return;
   }
   const lines = apps.map((app, i) => formatAppLine(app, offset + i + 1)).join("\n");
-  const text = `<b>Заявки (${offset + 1}–${Math.min(offset + apps.length, total)} з ${total})</b>\n\n${lines}`;
-  const keyboard = buildListKeyboard(apps, offset, total);
+  const title = type === "all" ? "Заявки" : `${TYPE_EMOJI[type]} ${TYPE_LABELS[type]} — заявки`;
+  const text = `<b>${title} (${offset + 1}–${Math.min(offset + apps.length, total)} з ${total})</b>\n\n${lines}`;
+  const keyboard = buildListKeyboard(apps, offset, total, type);
   const chatId = query.message?.chat.id ?? query.from.id;
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: keyboard } });
 }
@@ -414,7 +521,7 @@ async function handleCancelDeleteCallback(env: Env, query: TelegramCallbackQuery
 async function handleMenuCallback(env: Env, query: TelegramCallbackQuery): Promise<void> {
   await answerCallbackQuery(env, query.id);
   const chatId = query.message?.chat.id ?? query.from.id;
-  const text = `<b>Головне меню</b>\n\n<b>Команди:</b>\n/last — остання заявка\n/list — список заявок\n/search &lt;прізвище&gt; — пошук\n/group &lt;номер&gt; — фільтр за групою\n/stats — статистика\n/groups — список груп\n/season — поточний сезон\n/admins — адміни\n/delete &lt;id&gt; — видалити`;
+  const text = `<b>Головне меню</b>\n\n${helpText}`;
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: mainKeyboard });
 }
 
@@ -424,18 +531,7 @@ async function handleStatsCallback(env: Env, query: TelegramCallbackQuery): Prom
     return;
   }
   await answerCallbackQuery(env, query.id);
-  const total = await countApplications(env.GROUP_APPLICATIONS);
-  const groupCounts: Record<string, number> = {};
-  const all = await listApplications(env.GROUP_APPLICATIONS, { limit: total });
-  for (const app of all.apps) {
-    for (const groupName of app.groupNames) {
-      groupCounts[groupName] = (groupCounts[groupName] ?? 0) + 1;
-    }
-  }
-  const groupLines = Object.entries(groupCounts)
-    .map(([name, count]) => `• ${escapeHtml(name.split(" — ")[0])}: ${count}`)
-    .join("\n");
-  const text = `<b>Статистика</b>\n\nВсього заявок: ${total}\n\n<b>За групами:</b>\n${groupLines}`;
+  const text = await buildStatsText(env.GROUP_APPLICATIONS);
   const chatId = query.message?.chat.id ?? query.from.id;
   await sendAdminMessage(env, chatId, { text, parse_mode: "HTML", reply_markup: { inline_keyboard: [[{ text: "🏠 Меню", callback_data: "menu" }]] } });
 }
@@ -461,10 +557,17 @@ async function handleMessage(env: Env, message: TelegramMessage): Promise<void> 
       await handleStart(env, message, "");
       break;
     case "last":
-      await handleLast(env, message);
+      await handleLast(env, message, args);
       break;
     case "list":
       await handleList(env, message, args);
+      break;
+    case "serving":
+      await handleList(env, message, "serving");
+      break;
+    case "question":
+    case "questions":
+      await handleList(env, message, "question");
       break;
     case "search":
       await handleSearch(env, message, args);
@@ -513,7 +616,9 @@ async function handleCallback(env: Env, query: TelegramCallbackQuery): Promise<v
     await handleStatsCallback(env, query);
     return;
   }
-  const [prefix, value] = data.split(":");
+  const separator = data.indexOf(":");
+  const prefix = separator === -1 ? data : data.slice(0, separator);
+  const value = separator === -1 ? "" : data.slice(separator + 1);
   switch (prefix) {
     case "app":
       await handleAppCallback(env, query, value);

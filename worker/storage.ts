@@ -1,4 +1,4 @@
-import type { Group, GroupApplication, Season, SiteConfig } from "./types";
+import type { ApplicationType, Group, GroupApplication, Season, Serving, SiteConfig } from "./types";
 
 const APP_PREFIX = "app:";
 const ARCHIVE_PREFIX = "archive:";
@@ -80,6 +80,20 @@ export async function updateSeason(kv: KVNamespace, season: Season): Promise<voi
   }
 }
 
+export async function getServings(kv: KVNamespace): Promise<Serving[]> {
+  const value = await kv.get(`${CONFIG_PREFIX}servings`);
+  if (!value) return [];
+  try {
+    return JSON.parse(value) as Serving[];
+  } catch {
+    return [];
+  }
+}
+
+export async function setServings(kv: KVNamespace, servings: Serving[]): Promise<void> {
+  await kv.put(`${CONFIG_PREFIX}servings`, JSON.stringify(servings));
+}
+
 export async function getCurrentGroups(kv: KVNamespace): Promise<Group[]> {
   const value = await kv.get(GROUPS_KEY);
   if (!value) return [];
@@ -126,6 +140,10 @@ export async function getLogs(kv: KVNamespace, limit = 50): Promise<LogEntry[]> 
   } catch {
     return [];
   }
+}
+
+export async function clearLogs(kv: KVNamespace): Promise<void> {
+  await kv.delete(LOGS_KEY);
 }
 
 export async function addLog(
@@ -193,6 +211,11 @@ interface ListOptions {
   limit?: number;
   seasonId?: string;
   archive?: boolean;
+  type?: ApplicationType;
+}
+
+export function applicationType(app: GroupApplication): ApplicationType {
+  return app.type === "serving" || app.type === "question" ? app.type : "group";
 }
 
 async function getAllApplications(kv: KVNamespace, options: ListOptions = {}): Promise<GroupApplication[]> {
@@ -213,6 +236,7 @@ async function getAllApplications(kv: KVNamespace, options: ListOptions = {}): P
       try {
         const app = JSON.parse(value) as GroupApplication;
         if (options.seasonId && !options.archive && app.seasonId !== options.seasonId) continue;
+        if (options.type && applicationType(app) !== options.type) continue;
         apps.push(app);
       } catch {
         // ignore invalid entries
@@ -244,6 +268,9 @@ export async function searchApplications(
   return all.filter((app) =>
     app.name.toLowerCase().includes(lower) ||
     app.phone.toLowerCase().includes(lower) ||
+    (app.email ?? "").toLowerCase().includes(lower) ||
+    (app.serving ?? "").toLowerCase().includes(lower) ||
+    (app.message ?? "").toLowerCase().includes(lower) ||
     app.groupNames.some((name) => name.toLowerCase().includes(lower)),
   );
 }

@@ -1,27 +1,42 @@
 import {
   addAdmin,
   addLog,
+  applicationType,
   archiveCurrentSeason,
-  countApplications,
+  clearLogs,
   deleteApplication,
   deleteSeason,
+  findApplicationKey,
   getAdmins,
+  getApplication,
   getCurrentGroups,
   getCurrentSeason,
   getLogs,
   getSeasons,
+  getServings,
   getSiteConfig,
   listApplications,
   removeAdmin,
-  setAdmins,
   setCurrentGroups,
+  setServings,
   setSiteConfig,
   startNewSeason,
-  updateSeason,
 } from "./storage";
 import { cookie, json, signAdminSession, verifyAdminSession } from "./telegram";
 import type { Env } from "./env";
-import type { Group, GroupApplication, Season, SiteConfig } from "./types";
+import type { ApplicationType, Group, GroupApplication, Serving, SiteConfig } from "./types";
+
+function parseApplicationType(value: string | null): ApplicationType | undefined {
+  if (value === "group" || value === "serving" || value === "question") return value;
+  return undefined;
+}
+
+function applicationDetails(app: GroupApplication): string {
+  const type = applicationType(app);
+  if (type === "serving") return [app.serving, app.message].filter(Boolean).join(" · ");
+  if (type === "question") return [app.message, app.email].filter(Boolean).join(" · ");
+  return app.groupNames.join("; ");
+}
 
 function badRequest(message: string): Response {
   return json({ message }, 400);
@@ -61,15 +76,23 @@ async function parseJson<T>(request: Request): Promise<T | null> {
   }
 }
 
-async function csvExport(kv: KVNamespace, seasonId?: string, archive?: boolean): Promise<string> {
-  const { apps } = await listApplications(kv, { limit: 10_000, seasonId, archive });
-  const header = ["ID", "Name", "Phone", "Groups", "Date", "Season", "Status"].join(",") + "\n";
+const TYPE_LABELS: Record<ApplicationType, string> = {
+  group: "Домашня група",
+  serving: "Служіння",
+  question: "Питання",
+};
+
+async function csvExport(kv: KVNamespace, seasonId?: string, archive?: boolean, type?: ApplicationType): Promise<string> {
+  const { apps } = await listApplications(kv, { limit: 10_000, seasonId, archive, type });
+  const header = ["ID", "Type", "Name", "Phone", "Email", "Details", "Date", "Season", "Status"].join(",") + "\n";
   const escape = (value: string) => `"${value.replaceAll('"', '""')}"`;
   const rows = apps.map((app) => [
     app.id,
+    TYPE_LABELS[applicationType(app)],
     escape(app.name),
     escape(app.phone),
-    escape(app.groupNames.join("; ")),
+    escape(app.email ?? ""),
+    escape(applicationDetails(app)),
     new Date(app.createdAt).toISOString(),
     app.seasonId,
     app.status ?? "new",
@@ -163,6 +186,12 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
     return withCors(json({ message: "Method not allowed" }, 405), request);
   }
 
+  if (pathname === "/admin/api/seasons/archive") {
+    if (request.method !== "POST") return withCors(json({ message: "Method not allowed" }, 405), request);
+    const archived = await archiveCurrentSeason(kv);
+    return withCors(json({ archived }), request);
+  }
+
   const seasonIdMatch = pathname.match(/^\/admin\/api\/seasons\/([^/]+)$/);
   if (seasonIdMatch) {
     const seasonId = decodeURIComponent(seasonIdMatch[1]);
@@ -178,21 +207,46 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
     return withCors(json({ message: "Method not allowed" }, 405), request);
   }
 
-  if (pathname === "/admin/api/seasons/archive") {
-    if (request.method !== "POST") return withCors(json({ message: "Method not allowed" }, 405), request);
-    const archived = await archiveCurrentSeason(kv);
-    return withCors(json({ archived }), request);
-  }
-
   if (pathname === "/admin/api/applications") {
     const searchParams = url.searchParams;
     const offset = Number(searchParams.get("offset") ?? 0);
     const limit = Math.min(100, Number(searchParams.get("limit") ?? 50));
     const seasonId = searchParams.get("seasonId") ?? undefined;
     const archive = searchParams.get("archive") === "true";
+    const type = parseApplicationType(searchParams.get("type"));
     if (request.method === "GET") {
-      const result = await listApplications(kv, { offset, limit, seasonId, archive });
+      const result = await listApplications(kv, { offset, limit, seasonId, archive, type });
       return withCors(json(result), request);
+    }
+    return withCors(json({ message: "Method not allowed" }, 405), request);
+  }
+
+  if (pathname === "/admin/api/stats") {
+    if (request.method !== "GET") return withCors(json({ message: "Method not allowed" }, 405), request);
+    const { apps } = await listApplications(kv, { limit: 10_000 });
+    const byType: Record<ApplicationType, number> = { group: 0, serving: 0, question: 0 };
+    for (const app of apps) {
+      byType[applicationType(app)] += 1;
+    }
+    return withCors(json({ total: apps.length, byType }), request);
+  }
+
+  if (pathname === "/admin/api/servings") {
+    if (request.method === "GET") {
+      const servings = await getServings(kv);
+      return withCors(json({ servings }), request);
+    }
+    if (request.method === "PUT") {
+      const body = await parseJson<{ servings?: Serving[] }>(request);
+      if (!body?.servings || !Array.isArray(body.servings)) return withCors(badRequest("Invalid servings"), request);
+      const servings = body.servings.map((s, i) => ({
+        id: Number.isInteger(s.id) ? s.id : i + 1,
+        title: (s.title ?? "").trim(),
+        description: (s.description ?? "").trim(),
+      })).filter((s) => s.title);
+      await setServings(kv, servings);
+      await addLog(kv, "servings_updated", `${servings.length} служінь`);
+      return withCors(json({ servings }), request);
     }
     return withCors(json({ message: "Method not allowed" }, 405), request);
   }
@@ -256,7 +310,7 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
       return withCors(json({ logs }), request);
     }
     if (request.method === "DELETE") {
-      await kv.delete(`${CONFIG_PREFIX}logs`);
+      await clearLogs(kv);
       return withCors(json({ ok: true }), request);
     }
     return withCors(json({ message: "Method not allowed" }, 405), request);
@@ -281,7 +335,8 @@ export async function handleAdminApi(request: Request, env: Env): Promise<Respon
     const searchParams = url.searchParams;
     const seasonId = searchParams.get("seasonId") ?? undefined;
     const archive = searchParams.get("archive") === "true";
-    const csv = await csvExport(kv, seasonId, archive);
+    const type = parseApplicationType(searchParams.get("type"));
+    const csv = await csvExport(kv, seasonId, archive, type);
     return withCors(new Response(csv, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",

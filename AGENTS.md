@@ -17,4 +17,9 @@
   1. Create a KV namespace and bind it as `GROUP_APPLICATIONS` in the Pages project.
   2. Set `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ADMIN_CHAT_ID`, and `TELEGRAM_WEBHOOK_SECRET` (optionally `TELEGRAM_ADMIN_USER_IDS`).
   3. After deploy, call `POST /api/setup-telegram` with `Authorization: Bearer <TELEGRAM_WEBHOOK_SECRET>` to register the webhook.
-  4. Admin commands: `/start`, `/last`, `/list`, `/search <query>`, `/group <number>`, `/stats`, `/delete <id>`.
+  4. Admin commands: `/start`, `/last [тип]`, `/list [тип]`, `/search <query>`, `/group <number>`, `/serving`, `/questions`, `/stats`, `/delete <id>`.
+- Applications have three types (`type` field, legacy records default to `group`):
+  - `group` — запис на домашню групу: `POST /api/group-registration`.
+  - `serving` — заявка на служіння: `POST /api/serving-registration`; список служінь: `GET /api/servings`, адмін-CRUD: `/admin/api/servings`.
+  - `question` — питання з контактної форми: `POST /api/question`.
+- Admin API supports `?type=group|serving|question` on `/admin/api/applications` and `/admin/api/export`; counts via `/admin/api/stats`.
