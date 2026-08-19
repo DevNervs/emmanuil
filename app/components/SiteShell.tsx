@@ -56,49 +56,6 @@ function applyHeaderTheme(next: "dark" | "light") {
   document.documentElement.setAttribute("data-header-theme", next);
 }
 
-function useHeaderTheme() {
-  useLayoutEffect(() => {
-    const headerOffset = 88;
-    const observed = new Set<Element>();
-    let active: "dark" | "light" = "dark";
-
-    const updateTheme = () => {
-      const candidates = Array.from(observed)
-        .map((el) => ({ el, rect: el.getBoundingClientRect() }))
-        .filter(({ rect }) => rect.top < headerOffset && rect.bottom > headerOffset);
-      if (!candidates.length) return;
-      candidates.sort((a, b) => a.rect.top - b.rect.top);
-      const theme = candidates[0].el.getAttribute("data-header-theme");
-      if ((theme === "dark" || theme === "light") && theme !== active) {
-        active = theme;
-        applyHeaderTheme(active);
-      }
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) observed.add(entry.target);
-        else observed.delete(entry.target);
-      }
-      updateTheme();
-    }, { rootMargin: `-${headerOffset}px 0px 0px 0px`, threshold: 0 });
-
-    const sections = document.querySelectorAll("#main-content [data-header-theme]");
-    sections.forEach((section) => observer.observe(section));
-    updateTheme();
-
-    const onChange = () => updateTheme();
-    window.addEventListener("scroll", onChange, { passive: true });
-    window.addEventListener("resize", onChange, { passive: true });
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", onChange);
-      window.removeEventListener("resize", onChange);
-    };
-  }, []);
-}
-
 /** Same-page # links: smooth scrollIntoView for Safari/Chrome; no wheel hijacking. */
 function useSmoothHashLinks() {
   useLayoutEffect(() => {
@@ -145,14 +102,6 @@ function applyHeaderCompact(next: boolean) {
   document.documentElement.classList.toggle("hdr-compact", next);
 }
 
-function readHeaderCompact() {
-  const y = window.scrollY || document.documentElement.scrollTop;
-  let current = document.documentElement.classList.contains("hdr-compact");
-  if (!current && y >= 72) current = true;
-  if (current && y <= 28) current = false;
-  return current;
-}
-
 function getInitialCompact() {
   if (typeof document === "undefined") return false;
   return document.documentElement.classList.contains("hdr-compact") || (window.scrollY || document.documentElement.scrollTop) >= 72;
@@ -160,19 +109,40 @@ function getInitialCompact() {
 
 export function SiteHeader({ active }: { active?: string }) {
   const [compact, setCompact] = useState(getInitialCompact);
-  useHeaderTheme();
   useLayoutEffect(() => {
+    const root = document.documentElement;
+    const header = document.querySelector<HTMLElement>(".site-header");
+    const sections = Array.from(root.querySelectorAll<HTMLElement>("#main-content [data-header-theme]"));
+    let activeTheme = root.getAttribute("data-header-theme");
     let frame = 0;
-    const initial = readHeaderCompact();
-    setCompact(initial);
-    applyHeaderCompact(initial);
-    const bootFrame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => document.documentElement.classList.remove("hdr-boot"));
-    });
 
-    const updateCompact = () => {
+    // Pick the theme of the section that covers most of the header band [0, headerBottom],
+    // so the panel colour always matches the background actually behind it.
+    const syncTheme = () => {
+      if (!sections.length) return;
+      const line = header ? header.getBoundingClientRect().bottom : 88;
+      let bestTheme: string | null = null;
+      let bestCoverage = 0;
+      let trailingTheme: string | null = null;
+      for (const el of sections) {
+        const rect = el.getBoundingClientRect();
+        const coverage = Math.min(rect.bottom, line) - Math.max(rect.top, 0);
+        if (coverage > bestCoverage) {
+          bestCoverage = coverage;
+          bestTheme = el.getAttribute("data-header-theme");
+        }
+        if (rect.top <= line) trailingTheme = el.getAttribute("data-header-theme");
+      }
+      const next = bestCoverage > 0 ? bestTheme : trailingTheme;
+      if ((next === "dark" || next === "light") && next !== activeTheme) {
+        activeTheme = next;
+        applyHeaderTheme(next);
+      }
+    };
+
+    const run = () => {
       frame = 0;
-      const y = window.scrollY || document.documentElement.scrollTop;
+      const y = window.scrollY || root.scrollTop;
       setCompact((prev) => {
         let next = prev;
         if (!prev && y >= 72) next = true;
@@ -180,17 +150,34 @@ export function SiteHeader({ active }: { active?: string }) {
         if (next !== prev) applyHeaderCompact(next);
         return next;
       });
+      syncTheme();
     };
+
     const onScroll = () => {
       if (frame) return;
-      frame = window.requestAnimationFrame(updateCompact);
+      frame = window.requestAnimationFrame(run);
     };
+
+    syncTheme();
+    onScroll();
+    const bootFrame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => root.classList.remove("hdr-boot"));
+    });
+
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll, { passive: true });
-    onScroll();
+    window.addEventListener("load", onScroll);
+
+    // Re-sync when late content (video, images) reflows sections under the header.
+    const main = document.getElementById("main-content");
+    const resizeObserver = main ? new ResizeObserver(onScroll) : null;
+    if (main && resizeObserver) resizeObserver.observe(main);
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener("load", onScroll);
+      resizeObserver?.disconnect();
       cancelAnimationFrame(bootFrame);
       if (frame) window.cancelAnimationFrame(frame);
     };
